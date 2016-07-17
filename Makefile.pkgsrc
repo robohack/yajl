@@ -1,0 +1,14 @@
+# -*-makefile-bsdmake-*-
+
+YAJL_MAJOR =	2
+YAJL_MINOR =	1
+YAJL_MICRO =	1
+
+# N.B.:  the pkgtools/bootstrap-mk-files package does not yet properly
+# support building shared libraries on non-GNU-binutils platforms, so
+# you will not be able to build yajl on such platforms as Mac OS X yet.
+
+.if make(includes)
+# n.b.:  this must always be just a relative path
+INCSDIR = yajl
+.endif
