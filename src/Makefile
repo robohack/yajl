@@ -5,9 +5,9 @@
 
 LIB =	yajl
 
-SHLIB_MAJOR =	2
-SHLIB_MINOR =	1
-SHLIB_TEENY =	0
+SHLIB_MAJOR =   ${YAJL_MAJOR}
+SHLIB_MINOR =   ${YAJL_MINOR}
+SHLIB_TEENY =   ${YAJL_MICRO}
 
 #WARNS =	3
 
@@ -21,37 +21,31 @@ SRCS +=	yajl_parser.c
 SRCS +=	yajl_tree.c
 SRCS +=	yajl_version.c
 
-# XXX This mess is because the library source stupidly requires the
-# headers to be installed first, but that is not normal outside of a
-# complete operating system's source tree.
-#
-# n.b.:  if you get a warning about an "Unknown modifier 'D'" then set
-# $MAKEOBJDIRPREFIX in the environment!
-#
-.if !empty(MAKEOBJDIRPREFIX) && exists(${MAKEOBJDIRPREFIX})
-. if defined(CPPFLAGS)
-CPPFLAGS += -I${.OBJDIR}/api
-. else
-CFLAGS += -I${.OBJDIR}/api
-. endif
-.elif defined(MAKEOBJDIR)
-. if defined(CPPFLAGS)
-CPPFLAGS += -I.
-. else
-CFLAGS += -I.
-. endif
+.if defined(CPPFLAGS)
+CPPFLAGS += -I. -I${.CURDIR}
 .else
-. if defined(CPPFLAGS)
-CPPFLAGS += -I${.OBJDIR}/../api/obj${OBJMACHINE:D.${MACHINE}}
-. else
-CFLAGS += -I${.OBJDIR}/../api/obj${OBJMACHINE:D.${MACHINE}}
-. endif
+CFLAGS += -I. -I${.CURDIR}
 .endif
 
-SUBDIR += api
+yajl/yajl_version.h:	${.CURDIR}/yajl/yajl_version.h.in
+	sed -e 's/$${YAJL_MAJOR}/'${YAJL_MAJOR}'/' \
+	    -e 's/$${YAJL_MINOR}/'${YAJL_MINOR}'/' \
+	    -e 's/$${YAJL_MICRO}/'${YAJL_MICRO}'/' \
+	< ${.ALLSRC} > ${.TARGET}
+
+# no matter which if any are done first, build the header!
+#
+yajl_version.d: yajl/yajl_version.h
+yajl_version.go: yajl/yajl_version.h
+yajl_version.ln: yajl/yajl_version.h
+yajl_version.o: yajl/yajl_version.h
+yajl_version.pico: yajl/yajl_version.h
+yajl_version.po: yajl/yajl_version.h
+yajl_version.So: yajl/yajl_version.h
+
+SUBDIR += yajl
 
 .include <bsd.lib.mk>
-# xxx hack for buggy old bsdmake on old OSX
-.if !defined(DISTRIBUTION)
+.if !defined(DISTRIBUTION)	# avoid dup include on some systems
 .include <bsd.subdir.mk>
 .endif

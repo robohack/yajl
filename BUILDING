@@ -1,9 +1,13 @@
 Short story:
 
-	make && make install PREFIX=/usr/local
+	mkdir /path/somwhere
+	env MAKEOBJDIRPREFIX=/path/somewhere bsdmake
+	env MAKEOBJDIRPREFIX=/path/somewhere bsdmake DESTDIR=/usr/local
+        rm -rf /path/somewhere
 
-(where "make" is a make of the BSD persuasion, e.g. bsdmake on
-Darwin/OSX, or bmake on other non-BSD-based systems.)
+(where "bsdmake" is of course a 'make' of the BSD persuasion,
+e.g. "make" on BSDs, "bsdmake" on Darwin/OSX, or "bmake" on other
+non-BSD-based systems.)
 
 When things go wrong:
 
@@ -11,3 +15,9 @@ Acquire and install bmake and mk-files and try again.
 
         http://www.crufty.net/ftp/pub/sjg/bmake.tar.gz
         http://www.crufty.net/ftp/pub/sjg/mk.tar.gz
+
+NOTES:
+
+- on NetBSD-5.x it may be necessary to run "make
+  MAKEOBJDIRPREFIX=... all" after trying an install, then run the
+  install again (something goes wrong with shared library building)
