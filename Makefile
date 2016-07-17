@@ -8,6 +8,10 @@
 # yet fully ported to OSX/Darwin), and Simon Gerraty's Bmake &
 # Mk-files from http://www.crufy.net/FreeWare/.
 #
+# Pkgsrc will install on a vast number of systems, including
+# MS-Windows with Cygwin.  Simon's Bmake works on many Unix-like
+# systems.
+#
 # Note:  You can use MAKEOBJDIRPREFIX as so to build everything
 # elsewhere, even withing a single sub-directory of the top of the
 # source tree (i.e. instead of polluting the rest of the source tree
@@ -22,14 +26,16 @@
 #
 # If you don't use MAKEOBJDIRPREFIX then "obj.${MACHINE}"
 # sub-directories will be created for each directory with products,
-# except on OSX where the "make obj" facility is somewhat broken and
-# by default assumes "/usr/obj" exists.  You can avoid this by
-# creating "obj.${MACHINE}" sub-directories in every source
-# sub-directory first, like this (assuming you're using git):
+# except on OSX where the "bsdmake obj" facility is somewhat broken
+# and by default either assumes "/usr/obj" exists (on older systems
+# with a native "bsdmake"), or uses "/usr/local/Cellar/bsdmake/24/obj"
+# for systems with Apple "bsdmake" installed by Nomebrew.  You can
+# avoid this by creating "obj.${MACHINE}" sub-directories in every
+# source sub-directory first, like this (assuming you're using git):
 #
 #	find . -type d -name .git -prune -o -type d ! -name .git ! -name 'obj.*' ! -name . -exec mkdir {}/obj.$(uname -m) \;
 #
-# Then using "bsdmake NO_OBJ=yes"
+# Then use "bsdmake NO_OBJ=yes" to build, etc.
 #
 # N.B.:  Some variants of BSD Make treat $MAKEOBJDIR as a
 # sub-directory under /usr/obj, and others treat it as a sub-directory
