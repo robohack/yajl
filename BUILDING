@@ -1,23 +1,13 @@
-Short story (If you already have ruby and cmake):
+Short story:
 
-./configure && make install
+	make && make install PREFIX=/usr/local
+
+(where "make" is a make of the BSD persuasion, e.g. bsdmake on
+Darwin/OSX, or bmake on other non-BSD-based systems.)
 
 When things go wrong:
 
-attain CMake (http://www.cmake.org) and ruby (http://ruby-lang.org) and
-try again.
+Acquire and install bmake and mk-files and try again.
 
-OR, attain CMake and build by hand:
-
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make 
-5. build output left in yajl-X.Y.Z
-
-NOTE: for 64-bit systems where lib64 is used you can pass the cmake
-      variable LIB_SUFFIX to cause installation into the system's 'lib64'
-      directory.
-
-best,
-lloyd
+        http://www.crufty.net/ftp/pub/sjg/bmake.tar.gz
+        http://www.crufty.net/ftp/pub/sjg/mk.tar.gz
