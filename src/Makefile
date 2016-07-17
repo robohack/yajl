@@ -84,6 +84,8 @@ afterinstall: _yajl_static_lib_install_symlink
 _yajl_static_lib_build_symlink:	.PHONY
 	ln -fs lib$(LIB).a lib$(LIB)_s.a
 
+CLEANFILES += lib$(LIB)_s.a
+
 _yajl_static_lib_install_symlink: .PHONY
 	ln -fs lib$(LIB).a ${DESTDIR}${LIBDIR}/lib$(LIB)_s.a
 
