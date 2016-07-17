@@ -2,15 +2,34 @@
 
 .include "${.CURDIR}/Makefile.inc"
 
+# This Makefile works with NetBSD Make, OSX bsdmake, Pkgsrc bmake (on
+# OSX/Darwin one must set "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY="
+# because that Pkgsrc's bootstrap-mk-files (as of 20160411) are not
+# yet fully ported to OSX/Darwin), and Simon Gerraty's Bmake &
+# Mk-files from http://www.crufy.net/FreeWare/.
 #
-# This makefile works with NetBSD Make, OSX bsdmake, Pkgsrc bmake
-# (except on OSX), and Simon Gerraty's Bmake & Mk-files.
-#
-# Note:  Always use $MAKEOBJDIRPREFIX, ideally set to build somewhere
-# entirely outside of the project source tree:
+# Note:  You can use MAKEOBJDIRPREFIX as so to build everything
+# elsewhere, even withing a single sub-directory of the top of the
+# source tree (i.e. instead of polluting the rest of the source tree
+# with "obj" sub-directories):
 #
 #	mkdir build
-#	env MAKEOBJDIRPREFIX=$(pwd)/build bsdmake
+#	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build
+#
+# However doing so more or less implies always invoking the build at
+# the top of the source tree, with MAKEOBJDIRPREFIX set either on the
+# command-line or in the environment).
+#
+# If you don't use MAKEOBJDIRPREFIX then "obj.${MACHINE}"
+# sub-directories will be created for each directory with products,
+# except on OSX where the "make obj" facility is somewhat broken and
+# by default assumes "/usr/obj" exists.  You can avoid this by
+# creating "obj.${MACHINE}" sub-directories in every source
+# sub-directory first, like this (assuming you're using git):
+#
+#	find . -type d -name .git -prune -o -type d ! -name .git ! -name 'obj.*' ! -name . -exec mkdir {}/obj.$(uname -m) \;
+#
+# Then using "bsdmake NO_OBJ=yes"
 #
 # N.B.:  Some variants of BSD Make treat $MAKEOBJDIR as a
 # sub-directory under /usr/obj, and others treat it as a sub-directory
@@ -18,7 +37,7 @@
 #
 # To install the results you can do:
 #
-#	env MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=$(pwd)/dist install
+#	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist install
 #
 # (This is not the normal use of DESTDIR in BSD Make, but it is the
 # best way for out-of-tree builds, and it does not get in the way of
@@ -28,23 +47,26 @@
 
 SUBDIR =	src
 
+# Not all older mk-files support having a .WAIT in a SUBDIR list, but
+# it is vital and necessary for parallel builds (i.e. use of 'make -j')
+#
+#SUBDIR +=	.WAIT
+
 SUBDIR +=	reformatter
 SUBDIR +=	verify
-#SUBDIR +=	example
-
-#SUBDIR +=	test
-#SUBDIR +=	perf
+SUBDIR +=	example
+SUBDIR +=	perf
+SUBDIR +=	test
 
 .ORDER: ${SUBDIR}
 
 #
 # The rest is just default boilerplate for stand-alone builds....
 #
-# (yes, we force "make obj", though with Bmake that could also be done
-# with MKOBJDIRS=auto -- it is stupid to build in the source directory)
+# (yes, "make obj" is forced -- it is stupid to build in the source directory)
 #
 
-BUILDTARGETS =	do-obj do-depend
+BUILDTARGETS =	yajl-do-obj yajl-do-depend
 
 # this must be the first target
 #
@@ -53,7 +75,7 @@ all: .PHONY .MAKE ${BUILDTARGETS}
 .ORDER: ${BUILDTARGETS}
 
 .for targ in ${BUILDTARGETS}
-${targ}: .PHONY ${targ:S/do-//}
+${targ}: .PHONY ${targ:S/yajl-do-//}
 .endfor
 
 beforeinstall: _yajl_install_dirs
