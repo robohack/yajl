@@ -28,6 +28,21 @@ SRCS +=	yajl_parser.c
 SRCS +=	yajl_tree.c
 SRCS +=	yajl_version.c
 
+FILES +=		yajl.pc
+FILESDIR_yajl.pc =	${PKGCONFIGDIR}
+FILESBUILD_yajl.pc =	yes
+yajl.pc: ${.CURDIR}/yajl.pc.in
+	sed -e 's/@YAJL_MAJOR@/${YAJL_MAJOR}/' \
+	    -e 's/@YAJL_MINOR@/${YAJL_MINOR}/' \
+	    -e 's/@YAJL_MICRO@/${YAJL_MICRO}/' \
+	    -e 's|@PREFIX@|${PREFIX}|' \
+	    -e 's|@INCSDIR@|${INCSDIR}|' \
+	    -e 's|@LIBDIR@|${LIBDIR}|' \
+	< ${.CURDIR}/yajl.pc.in > ${.TARGET}
+
+yajl.pc: ${.CURDIR}/Makefile
+yajl.pc: ${.CURDIR}/${yajl_topdir}/Makefile.inc
+
 # We have to do this here, not in the sub-directory, because during
 # "make depend" the local actions are done before descending into the
 # sub-directory (since it's not normal for a directory with products

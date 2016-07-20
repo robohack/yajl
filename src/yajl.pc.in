@@ -1,9 +1,19 @@
-prefix=${CMAKE_INSTALL_PREFIX}
-libdir=${dollar}{prefix}/lib${LIB_SUFFIX}
-includedir=${dollar}{prefix}/include/yajl
+#
+# for pkgconf, or the older pkg-config, if you really must
+#
+# if "prefix" is not set at build time it can be set at install time,
+# though see the comment above "Libs:" below
+#
+prefix=@PREFIX@
+libdir=${prefix}/@LIBDIR@
+includedir=${prefix}/@INCSDIR@
 
 Name: Yet Another JSON Library
 Description: A Portable JSON parsing and serialization library in ANSI C
-Version: ${YAJL_MAJOR}.${YAJL_MINOR}.${YAJL_MICRO}
-Cflags: -I${dollar}{includedir}
-Libs: -L${dollar}{libdir} -lyajl
+Version: @YAJL_MAJOR@.@YAJL_MINOR@.@YAJL_MICRO@
+Cflags: -I${includedir}
+#
+# on some systems the linker may need a "-rpath" option...
+# (pkgsrc will add this automatically at install time)
+#
+Libs: -L${libdir} -lyajl

@@ -42,6 +42,11 @@ OBJMACHINE =	yes
 # with a symlink in order to preserve normal naming conventions for
 # the actual file.)
 #
+# Note that the .pc file as-built (for pkgconf, or the older
+# pkg-config, may still require adjustments after a "dist" archive is
+# un-packed since it may not have been original configured for the
+# final installation directory).
+#
 #LDSTATIC =	-static
 
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also
@@ -54,6 +59,10 @@ INCSDIR ?= /include/yajl
 LIBDIR ?= /lib
 DEBUGDIR ?= /libdata/debug
 LINTLIBDIR ?= /libdata
+
+# hmmmm....  this apparently has no precedent in the world of BSD Make
+# base it off of LIBDIR....
+PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # xxx all this otherwise some systems won't allow unprivileged installs
 .if ${USER} != "root"

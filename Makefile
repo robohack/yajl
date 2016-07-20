@@ -84,11 +84,20 @@ all: .PHONY .MAKE ${BUILDTARGETS}
 ${targ}: .PHONY ${targ:S/yajl-do-//}
 .endfor
 
+yajl_install_dirs += ${BINDIR}
+yajl_install_dirs += ${INCSDIR}
+yajl_install_dirs += ${LIBDIR}
+yajl_install_dirs += ${PKGCONFIGDIR}
+yajl_install_dirs += ${DEBUGDIR}
+yajl_install_dirs += ${DEBUGDIR}/bin
+yajl_install_dirs += ${DEBUGDIR}/lib
+yajl_install_dirs += ${LINTLIBDIR}
+
 beforeinstall: _yajl_install_dirs
 
 # many BSD system mk files will not make directories on demand
 _yajl_install_dirs: .PHONY
-.for instdir in ${BINDIR} ${INCSDIR} ${LIBDIR} ${DEBUGDIR} ${DEBUGDIR}/bin ${DEBUGDIR}/lib ${LINTLIBDIR}
+.for instdir in ${yajl_install_dirs}
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
