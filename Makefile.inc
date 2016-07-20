@@ -1,10 +1,11 @@
 # -*-makefile-bsdmake-*-
 
-#
 # Common setup for BSD Makefiles
 #
 # N.B.:  Nothing in here should be changed just to build libyajl.
 #
+# (Some settings can be overridden on the command-line or from
+# environment varibles though...)
 
 YAJL_MAJOR =	2
 YAJL_MINOR =	1
@@ -14,8 +15,10 @@ YAJL_VERSION =	${YAJL_MAJOR}.${YAJL_MINOR}.${YAJL_MICRO}
 
 OBJMACHINE =	yes
 
-# N.B.:  testing in the build or 'install' (distribution) directories
-# is "hard" (i.e. annoyingly more difficult than it should be) without
+# N.B.:  testing in the build or 'install' (distribution) directories,
+# or making a distribution that can be un-packed on a target system in
+# any arbitrary hierarchy (/usr/local, /opt, /usr/pkg, etc.)  is
+# "hard" (i.e. annoyingly more difficult than it should be) without
 # dancing with the dynamic linker.  (Or suffering the horrors of even
 # worse monstrosities, such as "GNU libtool"!)
 #
