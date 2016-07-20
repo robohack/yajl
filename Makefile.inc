@@ -50,7 +50,7 @@ OBJMACHINE =	yes
 INSTALL_OPTS =	# for specific ownerships
 # these will be over-ridden by pkgsrc
 BINDIR ?= /bin
-INCSDIR ?= /include
+INCSDIR ?= /include/yajl
 LIBDIR ?= /lib
 DEBUGDIR ?= /libdata/debug
 LINTLIBDIR ?= /libdata

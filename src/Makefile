@@ -34,11 +34,14 @@ SRCS +=	yajl_version.c
 # to also have sub-directories).
 #
 beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h
-yajl/yajl_version.h:	${.CURDIR}/yajl/yajl_version.h.in
-	sed -e 's/$${YAJL_MAJOR}/'${YAJL_MAJOR}'/' \
-	    -e 's/$${YAJL_MINOR}/'${YAJL_MINOR}'/' \
-	    -e 's/$${YAJL_MICRO}/'${YAJL_MICRO}'/' \
-	< ${.ALLSRC} > ${.TARGET}
+yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
+	sed -e 's/$${YAJL_MAJOR}/${YAJL_MAJOR}/' \
+	    -e 's/$${YAJL_MINOR}/${YAJL_MINOR}/' \
+	    -e 's/$${YAJL_MICRO}/${YAJL_MICRO}/' \
+	< ${.CURDIR}/yajl/yajl_version.h.in > ${.TARGET}
+
+yajl/yajl_version.h: ${.CURDIR}/Makefile
+yajl/yajl_version.h: ${.CURDIR}/${yajl_topdir}/Makefile.inc
 
 ${.OBJDIR}/yajl:
 	mkdir ${.TARGET}
@@ -48,6 +51,7 @@ ${.OBJDIR}/yajl:
 #
 .if !exists(${.OBJDIR}/${yajl_topdir}/src)
 FILES += yajl/yajl_version.h
+# n.b.:  FILESDIR_blah won't work because of the "yajl/" directory
 FILESDIR = ${INCSDIR}
 .endif
 
