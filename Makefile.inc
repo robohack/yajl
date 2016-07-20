@@ -73,6 +73,7 @@ DEBUGGRP !=	id -g
 STRIP =		# empty (needed for OSX bsdmake install)
 
 # more hacks to avoid missing system dependencies with DESTDIR set
+DPLIBC =		# empty
 LIBC =			# empty
 LIBCRT0 =		# empty
 LIBCRTI =		# empty

@@ -28,10 +28,3 @@ NOTES:
 
 - see the comments in the top-level Makefile for more hints about
   issues with various mk-files (also more in Makefile.inc)
-
-- on NetBSD-5.x it may be necessary to run "make && make
-  DESTDIR=... install && make && make DESTDIR=...", i.e. run "make"
-  again after the install fails, then install again (something goes
-  wrong with shared library install and it tries to make it again
-  during install, probably a dependency seems out of date but really
-  isn't, but with DESTDIR set, the build during install fails)
