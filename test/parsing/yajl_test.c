@@ -17,15 +17,17 @@
 #include <yajl/yajl_parse.h>
 #include <yajl/yajl_gen.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <assert.h>
 
-/* memory debugging routines */
+/* memory debugging routines and other context */
 typedef struct
 {
+    unsigned int do_printfs:1;
     unsigned int numFrees;
     unsigned int numMallocs;
     /* XXX: we really need a hash table here with per-allocation
@@ -67,70 +69,90 @@ static void * yajlTestRealloc(void * ctx, void * ptr, size_t sz)
 
 static int test_yajl_null(void *ctx)
 {
-    printf("null\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("null\n");
+    }
     return 1;
 }
 
 static int test_yajl_boolean(void * ctx, int boolVal)
 {
-    printf("bool: %s\n", boolVal ? "true" : "false");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("bool: %s\n", boolVal ? "true" : "false");
+    }
     return 1;
 }
 
 static int test_yajl_integer(void *ctx, long long integerVal)
 {
-    printf("integer: %lld\n", integerVal);
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("integer: %lld\n", integerVal);
+    }
     return 1;
 }
 
 static int test_yajl_double(void *ctx, double doubleVal)
 {
-    printf("double: %g\n", doubleVal);
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("double: %g\n", doubleVal);
+    }
     return 1;
 }
 
 static int test_yajl_string(void *ctx, const unsigned char * stringVal,
                             size_t stringLen)
 {
-    printf("string: '");
-    fwrite(stringVal, 1, stringLen, stdout);
-    printf("'\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("string: '");
+        fwrite(stringVal, 1, stringLen, stdout);
+        printf("'\n");
+    }
     return 1;
 }
 
 static int test_yajl_map_key(void *ctx, const unsigned char * stringVal,
                              size_t stringLen)
 {
-    char * str = (char *) malloc(stringLen + 1);
-    str[stringLen] = 0;
-    memcpy(str, stringVal, stringLen);
-    printf("key: '%s'\n", str);
-    free(str);
+    if (TEST_CTX(ctx)->do_printfs) {
+        char * str = (char *) malloc(stringLen + 1);
+        str[stringLen] = 0;
+        memcpy(str, stringVal, stringLen);
+        printf("key: '%s'\n", str);
+        free(str);
+    }
     return 1;
 }
 
 static int test_yajl_start_map(void *ctx)
 {
-    printf("map open '{'\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("map open '{'\n");
+    }
     return 1;
 }
 
 
 static int test_yajl_end_map(void *ctx)
 {
-    printf("map close '}'\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("map close '}'\n");
+    }
     return 1;
 }
 
 static int test_yajl_start_array(void *ctx)
 {
-    printf("array open '['\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("array open '['\n");
+    }
     return 1;
 }
 
 static int test_yajl_end_array(void *ctx)
 {
-    printf("array close ']'\n");
+    if (TEST_CTX(ctx)->do_printfs) {
+        printf("array close ']'\n");
+    }
     return 1;
 }
 
@@ -151,7 +173,7 @@ static yajl_callbacks callbacks = {
 static void usage(const char * progname)
 {
     fprintf(stderr,
-            "usage:  %s [options]\n"
+            "usage:  %s [options] [file.json]\n"
             "Parse input from stdin as JSON and ouput parsing details "
                                                           "to stdout\n"
             "   -b  set the read buffer size\n"
@@ -159,6 +181,7 @@ static void usage(const char * progname)
             "   -g  allow *g*arbage after valid JSON text\n"
             "   -m  allows the parser to consume multiple JSON values\n"
             "       from a single string separated by whitespace\n"
+            "   -N  do not print tokens or values\n"
             "   -p  partial JSON documents should not cause errors\n",
             progname);
     exit(1);
@@ -178,7 +201,11 @@ main(int argc, char ** argv)
 
     /* memory allocation debugging: allocate a structure which collects
      * statistics */
-    yajlTestMemoryContext memCtx = { 0,0 };
+    yajlTestMemoryContext memCtx;
+
+    memCtx.do_printfs = 1;
+    memCtx.numMallocs = 0;
+    memCtx.numFrees = 0;
 
     /* memory allocation debugging: allocate a structure which holds
      * allocation routines */
@@ -192,9 +219,9 @@ main(int argc, char ** argv)
     allocFuncs.ctx = (void *) &memCtx;
 
     /* allocate the parser */
-    hand = yajl_alloc(&callbacks, &allocFuncs, NULL);
+    hand = yajl_alloc(&callbacks, &allocFuncs, (void *) &memCtx);
 
-    /* check arguments.  We expect exactly one! */
+    /* check arguments... so lame... */
     for (i=1;i<argc;i++) {
         if (!strcmp("-c", argv[i])) {
             yajl_config(hand, yajl_allow_comments, 1);
@@ -218,6 +245,8 @@ main(int argc, char ** argv)
             yajl_config(hand, yajl_allow_trailing_garbage, 1);
         } else if (!strcmp("-m", argv[i])) {
             yajl_config(hand, yajl_allow_multiple_values, 1);
+        } else if (!strcmp("-N", argv[i])) {
+            memCtx.do_printfs = 0;
         } else if (!strcmp("-p", argv[i])) {
             yajl_config(hand, yajl_allow_partial_values, 1);
         } else {
@@ -239,16 +268,23 @@ main(int argc, char ** argv)
     if (fileName)
     {
         file = fopen(fileName, "r");
+        if (file == NULL) {
+            fprintf(stderr, "error opening '%s': %s\n", fileName, strerror(errno));
+            yajl_free(hand);
+            free(fileData);
+            exit(1);
+        }
     }
     else
     {
         file = stdin;
+        fileName = "stdin";
     }
     for (;;) {
         rd = fread((void *) fileData, 1, bufSize, file);
 
-        if (rd == 0) {
-            if (!feof(stdin)) {
+        if (rd <= 0) {
+            if (!feof(file)) {
                 fprintf(stderr, "error reading from '%s'\n", fileName);
             }
             break;
@@ -287,5 +323,6 @@ main(int argc, char ** argv)
     fflush(stdout);
     printf("memory leaks:\t%u\n", memCtx.numMallocs - memCtx.numFrees);
 
-    return 0;
+    exit(0);
+    /* NOTREACHED */
 }
