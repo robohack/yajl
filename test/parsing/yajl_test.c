@@ -18,11 +18,20 @@
 #include <yajl/yajl_gen.h>
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <assert.h>
+
+#if !defined(DBL_DIG)
+# if defined(__DBL_DIG__)
+#  define DBL_DIG	__DBL_DIG__
+# else
+#  define DBL_DIG	15		/* assumes binary64 IEEE 754 double */
+# endif
+#endif
 
 /* memory debugging routines and other context */
 typedef struct
@@ -94,7 +103,7 @@ static int test_yajl_integer(void *ctx, long long integerVal)
 static int test_yajl_double(void *ctx, double doubleVal)
 {
     if (TEST_CTX(ctx)->do_printfs) {
-        printf("double: %g\n", doubleVal);
+        printf("double: %.*g\n", DBL_DIG, doubleVal);
     }
     return 1;
 }

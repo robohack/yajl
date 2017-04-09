@@ -223,6 +223,15 @@ yajl_gen_integer(yajl_gen g, long long int number)
 #define isinf !_finite
 #endif
 
+#if !defined(DBL_DIG)
+# if defined(__DBL_DIG__)
+#  define DBL_DIG	__DBL_DIG__
+# else
+#  define DBL_DIG	15		/* assumes binary64 IEEE 754 double */
+# endif
+#endif
+
+
 yajl_gen_status
 yajl_gen_double(yajl_gen g, double number)
 {
@@ -230,7 +239,7 @@ yajl_gen_double(yajl_gen g, double number)
     ENSURE_VALID_STATE; ENSURE_NOT_KEY;
     if (isnan(number) || isinf(number)) return yajl_gen_invalid_number;
     INSERT_SEP; INSERT_WHITESPACE;
-    sprintf(i, "%.20g", number);
+    sprintf(i, "%.*g", DBL_DIG, number);
     if (strspn(i, "0123456789-") == strlen(i)) {
         strcat(i, ".0");
     }
