@@ -4,8 +4,8 @@
 #
 # N.B.:  Nothing in here should be changed just to build libyajl.
 #
-# (Some settings can be overridden on the command-line or from
-# environment varibles though...)
+# (Some settings can be overridden on the command-line or from environment
+# variables though...)
 
 YAJL_MAJOR =	2
 YAJL_MINOR =	1
@@ -15,18 +15,23 @@ YAJL_VERSION =	${YAJL_MAJOR}.${YAJL_MINOR}.${YAJL_MICRO}
 
 OBJMACHINE =	yes
 
-# N.B.:  testing in the build or 'install' (distribution) directories,
-# or making a distribution that can be un-packed on a target system in
-# any arbitrary hierarchy (/usr/local, /opt, /usr/pkg, etc.)  is
-# "hard" (i.e. annoyingly more difficult than it should be) without
-# dancing with the dynamic linker.  (Or suffering the horrors of even
-# worse monstrosities, such as "GNU libtool"!)
+# For testing and debugging -- at least on sane systems, or with 'bmake'
 #
-# Setting LDSTATIC to the linker flag which forces static linking is
-# the easy and best fix on most platforms which support full static
-# linking.  However, sadly, OS X is not one of them.  As a result on
-# OS X it is necessary to set the variable DYLD_LIBRERY_PATH in the
-# environment to include the location of the library to be tested:
+# (note this can also be set on the command line)
+#
+#DBG = -O0 -g
+
+# N.B.:  testing in the build or 'install' (distribution) directories, or making
+# a distribution that can be un-packed on a target system in any arbitrary
+# hierarchy (/usr/local, /opt, /usr/pkg, etc.)  is "hard" (i.e. annoyingly more
+# difficult than it should be) without dancing with the dynamic linker.  (Or
+# suffering the horrors of even worse monstrosities, such as "GNU libtool"!)
+#
+# Setting LDSTATIC to the linker flag which forces static linking is the easy
+# and best fix on most platforms which support full static linking.  However,
+# sadly, OS X is not one of them.  As a result on OS X it is necessary to set
+# the variable DYLD_LIBRARY_PATH in the environment to include the location of
+# the library to be tested:
 #
 #	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build
 #	DYLD_LIBRARY_PATH=$(pwd)/build/$(pwd)/src $(pwd)/build/$(pwd)/example/parse_config
@@ -38,22 +43,20 @@ OBJMACHINE =	yes
 #	cd dist
 #	DYLD_LIBRARY_PATH=lib bin/parse_config
 #
-# Instead for OS X we use the often-used trick of appending "_s" or
-# similar to the static library's name in order to hide the normal
-# name of the dynamic library and to trick the linker into thinking
-# there is only a static library available.  (This is actually done
-# with a symlink in order to preserve normal naming conventions for
-# the actual file.)
+# Instead for OS X we use the often-used trick of appending "_s" or similar to
+# the static library's name in order to hide the normal name of the dynamic
+# library and to trick the linker into thinking there is only a static library
+# available.  (This is actually done with a symlink in order to preserve normal
+# naming conventions for the actual file.)
 #
-# Note that the .pc file as-built (for pkgconf, or the older
-# pkg-config, may still require adjustments after a "dist" archive is
-# un-packed since it may not have been original configured for the
-# final installation directory).
+# Note that the .pc file as-built (for pkgconf, or the older pkg-config, may
+# still require adjustments after a "dist" archive is un-packed since it may not
+# have been original configured for the final installation directory).
 #
 #LDSTATIC =	-static
 
-# N.B.:  ${DESTDIR} if set on the 'install' command line, it is also
-# prepended to each of these target directories.
+# N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
+# to each of these target directories.
 #
 INSTALL_OPTS =	# for specific ownerships
 # these will be over-ridden by pkgsrc
@@ -63,8 +66,8 @@ LIBDIR ?= /lib
 DEBUGDIR ?= /libdata/debug
 LINTLIBDIR ?= /libdata
 
-# hmmmm....  this apparently has no precedent in the world of BSD Make
-# base it off of LIBDIR....
+# hmmmm....  This apparently has no precedent in the world of BSD Make.  Base it
+# off of LIBDIR....
 PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # xxx all this otherwise some systems won't allow unprivileged installs
@@ -96,8 +99,8 @@ SHLIB_LDENDFILE =	# empty
 
 # Finally some common settings
 #
-# N.B.:  all sub-directory Makefiles must set ${yajl_topdir} to be a
-# relative path to the top of the source tree.
+# N.B.:  all sub-directory Makefiles must set ${yajl_topdir} to be a relative
+# path to the top of the source tree.
 #
 yajl_srcdir =	${.CURDIR}/${yajl_topdir}/src
 
@@ -111,8 +114,8 @@ CFLAGS +=	-I${yajl_srcdir}
 
 .if !defined(LIB)
 #
-# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX}
-# is tedious.
+# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
+# tedious.
 #
 . if exists(${.OBJDIR}/${yajl_topdir}/src)
 LDADD += -L${.OBJDIR}/${yajl_topdir}/src

@@ -9,8 +9,8 @@ LIB =	yajl
 
 .include <bsd.own.mk>
 
-# If these are set bland then no shared library is built and so on OSX
-# then even Pkgsrc bmake can complete a successful build.
+# If these are set blank then no shared library is built, and so on OSX even
+# Pkgsrc bmake can then complete a successful build.
 #
 SHLIB_MAJOR ?=   ${YAJL_MAJOR}
 SHLIB_MINOR ?=   ${YAJL_MINOR}
@@ -43,10 +43,17 @@ yajl.pc: ${.CURDIR}/yajl.pc.in
 yajl.pc: ${.CURDIR}/Makefile
 yajl.pc: ${.CURDIR}/${yajl_topdir}/Makefile.inc
 
-# We have to do this here, not in the sub-directory, because during
-# "make depend" the local actions are done before descending into the
-# sub-directory (since it's not normal for a directory with products
-# to also have sub-directories).
+# We have to do this here, not in the sub-directory, because during "make
+# depend" the local actions are done before descending into the sub-directory
+# (since it's not normal for a directory with products to also have
+# sub-directories).
+#
+# N.B.:  The true BSD way to do this would be with a "make includes" step and to
+# not only build this file, but to also install all of the other include files
+# as well during that step, and then we could set '-I' to point to the
+# (intermediate) "include" directory.  In a project like this we should probably
+# "make includes" into the build tree, not into the OBJDIR, not into the final
+# INCSDIR since we cannot have DESTDIR set when building.
 #
 beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h
 yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
@@ -61,8 +68,8 @@ yajl/yajl_version.h: ${.CURDIR}/${yajl_topdir}/Makefile.inc
 ${.OBJDIR}/yajl:
 	mkdir ${.TARGET}
 
-# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX}
-# is tedious.
+# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
+# tedious.
 #
 .if !exists(${.OBJDIR}/${yajl_topdir}/src)
 FILES += yajl/yajl_version.h
@@ -71,8 +78,8 @@ FILESDIR = ${INCSDIR}
 .endif
 
 CLEANFILES += yajl/yajl_version.h
-# note:  cleandir doesn't remove local ${.OBJDIR} so we also won't
-# worry about removing the "yajl" sub-directory
+# note:  cleandir doesn't remove local ${.OBJDIR} so we also won't worry about
+# removing the "yajl" sub-directory
 
 # This .if is annoying, but some older systems don't support CPPFLAGS.
 #
@@ -84,18 +91,17 @@ CPPFLAGS += -I.
 CFLAGS += -I.
 .endif
 
-# here we do a little trick to pre-create a symlink to a unique name
-# for the static library so that on systems which don't allow full
-# static linking, but where static linking to some libraries is
-# desired, these unique static names can be selected.  This is also
-# done in building the companion binaries for this project in order to
-# ensure they can be tested without requiring an annoying
-# configuration dance with the dynamic runtime linker.
+# here we do a little trick to pre-create a symlink to a unique name for the
+# static library so that on systems which don't allow full static linking, but
+# where static linking to some libraries is desired, these unique static names
+# can be selected.  This is also done in building the companion binaries for
+# this project in order to ensure they can be tested without requiring an
+# annoying configuration dance with the dynamic runtime linker.
 #
-# Note:  This is an example of BSD Make's need for phony targets with
-# no action rules being used to trigger phony dependencies with action
-# rules.  If the intermediate dependency had action rules, then it
-# would become a target, phony or not.
+# Note:  This is an example of BSD Make's need for phony targets with no action
+# rules being used to trigger phony dependencies with action rules.  If the
+# intermediate dependency had action rules, then it would become a target, phony
+# or not.
 #
 afterdepend: _yajl_static_lib_build_symlink
 afterinstall: _yajl_static_lib_install_symlink
@@ -108,16 +114,15 @@ CLEANFILES += lib$(LIB)_s.a
 _yajl_static_lib_install_symlink: .PHONY
 	ln -fs lib$(LIB).a ${DESTDIR}${LIBDIR}/lib$(LIB)_s.a
 
-# As mentioned above it is not (currently) normal for a BSD Make
-# system to allow a sub-directory in a library source directory, but
-# for now it seems we can trick known systems into allowing it to
-# work.  The problem is though that some targets are disabled for
-# sub-directories because the are defined for the local directory,
-# thush why we build yajl/yajl_version.h above.
+# As mentioned above it is not (currently) normal for a BSD Make system to allow
+# a sub-directory in a library source directory, but for now it seems we can
+# trick known systems into allowing it to work.  The problem is though that some
+# targets are disabled for sub-directories because the are defined for the local
+# directory, thus why we build yajl/yajl_version.h above.
 #
-# Ideally we would move yajl to ../include and force the "includes"
-# target to be run for "beforedepend", installing all headers into a
-# "yajl" sub-directory of the build directory.
+# Ideally we would move yajl to ../include and force the "includes" target to be
+# run for "beforedepend", installing all headers into a "yajl" sub-directory of
+# the build directory.
 #
 SUBDIR += yajl
 

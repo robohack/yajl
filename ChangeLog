@@ -1,3 +1,7 @@
+2.1.0-bsdmake
+     * @robohack - convert build system to BSD Make
+     * @robohack - fix rounding of double values
+
 2.1.0
      * @nonodename, @patperry - fixed some compiler warnings
      * @yep, @emaste - documentation improvements

@@ -1,3 +1,4 @@
+* see http://seriot.ch/parsing_json.html [aka http://seriot.ch/parsing_json.php]
 * add a test for 0x1F bug
 * numeric overflow in integers and double
 * line and char offsets in the lexer and in error messages

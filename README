@@ -5,10 +5,10 @@
 
 Welcome to Yet Another JSON Library (YAJL)
 
-## Why does the world need another C library for parsing JSON?  
+## Why does the world need another C library for parsing JSON?
 
-Good question.  In a review of current C JSON parsing libraries I was 
-unable to find one that satisfies my requirements.  Those are, 
+Good question.  In a review of current C JSON parsing libraries I was
+unable to find one that satisfies my requirements.  Those are,
 0. written in C
 1. portable
 2. robust -- as close to "crash proof" as possible
@@ -20,7 +20,7 @@ unable to find one that satisfies my requirements.  Those are,
 7. simple to use
 8. tiny
 
-Numbers 3, 5, 6, and 7 were particularly hard to find, and were what 
+Numbers 3, 5, 6, and 7 were particularly hard to find, and were what
 caused me to ultimately create YAJL.  This document is a tour of some
 of the more important aspects of YAJL.
 
@@ -71,4 +71,4 @@ application.
 Fat free.  No whip.
 
 enjoy,
-Lloyd - July, 2007 
+Lloyd - July, 2007
