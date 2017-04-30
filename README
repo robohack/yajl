@@ -5,10 +5,20 @@
 
 Welcome to Yet Another JSON Library (YAJL)
 
+## NOTE:  This is a forked version.
+
+This is a fork of Lloyd's version which uses BSDMake for building, and
+which includes a few minor bug fixes.  See the ChangeLog.  This fork is
+hosted at [robohack's GitHub][GHRY] by Greg A. Woods.
+
+[GRHY]: https://github.com/robohack/yajl/
+
+
 ## Why does the world need another C library for parsing JSON?
 
 Good question.  In a review of current C JSON parsing libraries I was
 unable to find one that satisfies my requirements.  Those are,
+
 0. written in C
 1. portable
 2. robust -- as close to "crash proof" as possible
