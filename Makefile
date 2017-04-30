@@ -33,6 +33,11 @@
 #
 # Then use "bsdmake NO_OBJ=yes" to build, etc.
 #
+# If you want to (as would be sane to do) go back to using a 'build' directory
+# then you can remove all the obj.* detritus with:
+#
+#	find . -type d -name .git -prune -o -type d ! -name .git ! -name 'obj.*' ! -name . -exec rm -rf {}/obj.$(uname -m) \;
+#
 # N.B.:  Some variants of BSD Make treat $MAKEOBJDIR as a sub-directory under
 # /usr/obj, and others treat it as a sub-directory under ${.CURDIR}.  You have
 # been warned.  Just use $MAKEOBJDIRPREFIX.
@@ -47,7 +52,7 @@
 #
 #	bsdmake DESTDIR=$(pwd)/dist install
 #
-# DESTDIR can of course be any directory.
+# DESTDIR can of course be any directory, e.g. /usr/local.
 #
 # (This is not the normal use of DESTDIR in BSD Make, but it is the best way for
 # out-of-tree builds, and it does not get in the way of pkgsrc either.)
@@ -78,7 +83,7 @@ SUBDIR +=	test
 # existing obj* directories the second time around...
 #
 
-BUILDTARGETS =	yajl-do-obj yajl-do-depend
+BUILDTARGETS =	bmake-do-obj bmake-do-depend
 
 # this must be the first target
 #
@@ -87,23 +92,31 @@ all: .PHONY .MAKE ${BUILDTARGETS}
 .ORDER: ${BUILDTARGETS}
 
 .for targ in ${BUILDTARGETS}
-${targ}: .PHONY ${targ:S/yajl-do-//}
+${targ}: .PHONY ${targ:S/bmake-do-//}
 .endfor
 
-yajl_install_dirs += ${BINDIR}
-yajl_install_dirs += ${INCSDIR}
-yajl_install_dirs += ${LIBDIR}
-yajl_install_dirs += ${PKGCONFIGDIR}
-yajl_install_dirs += ${DEBUGDIR}
-yajl_install_dirs += ${DEBUGDIR}/bin
-yajl_install_dirs += ${DEBUGDIR}/lib
-yajl_install_dirs += ${LINTLIBDIR}
+# most implementations do not make 'regress' depend on first building everything
+# but we need to build everything before we can do any testing
+#
+regress: .PHONY all
 
-beforeinstall: _yajl_install_dirs
+bmake_install_dirs += ${BINDIR}
+bmake_install_dirs += ${INCSDIR}
+bmake_install_dirs += ${LIBDIR}
+bmake_install_dirs += ${PKGCONFIGDIR}
+bmake_install_dirs += ${DEBUGDIR}
+bmake_install_dirs += ${DEBUGDIR}/bin
+bmake_install_dirs += ${DEBUGDIR}/lib
+bmake_install_dirs += ${LINTLIBDIR}
+bmake_install_dirs += ${SHAREDIR}/doc/html
+bmake_install_dirs += ${SHAREDIR}/doc/yajl
+bmake_install_dirs += ${SHAREDIR}/man
+
+beforeinstall: _bmake_install_dirs
 
 # many BSD system mk files will not make directories on demand
-_yajl_install_dirs: .PHONY
-.for instdir in ${yajl_install_dirs}
+_bmake_install_dirs: .PHONY
+.for instdir in ${bmake_install_dirs}
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 

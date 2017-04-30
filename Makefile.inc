@@ -1,6 +1,6 @@
 # -*-makefile-bsdmake-*-
 
-# Common setup for BSD Makefiles
+# Common/shared setup for BSD Makefiles
 #
 # N.B.:  Nothing in here should be changed just to build libyajl.
 #
@@ -12,6 +12,9 @@ YAJL_MINOR =	1
 YAJL_MICRO =	0
 
 YAJL_VERSION =	${YAJL_MAJOR}.${YAJL_MINOR}.${YAJL_MICRO}
+
+# NOTICE:  Nothing below here _should_ be project dependent
+# xxx except see INCSDIR and 2nd last line...  sigh.
 
 OBJMACHINE =	yes
 
@@ -55,8 +58,8 @@ OBJMACHINE =	yes
 #
 #LDSTATIC =	-static
 
-# N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
-# to each of these target directories.
+# N.B.:  ${DESTDIR} if set on the 'install' command line, is also prepended to
+# each of these target directories.
 #
 INSTALL_OPTS =	# for specific ownerships
 # these will be over-ridden by pkgsrc
@@ -65,6 +68,7 @@ INCSDIR ?= /include/yajl
 LIBDIR ?= /lib
 DEBUGDIR ?= /libdata/debug
 LINTLIBDIR ?= /libdata
+SHAREDIR ?= /share
 
 # hmmmm....  This apparently has no precedent in the world of BSD Make.  Base it
 # off of LIBDIR....
@@ -99,28 +103,40 @@ SHLIB_LDENDFILE =	# empty
 
 # Finally some common settings
 #
-# N.B.:  all sub-directory Makefiles must set ${yajl_topdir} to be a relative
-# path to the top of the source tree.
+# N.B.:  all sub-directory Makefiles must set ${bmake_topdir} to be a relative
+# path to the top of the source tree.  This would not be necessary if/when all
+# supported BSDMake versions have the ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL}
+# was first found in NetBSD-current after 2009/09/08 but it is not found in any
+# release until 6.0.  Unfortunately there is no easy way to know definitively
+# what version of BSDMake is being used.  Simon Gerraty's bmake has
+# MAKE_VERSION, as does FreeBSD's make though they are entirely and totally
+# unrelated. In NetBSD MAKE_VERSION was only briefly present since it
+# represented the build date, not the release date, and it was removed in order
+# to make it possible to do reproducible builds.
 #
-yajl_srcdir =	${.CURDIR}/${yajl_topdir}/src
+bmake_srcdir =	${.CURDIR}/${bmake_topdir}/src
 
 # This .if is annoying, but some older systems don't support CPPFLAGS.
 #
 .if defined(CPPFLAGS)
-CPPFLAGS +=	-I${yajl_srcdir}
+CPPFLAGS +=	-I${bmake_srcdir}
 .else
-CFLAGS +=	-I${yajl_srcdir}
+CFLAGS +=	-I${bmake_srcdir}
 .endif
 
+# XXX this is, very unfortunately, project dependent!
+#
 .if !defined(LIB)
 #
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
-. if exists(${.OBJDIR}/${yajl_topdir}/src)
-LDADD += -L${.OBJDIR}/${yajl_topdir}/src
+. if exists(${.OBJDIR}/${bmake_topdir}/src)
+LDADD += -L${.OBJDIR}/${bmake_topdir}/src
 . else
-LDADD += -L../${yajl_topdir}/src/${.OBJDIR:T}
+LDADD += -L../${bmake_topdir}/src/${.OBJDIR:T}
 . endif
+# see src/Makefile for where LIB is set
+# -l${LIB}_s
 LDADD += -lyajl_s
 .endif

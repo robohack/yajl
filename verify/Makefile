@@ -1,11 +1,11 @@
 # -*-makefile-bsdmake-*-
 
-yajl_topdir = ..
+bmake_topdir = ..
 
-.include "${.CURDIR}/${yajl_topdir}/Makefile.inc"
+.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
 
 PROG = 	json_verify
 
-MAN=	# empty
+MAN =	# empty
 
 .include <bsd.prog.mk>

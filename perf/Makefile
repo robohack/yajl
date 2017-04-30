@@ -1,15 +1,15 @@
 # -*-makefile-bsdmake-*-
 
-yajl_topdir = ..
+bmake_topdir = ..
 
-.include "${.CURDIR}/${yajl_topdir}/Makefile.inc"
+.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
 
 SRCS = perftest.c
 SRCS += documents.c
 
 PROG = 	perftest
 
-MAN=	# empty
+MAN =	# empty
 
 # don't install
 proginstall:

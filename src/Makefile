@@ -1,11 +1,11 @@
 # -*-makefile-bsdmake-*-
 
-yajl_topdir = ..
+bmake_topdir = ..
 
 # this must be set first to avoid the top-level LDADD
 LIB =	yajl
 
-.include "${.CURDIR}/${yajl_topdir}/Makefile.inc"
+.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
 
 .include <bsd.own.mk>
 
@@ -41,7 +41,7 @@ yajl.pc: ${.CURDIR}/yajl.pc.in
 	< ${.CURDIR}/yajl.pc.in > ${.TARGET}
 
 yajl.pc: ${.CURDIR}/Makefile
-yajl.pc: ${.CURDIR}/${yajl_topdir}/Makefile.inc
+yajl.pc: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 
 # We have to do this here, not in the sub-directory, because during "make
 # depend" the local actions are done before descending into the sub-directory
@@ -63,7 +63,7 @@ yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	< ${.CURDIR}/yajl/yajl_version.h.in > ${.TARGET}
 
 yajl/yajl_version.h: ${.CURDIR}/Makefile
-yajl/yajl_version.h: ${.CURDIR}/${yajl_topdir}/Makefile.inc
+yajl/yajl_version.h: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 
 ${.OBJDIR}/yajl:
 	mkdir ${.TARGET}
@@ -71,7 +71,7 @@ ${.OBJDIR}/yajl:
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
-.if !exists(${.OBJDIR}/${yajl_topdir}/src)
+.if !exists(${.OBJDIR}/${bmake_topdir}/src)
 FILES += yajl/yajl_version.h
 # n.b.:  FILESDIR_blah won't work because of the "yajl/" directory
 FILESDIR = ${INCSDIR}
@@ -103,15 +103,15 @@ CFLAGS += -I.
 # intermediate dependency had action rules, then it would become a target, phony
 # or not.
 #
-afterdepend: _yajl_static_lib_build_symlink
-afterinstall: _yajl_static_lib_install_symlink
+afterdepend: _bmake_static_lib_build_symlink
+afterinstall: _bmake_static_lib_install_symlink
 
-_yajl_static_lib_build_symlink:	.PHONY
+_bmake_static_lib_build_symlink:	.PHONY
 	ln -fs lib$(LIB).a lib$(LIB)_s.a
 
 CLEANFILES += lib$(LIB)_s.a
 
-_yajl_static_lib_install_symlink: .PHONY
+_bmake_static_lib_install_symlink: .PHONY
 	ln -fs lib$(LIB).a ${DESTDIR}${LIBDIR}/lib$(LIB)_s.a
 
 # As mentioned above it is not (currently) normal for a BSD Make system to allow

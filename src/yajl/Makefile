@@ -1,15 +1,15 @@
 # -*-makefile-bsdmake-*-
 
-yajl_topdir = ../..
+bmake_topdir = ../..
 
-.include "${.CURDIR}/${yajl_topdir}/Makefile.inc"
+.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
 
 .include <bsd.own.mk>
 
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX}
 # is tedious.
 #
-.if exists(${.OBJDIR}/${yajl_topdir}/src)
+.if exists(${.OBJDIR}/${bmake_topdir}/src)
 INCS =	yajl_version.h
 .endif
 
