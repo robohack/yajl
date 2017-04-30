@@ -2,9 +2,20 @@ Short story:
 
 	bsdmake && bsdmake DESTDIR=/usr/local install
 
+A slightly cleaner way:
+
+	mkdir build
+	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build
+	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=/usr/local install
+
+WARNING:  Do not specify DESTDIR for the first (build) phase!
+
 (where "bsdmake" is of course a 'make' of the BSD persuasion,
 e.g. "make" on BSDs, "bsdmake" on Darwin/OSX, or "bmake" on other
 non-BSD-based systems.)
+
+See also the comments in the top-level Makefile for more hints about
+issues with various mk-files (also some more comments in Makefile.inc).
 
 When things go wrong:
 
