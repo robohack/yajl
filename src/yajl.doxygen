@@ -26,8 +26,8 @@ simplified parsing and extraction of data from smallish JSON documents.
 
 \section usage Usage
 
-See <a href="reformatter_2json_reformat_8c-example.html">json_reformat.c</a> for a complete example of stream based parsing
-and generation of JSON.  See <a href="example_2parse_config_8c-example.html">parse_config.c</a> for an example of the
+See <a href="reformatter_2json__reformat_8c-example.html">json_reformat.c</a> for a complete example of stream based parsing
+and generation of JSON.  See <a href="example_2parse__config_8c-example.html">parse_config.c</a> for an example of the
 simplified tree interface.
 
 */

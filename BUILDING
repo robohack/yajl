@@ -26,5 +26,8 @@ NOTES:
   work-around to avoid building a shared library -- you really don't
   need it anyway)
 
-- see the comments in the top-level Makefile for more hints about
-  issues with various mk-files (also more in Makefile.inc)
+- if you have "doxygen" installed you can build (and install) the
+  documentation as well:
+
+	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build docs
+	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=/usr/local install-docs

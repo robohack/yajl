@@ -107,9 +107,22 @@ _yajl_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
-# XXX ???
+# this creates 'html', 'latex-, and 'man' sub-directories with generated
+# documentation
+#
+# xxx as-is this will always be executed since there are no real sources or targets
+#
 DOXYGEN ?=	doxygen
-docs:
-	${DOXYGEN} -g src/YAJL.dxy
+docs: .PHONY
+	${DOXYGEN} src/YAJL.dxy
+
+# xxx you can uncomment this if you have 'doxygen' installed and can build docs
+#afterinstall: .PHONY install-docs
+
+install-docs: .PHONY beforeinstall .WAIT docs
+	cp -R $(MAKEOBJDIRPREFIX)/html ${DESTDIR}${SHAREDIR}/doc/
+	cp README COPYING ChangeLog TODO ${DESTDIR}${SHAREDIR}/doc/yajl/
+	cp -R $(MAKEOBJDIRPREFIX)/latex ${DESTDIR}${SHAREDIR}/doc/yajl/
+	cp -R $(MAKEOBJDIRPREFIX)/man ${DESTDIR}${SHAREDIR}/
 
 .include <bsd.subdir.mk>
