@@ -87,6 +87,10 @@ FILESGRP !=	id -g
 NOBINMODE =	644		# else OSX bsdmake can't install!
 DEBUGOWN =	${USER}
 DEBUGGRP !=	id -g
+DOCOWN =	${USER}
+DOCGRP !=	id -g
+# xxx adapt for typo in mk-20150901 through at least mk-20170418
+DOGGRP !=	id -g
 .endif
 
 STRIP =		# empty (needed for OSX bsdmake install)
