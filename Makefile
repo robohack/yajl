@@ -108,8 +108,8 @@ bmake_install_dirs += ${DEBUGDIR}
 bmake_install_dirs += ${DEBUGDIR}/bin
 bmake_install_dirs += ${DEBUGDIR}/lib
 bmake_install_dirs += ${LINTLIBDIR}
-bmake_install_dirs += ${SHAREDIR}/doc/html
-bmake_install_dirs += ${SHAREDIR}/doc/yajl
+bmake_install_dirs += ${SHAREDIR}/doc/yajl/html
+bmake_install_dirs += ${SHAREDIR}/doc/yajl/latex
 bmake_install_dirs += ${SHAREDIR}/man
 
 beforeinstall: _bmake_install_dirs
@@ -125,17 +125,22 @@ _bmake_install_dirs: .PHONY
 #
 # xxx as-is this will always be executed since there are no real sources or targets
 #
+# XXX with different versions of BSDMake we end up needing ${.CURDIR} or similar
+# in the environment but we're safest to do that explicitly on the command line,
+# and also some (older) versions of doxygen don't allow "." in environment
+# variable names, so we have to be careful how we do it.
+#
 DOXYGEN ?=	doxygen
 docs: .PHONY
-	${DOXYGEN} src/YAJL.dxy
+	env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy
 
 # xxx you can uncomment this if you have 'doxygen' installed and can build docs
 #afterinstall: .PHONY install-docs
 
 install-docs: .PHONY beforeinstall .WAIT docs
-	cp -R $(MAKEOBJDIRPREFIX)/html ${DESTDIR}${SHAREDIR}/doc/
-	cp README COPYING ChangeLog TODO ${DESTDIR}${SHAREDIR}/doc/yajl/
-	cp -R $(MAKEOBJDIRPREFIX)/latex ${DESTDIR}${SHAREDIR}/doc/yajl/
-	cp -R $(MAKEOBJDIRPREFIX)/man ${DESTDIR}${SHAREDIR}/
+	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/yajl/
+	cp -R $(MAKEOBJDIRPREFIX:Q)/html ${DESTDIR}${SHAREDIR}/doc/yajl/html/
+	cp -R $(MAKEOBJDIRPREFIX:Q)/latex ${DESTDIR}${SHAREDIR}/doc/yajl/latex/
+	cp -R $(MAKEOBJDIRPREFIX:Q)/man ${DESTDIR}${SHAREDIR}/
 
 .include <bsd.subdir.mk>

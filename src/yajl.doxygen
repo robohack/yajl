@@ -21,13 +21,14 @@ generator. YAJL is released under the permissive ISC license.
    -# event driven
    -# support for generating "beautified" JSON 
    -# includes 
+
 It also includes a small simplified tree interface for 
 simplified parsing and extraction of data from smallish JSON documents.
 
 \section usage Usage
 
-See <a href="reformatter_2json__reformat_8c-example.html">json_reformat.c</a> for a complete example of stream based parsing
-and generation of JSON.  See <a href="example_2parse__config_8c-example.html">parse_config.c</a> for an example of the
-simplified tree interface.
+See <a href="examples.html">the examples</a> for complete examples of
+stream based parsing and generation of JSON; as well as an example of
+the simplified tree interface.
 
 */
