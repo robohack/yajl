@@ -116,7 +116,7 @@ yajl_gen_alloc(const yajl_alloc_funcs * afs)
 
     memset((void *) g, 0, sizeof(struct yajl_gen_t));
     /* copy in pointers to allocation routines */
-    memcpy((void *) &(g->alloc), (void *) afs, sizeof(yajl_alloc_funcs));
+    memcpy((void *) &(g->alloc), (const void *) afs, sizeof(yajl_alloc_funcs));
 
     g->print = (yajl_print_t)&yajl_buf_append;
     g->ctx = yajl_buf_alloc(&(g->alloc));
@@ -141,23 +141,25 @@ yajl_gen_free(yajl_gen g)
 }
 
 #define INSERT_SEP \
-    if (g->state[g->depth] == yajl_gen_map_key ||               \
-        g->state[g->depth] == yajl_gen_in_array) {              \
-        g->print(g->ctx, ",", 1);                               \
-        if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", 1);               \
-    } else if (g->state[g->depth] == yajl_gen_map_val) {        \
-        g->print(g->ctx, ":", 1);                               \
-        if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, " ", 1);                \
+    if (g->state[g->depth] == yajl_gen_map_key ||                       \
+        g->state[g->depth] == yajl_gen_in_array) {                      \
+        g->print(g->ctx, ",", (size_t) 1);                              \
+        if ((g->flags & yajl_gen_beautify))                             \
+            g->print(g->ctx, "\n", (size_t) 1);                         \
+    } else if (g->state[g->depth] == yajl_gen_map_val) {                \
+        g->print(g->ctx, ":", (size_t) 1);                              \
+        if ((g->flags & yajl_gen_beautify))                             \
+            g->print(g->ctx, " ", (size_t) 1);                          \
    }
 
 #define INSERT_WHITESPACE                                               \
-    if ((g->flags & yajl_gen_beautify)) {                                                    \
+    if ((g->flags & yajl_gen_beautify)) {                               \
         if (g->state[g->depth] != yajl_gen_map_val) {                   \
             unsigned int _i;                                            \
             for (_i=0;_i<g->depth;_i++)                                 \
                 g->print(g->ctx,                                        \
                          g->indentString,                               \
-                         (unsigned int)strlen(g->indentString));        \
+                         (size_t) strlen(g->indentString));             \
         }                                                               \
     }
 
@@ -203,7 +205,7 @@ yajl_gen_free(yajl_gen g)
 
 #define FINAL_NEWLINE                                        \
     if ((g->flags & yajl_gen_beautify) && g->state[g->depth] == yajl_gen_complete) \
-        g->print(g->ctx, "\n", 1);
+        g->print(g->ctx, "\n", (size_t) 1);
 
 yajl_gen_status
 yajl_gen_integer(yajl_gen g, long long int number)
@@ -211,7 +213,7 @@ yajl_gen_integer(yajl_gen g, long long int number)
     char i[32];
     ENSURE_VALID_STATE; ENSURE_NOT_KEY; INSERT_SEP; INSERT_WHITESPACE;
     sprintf(i, "%lld", number);
-    g->print(g->ctx, i, (unsigned int)strlen(i));
+    g->print(g->ctx, i, (size_t)strlen(i));
     APPENDED_ATOM;
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
@@ -243,7 +245,7 @@ yajl_gen_double(yajl_gen g, double number)
     if (strspn(i, "0123456789-") == strlen(i)) {
         strcat(i, ".0");
     }
-    g->print(g->ctx, i, (unsigned int)strlen(i));
+    g->print(g->ctx, i, (size_t)strlen(i));
     APPENDED_ATOM;
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
@@ -272,9 +274,9 @@ yajl_gen_string(yajl_gen g, const unsigned char * str,
         }
     }
     ENSURE_VALID_STATE; INSERT_SEP; INSERT_WHITESPACE;
-    g->print(g->ctx, "\"", 1);
+    g->print(g->ctx, "\"", (size_t) 1);
     yajl_string_encode(g->print, g->ctx, str, len, g->flags & yajl_gen_escape_solidus);
-    g->print(g->ctx, "\"", 1);
+    g->print(g->ctx, "\"", (size_t) 1);
     APPENDED_ATOM;
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
@@ -295,8 +297,8 @@ yajl_gen_bool(yajl_gen g, int boolean)
 {
     const char * val = boolean ? "true" : "false";
 
-	ENSURE_VALID_STATE; ENSURE_NOT_KEY; INSERT_SEP; INSERT_WHITESPACE;
-    g->print(g->ctx, val, (unsigned int)strlen(val));
+    ENSURE_VALID_STATE; ENSURE_NOT_KEY; INSERT_SEP; INSERT_WHITESPACE;
+    g->print(g->ctx, val, (size_t)strlen(val));
     APPENDED_ATOM;
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
@@ -309,8 +311,8 @@ yajl_gen_map_open(yajl_gen g)
     INCREMENT_DEPTH;
 
     g->state[g->depth] = yajl_gen_map_start;
-    g->print(g->ctx, "{", 1);
-    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", 1);
+    g->print(g->ctx, "{", (size_t) 1);
+    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", (size_t) 1);
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
 }
@@ -321,10 +323,10 @@ yajl_gen_map_close(yajl_gen g)
     ENSURE_VALID_STATE;
     DECREMENT_DEPTH;
 
-    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", 1);
+    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", (size_t) 1);
     APPENDED_ATOM;
     INSERT_WHITESPACE;
-    g->print(g->ctx, "}", 1);
+    g->print(g->ctx, "}", (size_t) 1);
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
 }
@@ -335,8 +337,8 @@ yajl_gen_array_open(yajl_gen g)
     ENSURE_VALID_STATE; ENSURE_NOT_KEY; INSERT_SEP; INSERT_WHITESPACE;
     INCREMENT_DEPTH;
     g->state[g->depth] = yajl_gen_array_start;
-    g->print(g->ctx, "[", 1);
-    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", 1);
+    g->print(g->ctx, "[", (size_t) 1);
+    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", (size_t) 1);
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
 }
@@ -346,10 +348,10 @@ yajl_gen_array_close(yajl_gen g)
 {
     ENSURE_VALID_STATE;
     DECREMENT_DEPTH;
-    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", 1);
+    if ((g->flags & yajl_gen_beautify)) g->print(g->ctx, "\n", (size_t) 1);
     APPENDED_ATOM;
     INSERT_WHITESPACE;
-    g->print(g->ctx, "]", 1);
+    g->print(g->ctx, "]", (size_t) 1);
     FINAL_NEWLINE;
     return yajl_gen_status_ok;
 }

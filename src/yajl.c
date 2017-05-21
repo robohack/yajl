@@ -123,7 +123,7 @@ yajl_parse(yajl_handle hand, const unsigned char * jsonText,
     /* lazy allocation of the lexer */
     if (hand->lexer == NULL) {
         hand->lexer = yajl_lex_alloc(&(hand->alloc),
-                                     hand->flags & yajl_allow_comments,
+                                     (int) hand->flags & yajl_allow_comments,
                                      !(hand->flags & yajl_dont_validate_strings));
     }
 
@@ -143,7 +143,7 @@ yajl_complete_parse(yajl_handle hand)
      * (multiple values, partial values, etc). */
     if (hand->lexer == NULL) {
         hand->lexer = yajl_lex_alloc(&(hand->alloc),
-                                     hand->flags & yajl_allow_comments,
+                                     (int) hand->flags & yajl_allow_comments,
                                      !(hand->flags & yajl_dont_validate_strings));
     }
 

@@ -170,7 +170,7 @@ main(int argc, char ** argv)
 
 
     for (;;) {
-        rd = fread((void *) fileData, 1, sizeof(fileData) - 1, stdin);
+        rd = fread((void *) fileData, (size_t) 1, sizeof(fileData) - 1, stdin);
 
         if (rd == 0) {
             if (!feof(stdin)) {
@@ -189,7 +189,7 @@ main(int argc, char ** argv)
             const unsigned char * buf;
             size_t len;
             yajl_gen_get_buf(g, &buf, &len);
-            fwrite(buf, 1, len, stdout);
+            fwrite(buf, (size_t) 1, len, stdout);
             yajl_gen_clear(g);
         }
     }

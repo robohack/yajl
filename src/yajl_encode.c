@@ -21,9 +21,9 @@
 #include <string.h>
 #include <stdio.h>
 
-static void CharToHex(unsigned char c, char * hexBuf)
+static void CharToHex(unsigned int c, unsigned char * hexBuf)
 {
-    const char * hexchar = "0123456789ABCDEF";
+    const unsigned char *hexchar = (const unsigned char * ) "0123456789ABCDEF";
     hexBuf[0] = hexchar[c >> 4];
     hexBuf[1] = hexchar[c & 0x0F];
 }
@@ -33,11 +33,11 @@ yajl_string_encode(const yajl_print_t print,
                    void * ctx,
                    const unsigned char * str,
                    size_t len,
-                   int escape_solidus)
+                   unsigned int escape_solidus)
 {
     size_t beg = 0;
     size_t end = 0;
-    char hexBuf[7];
+    unsigned char hexBuf[7];
     hexBuf[0] = '\\'; hexBuf[1] = 'u'; hexBuf[2] = '0'; hexBuf[3] = '0';
     hexBuf[6] = 0;
 
@@ -59,14 +59,14 @@ yajl_string_encode(const yajl_print_t print,
             case '\t': escaped = "\\t"; break;
             default:
                 if ((unsigned char) str[end] < 32) {
-                    CharToHex(str[end], hexBuf + 4);
-                    escaped = hexBuf;
+                    CharToHex((unsigned int) str[end], hexBuf + 4);
+                    escaped = (char *) hexBuf;
                 }
                 break;
         }
         if (escaped != NULL) {
             print(ctx, (const char *) (str + beg), end - beg);
-            print(ctx, escaped, (unsigned int)strlen(escaped));
+            print(ctx, escaped, (size_t)strlen(escaped));
             beg = ++end;
         } else {
             ++end;
@@ -80,8 +80,8 @@ static void hexToDigit(unsigned int * val, const unsigned char * hex)
     unsigned int i;
     for (i=0;i<4;i++) {
         unsigned char c = hex[i];
-        if (c >= 'A') c = (c & ~0x20) - 7;
-        c -= '0';
+        if (c >= 'A') c = (unsigned char) ((c & ~0x20) - 7);
+        c = (unsigned char) (c - '0');
         assert(!(c & 0xF0));
         *val = (*val << 4) | c;
     }
@@ -158,7 +158,7 @@ void yajl_string_decode(yajl_buf buf, const unsigned char * str,
                     unescaped = utf8Buf;
 
                     if (codepoint == 0) {
-                        yajl_buf_append(buf, unescaped, 1);
+                        yajl_buf_append(buf, unescaped, (size_t) 1);
                         beg = ++end;
                         continue;
                     }
@@ -168,7 +168,7 @@ void yajl_string_decode(yajl_buf buf, const unsigned char * str,
                 default:
                     assert("this should never happen" == NULL);
             }
-            yajl_buf_append(buf, unescaped, (unsigned int)strlen(unescaped));
+            yajl_buf_append(buf, unescaped, (size_t)strlen(unescaped));
             beg = ++end;
         } else {
             end++;

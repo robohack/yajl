@@ -120,7 +120,7 @@ extern "C" {
          *  example:
          *    yajl_config(h, yajl_allow_comments, 1); // turn comment support on
          */
-        yajl_allow_comments = 0x01,
+        yajl_allow_comments            = (1 << 0),
         /**
          * When set the parser will verify that all strings in JSON input are
          * valid UTF8 and will emit a parse error if this is not so.  When set,
@@ -130,7 +130,7 @@ extern "C" {
          * example:
          *   yajl_config(h, yajl_dont_validate_strings, 1); // disable utf8 checking
          */
-        yajl_dont_validate_strings     = 0x02,
+        yajl_dont_validate_strings     = (1 << 1),
         /**
          * By default, upon calls to yajl_complete_parse(), yajl will
          * ensure the entire input text was consumed and will raise an error
@@ -138,7 +138,7 @@ extern "C" {
          * check.  This can be useful when parsing json out of a that contains more
          * than a single JSON document.
          */
-        yajl_allow_trailing_garbage = 0x04,
+        yajl_allow_trailing_garbage    = (1 << 2),
         /**
          * Allow multiple values to be parsed by a single handle.  The
          * entire text must be valid JSON, and values can be seperated
@@ -148,7 +148,7 @@ extern "C" {
          * complete state.  This option can be useful when parsing multiple
          * values from an input stream.
          */
-        yajl_allow_multiple_values = 0x08,
+        yajl_allow_multiple_values     = (1 << 3),
         /**
          * When yajl_complete_parse() is called the parser will
          * check that the top level value was completely consumed.  I.E.,
@@ -156,7 +156,7 @@ extern "C" {
          * yajl will enter an error state (premature EOF).  Setting this
          * flag suppresses that check and the corresponding error.
          */
-        yajl_allow_partial_values = 0x10
+        yajl_allow_partial_values      = (1 << 4)
     } yajl_option;
 
     /** allow the modification of parser options subsequent to handle

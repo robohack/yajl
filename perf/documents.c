@@ -14,10 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "documents.h"
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "documents.h"
 
 /* latest twitter tweets from easter day */
 const char * doc1[] = 
@@ -1397,21 +1398,21 @@ const char ** g_documents[] = {
     NULL
 };
 
-int num_docs(void) 
+unsigned int num_docs(void) 
 {
-    int i = 0;
+    unsigned int i = 0;
     for (i=0;g_documents[i];i++);
     return i;
 }
 
-const char ** get_doc(int i) 
+const char ** get_doc(unsigned int i) 
 {
     return g_documents[i];
 }
 
-unsigned int doc_size(int i) 
+size_t doc_size(unsigned int i) 
 {
-    int sz = 0;
+    size_t sz = 0;
     const char ** p = get_doc(i);
     do { sz += strlen(*p); } while(*(++p));
     return sz;

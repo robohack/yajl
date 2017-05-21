@@ -113,7 +113,7 @@ static int test_yajl_string(void *ctx, const unsigned char * stringVal,
 {
     if (TEST_CTX(ctx)->do_printfs) {
         printf("string: '");
-        fwrite(stringVal, 1, stringLen, stdout);
+        fwrite(stringVal, (size_t) 1, stringLen, stdout);
         printf("'\n");
     }
     return 1;
@@ -208,14 +208,6 @@ main(int argc, char ** argv)
     size_t rd;
     int i, j;
 
-    /* memory allocation debugging: allocate a structure which collects
-     * statistics */
-    yajlTestMemoryContext memCtx;
-
-    memCtx.do_printfs = 1;
-    memCtx.numMallocs = 0;
-    memCtx.numFrees = 0;
-
     /* memory allocation debugging: allocate a structure which holds
      * allocation routines */
     yajl_alloc_funcs allocFuncs = {
@@ -224,6 +216,15 @@ main(int argc, char ** argv)
         yajlTestFree,
         (void *) NULL
     };
+
+    /* memory allocation debugging: allocate a structure which collects
+     * statistics */
+    yajlTestMemoryContext memCtx;
+
+    memCtx.do_printfs = 1;
+    memCtx.numMallocs = 0;
+    memCtx.numFrees = 0;
+
 
     allocFuncs.ctx = (void *) &memCtx;
 
@@ -245,7 +246,7 @@ main(int argc, char ** argv)
                 usage(argv[0]);
             }
 
-            bufSize = atoi(argv[i]);
+            bufSize = (size_t) atoi(argv[i]);
             if (!bufSize) {
                 fprintf(stderr, "%zu is an invalid buffer size\n",
                         bufSize);
@@ -290,7 +291,7 @@ main(int argc, char ** argv)
         fileName = "stdin";
     }
     for (;;) {
-        rd = fread((void *) fileData, 1, bufSize, file);
+        rd = fread((void *) fileData, (size_t) 1, bufSize, file);
 
         if (rd <= 0) {
             if (!feof(file)) {

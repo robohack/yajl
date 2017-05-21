@@ -76,7 +76,7 @@ main(int argc, char ** argv)
     }
 
     for (;;) {
-        rd = fread((void *) fileData, 1, sizeof(fileData) - 1, stdin);
+        rd = fread((void *) fileData, (size_t) 1, sizeof(fileData) - 1, stdin);
 
         retval = 0;
 

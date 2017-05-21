@@ -28,7 +28,7 @@
 static double mygettime(void) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    return now.tv_sec + (now.tv_usec / 1000000.0);
+    return (double) now.tv_sec + (now.tv_usec / 1000000.0);
 }
 #else
 #define _WIN32 1
@@ -49,7 +49,7 @@ static double mygettime(void) {
 static int
 run(int validate_utf8)
 {
-    long long times = 0; 
+    long long unsigned times = 0;
     double starttime;
 
     starttime = mygettime();
@@ -64,22 +64,22 @@ run(int validate_utf8)
 
         for (i = 0; i < 100; i++) {
             yajl_handle hand = yajl_alloc(NULL, NULL, NULL);
-            yajl_status stat;        
+            yajl_status stat;
             const char ** d;
 
             yajl_config(hand, yajl_dont_validate_strings, validate_utf8 ? 0 : 1);
 
-            for (d = get_doc(times % num_docs()); *d; d++) {
-                stat = yajl_parse(hand, (unsigned char *) *d, strlen(*d));
+            for (d = get_doc((unsigned int) (times % num_docs())); *d; d++) {
+                stat = yajl_parse(hand, (const unsigned char *) *d, strlen(*d));
                 if (stat != yajl_status_ok) break;
             }
-            
+
             stat = yajl_complete_parse(hand);
 
             if (stat != yajl_status_ok) {
                 unsigned char * str =
                     yajl_get_error(hand, 1,
-                                   (unsigned char *) *d,
+                                   (const unsigned char *) *d,
                                    (*d ? strlen(*d) : 0));
                 fprintf(stderr, "%s", (const char *) str);
                 yajl_free_error(hand, str);
@@ -96,14 +96,15 @@ run(int validate_utf8)
         double now;
         const char * all_units[] = { "B/s", "KB/s", "MB/s", (char *) 0 };
         const char ** units = all_units;
-        int i, avg_doc_size = 0;
+        unsigned int i;
+        size_t avg_doc_size = 0;
 
         now = mygettime();
 
         for (i = 0; i < num_docs(); i++) avg_doc_size += doc_size(i);
         avg_doc_size /= num_docs();
 
-        throughput = (times * avg_doc_size) / (now - starttime);
+        throughput = (double) (times * avg_doc_size) / (now - starttime);
         
         while (*(units + 1) && throughput > 1024) {
             throughput /= 1024;

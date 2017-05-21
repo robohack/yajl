@@ -33,7 +33,7 @@
 
  /* same semantics as strtol */
 long long
-yajl_parse_integer(const unsigned char *number, unsigned int length)
+yajl_parse_integer(const unsigned char *number, size_t length)
 {
     long long ret  = 0;
     long sign = 1;
@@ -69,7 +69,7 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
     unsigned char * str;
     const char * errorType = NULL;
     const char * errorText = NULL;
-    char text[72];
+    unsigned char text[72];
     const char * arrow = "                     (right here) ------^\n";
 
     if (yajl_bs_current(hand->stateStack) == yajl_state_parse_error) {
@@ -129,13 +129,13 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
         text[i] = 0;
         {
             char * newStr = (char *)
-                YA_MALLOC(&(hand->alloc), (unsigned int)(strlen((char *) str) +
-                                                         strlen((char *) text) +
-                                                         strlen(arrow) + 1));
+                YA_MALLOC(&(hand->alloc), (size_t)(strlen((char *) str) +
+                                                   strlen((char *) text) +
+                                                   strlen(arrow) + 1));
             if (newStr) {
                 newStr[0] = 0;
                 strcat((char *) newStr, (char *) str);
-                strcat((char *) newStr, text);
+                strcat((char *) newStr, (char *) text);
                 strcat((char *) newStr, arrow);
             }
             YA_FREE(&(hand->alloc), str);
@@ -159,7 +159,7 @@ yajl_status
 yajl_do_finish(yajl_handle hand)
 {
     yajl_status stat;
-    stat = yajl_do_parse(hand,(const unsigned char *) " ",1);
+    stat = yajl_do_parse(hand,(const unsigned char *) " ",(size_t) 1);
 
     if (stat != yajl_status_ok) return stat;
 
@@ -312,7 +312,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                             yajl_buf_append(hand->decodeBuf, buf, bufLen);
                             buf = yajl_buf_data(hand->decodeBuf);
                             errno = 0;
-                            d = strtod((char *) buf, NULL);
+                            d = strtod((const char *) buf, NULL);
                             if ((d == HUGE_VAL || d == -HUGE_VAL) &&
                                 errno == ERANGE)
                             {
@@ -330,7 +330,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                         }
                     }
                     break;
-                case yajl_tok_right_brace: {
+                case yajl_tok_right_brace:
                     if (yajl_bs_current(hand->stateStack) ==
                         yajl_state_array_start)
                     {
@@ -342,8 +342,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                         yajl_bs_pop(hand->stateStack);
                         goto around_again;
                     }
-                    /* intentional fall-through */
-                }
+                    /* FALLTHROUGH */
                 case yajl_tok_colon:
                 case yajl_tok_comma:
                 case yajl_tok_right_bracket:
@@ -393,7 +392,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                         buf = yajl_buf_data(hand->decodeBuf);
                         bufLen = yajl_buf_len(hand->decodeBuf);
                     }
-                    /* intentional fall-through */
+                    /* FALLTHROUGH */
                 case yajl_tok_string:
                     if (hand->callbacks && hand->callbacks->yajl_map_key) {
                         _CC_CHK(hand->callbacks->yajl_map_key(hand->ctx, buf,
@@ -411,6 +410,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                         yajl_bs_pop(hand->stateStack);
                         goto around_again;
                     }
+                    /* FALLTHROUGH */
                 default:
                     yajl_bs_set(hand->stateStack, yajl_state_parse_error);
                     hand->parseError =
@@ -493,6 +493,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
     }
 
     abort();
+    /* NOTREACHED */
     return yajl_status_error;
 }
 

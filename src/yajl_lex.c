@@ -82,13 +82,13 @@ struct yajl_lexer_t {
     size_t bufOff;
 
     /* are we using the lex buf? */
-    unsigned int bufInUse;
+    /* bool */ int bufInUse;
 
     /* shall we allow comments? */
-    unsigned int allowComments;
+    /* bool */ int allowComments;
 
     /* shall we validate utf8 inside strings? */
-    unsigned int validateUTF8;
+    /* bool */ int validateUTF8;
 
     yajl_alloc_funcs * alloc;
 };
@@ -102,7 +102,8 @@ struct yajl_lexer_t {
 
 yajl_lexer
 yajl_lex_alloc(yajl_alloc_funcs * alloc,
-               unsigned int allowComments, unsigned int validateUTF8)
+               /* bool */ int allowComments,
+               /* bool */ int validateUTF8)
 {
     yajl_lexer lxr = (yajl_lexer) YA_MALLOC(alloc, sizeof(struct yajl_lexer_t));
     memset((void *) lxr, 0, sizeof(struct yajl_lexer_t));
@@ -194,7 +195,7 @@ static const char charLookupTable[256] =
 static yajl_tok
 yajl_lex_utf8_char(yajl_lexer lexer, const unsigned char * jsonText,
                    size_t jsonTextLen, size_t * offset,
-                   unsigned char curChar)
+                   unsigned int curChar)
 {
     if (curChar <= 0x7f) {
         /* single byte */
@@ -252,7 +253,7 @@ if (*offset >= jsonTextLen) { \
  *  be skipped.
  * (lth) hi world, any thoughts on how to make this routine faster? */
 static size_t
-yajl_string_scan(const unsigned char * buf, size_t len, int utf8check)
+yajl_string_scan(const unsigned char * buf, size_t len, /* bool */ int utf8check)
 {
     unsigned char mask = IJC|NFP|(utf8check ? NUC : 0);
     size_t skip = 0;
@@ -343,7 +344,7 @@ yajl_lex_string(yajl_lexer lexer, const unsigned char * jsonText,
         /* when in validate UTF8 mode we need to do some extra work */
         else if (lexer->validateUTF8) {
             yajl_tok t = yajl_lex_utf8_char(lexer, jsonText, jsonTextLen,
-                                            offset, curChar);
+                                            offset, (unsigned int) curChar);
 
             if (t == yajl_tok_eof) {
                 tok = yajl_tok_eof;
@@ -679,7 +680,7 @@ yajl_lex_lex(yajl_lexer lexer, const unsigned char * jsonText,
         printf("EOF hit\n");
     } else {
         printf("lexed %s: '", tokToStr(tok));
-        fwrite(*outBuf, 1, *outLen, stdout);
+        fwrite(*outBuf, (size_t) 1, *outLen, stdout);
         printf("'\n");
     }
 #endif
@@ -719,6 +720,7 @@ yajl_lex_error_to_string(yajl_lex_error error)
             return "probable comment found in input text, comments are "
                    "not enabled.";
     }
+    /* NOTREACHED */
     return "unknown error code";
 }
 
@@ -749,7 +751,7 @@ yajl_tok yajl_lex_peek(yajl_lexer lexer, const unsigned char * jsonText,
     size_t outLen;
     size_t bufLen = yajl_buf_len(lexer->buf);
     size_t bufOff = lexer->bufOff;
-    unsigned int bufInUse = lexer->bufInUse;
+    /* bool */ int bufInUse = lexer->bufInUse;
     yajl_tok tok;
 
     tok = yajl_lex_lex(lexer, jsonText, jsonTextLen, &offset,

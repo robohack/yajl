@@ -29,10 +29,11 @@ main(void)
     char errbuf[1024];
 
     /* null plug buffers */
-    fileData[0] = errbuf[0] = 0;
+    fileData[0] = '\0';
+    errbuf[0] = '\0';
 
     /* read the entire config file */
-    rd = fread((void *) fileData, 1, sizeof(fileData) - 1, stdin);
+    rd = fread((void *) fileData, (size_t) 1, sizeof(fileData) - 1, stdin);
 
     /* file read error handling */
     if (rd == 0 && !feof(stdin)) {
