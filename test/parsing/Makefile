@@ -15,3 +15,4 @@ regress:
 	cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} sh ./run_tests.sh
 
 .include <bsd.prog.mk>
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

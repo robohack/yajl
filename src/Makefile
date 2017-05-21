@@ -130,3 +130,5 @@ SUBDIR += yajl
 .if !defined(DISTRIBUTION)	# avoid dup include on some systems
 .include <bsd.subdir.mk>
 .endif
+
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

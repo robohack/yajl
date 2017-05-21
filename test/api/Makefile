@@ -18,3 +18,4 @@ regress:
 	@echo Not running: ./${PROG}, because it is broken.
 
 .include <bsd.prog.mk>
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

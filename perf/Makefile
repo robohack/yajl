@@ -18,3 +18,4 @@ regress:
 	./perftest
 
 .include <bsd.prog.mk>
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

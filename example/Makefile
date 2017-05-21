@@ -15,3 +15,4 @@ regress:
 	[ "$$(./parse_config < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
 
 .include <bsd.prog.mk>
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
