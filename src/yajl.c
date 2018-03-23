@@ -64,7 +64,7 @@ yajl_alloc(const yajl_callbacks * callbacks,
     hand = (yajl_handle) YA_MALLOC(afs, sizeof(struct yajl_handle_t));
 
     /* copy in pointers to allocation routines */
-    memcpy((void *) &(hand->alloc), (void *) afs, sizeof(yajl_alloc_funcs));
+    hand->alloc = *afs;
 
     hand->callbacks = callbacks;
     hand->ctx = ctx;
@@ -135,7 +135,7 @@ yajl_parse(yajl_handle hand, const unsigned char * jsonText,
 yajl_status
 yajl_complete_parse(yajl_handle hand)
 {
-    /* The lexer is lazy allocated in the first call to parse.  if parse is
+    /* The lexer is lazy allocated in the first call to parse.  If parse is
      * never called, then no data was provided to parse at all.  This is a
      * "premature EOF" error unless yajl_allow_partial_values is specified.
      * allocating the lexer now is the simplest possible way to handle this
