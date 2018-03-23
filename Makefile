@@ -1,4 +1,4 @@
-# -*-makefile-bsdmake-*-
+# -*- makefile-bsdmake -*-
 
 .include "${.CURDIR}/Makefile.inc"
 
@@ -17,9 +17,25 @@
 #	mkdir build
 #	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build
 #
+# Then if the build succeeds (and assuming you're not cross-compiling) you can
+# run the regression tests to see if the results are correct.
+#
+#	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build regress
+#
 # However doing so more or less implies always invoking the build at the top of
 # the source tree, with MAKEOBJDIRPREFIX set either on the command-line or in
 # the environment).
+#
+# If you want to run make in just a sub-directory of the source tree AFTER
+# you've done an initial build then you can do so provided you always carefully
+# set MAKEOBJDIRPREFIX to the the fully qualified pathname of the initial build
+# directory you've initially created.
+#
+# You can create the initial build directory skeleton infrastructure by directly
+# building the "obj" and "depend" targets:
+#
+#	mkdir build
+#	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build obj depend
 #
 # If you don't use MAKEOBJDIRPREFIX then "obj.${MACHINE}" sub-directories will
 # be created for each directory with products, except on OSX where the "bsdmake
@@ -57,7 +73,7 @@
 # (This is not the normal use of DESTDIR in BSD Make, but it is the best way for
 # out-of-tree builds, and it does not get in the way of pkgsrc either.)
 #
-# N.B.:  Do not specify DESTDIR for the build phase!
+# N.B.:  Do not specify DESTDIR for the build or regress targets!
 
 SUBDIR =	src
 
@@ -104,13 +120,17 @@ bmake_install_dirs += ${BINDIR}
 bmake_install_dirs += ${INCSDIR}
 bmake_install_dirs += ${LIBDIR}
 bmake_install_dirs += ${PKGCONFIGDIR}
+# the DEBUGDIR ones could/should maybe depend on MKDEBUGLIB
 bmake_install_dirs += ${DEBUGDIR}
-bmake_install_dirs += ${DEBUGDIR}/bin
-bmake_install_dirs += ${DEBUGDIR}/lib
+bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/bin
+bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/lib
+# LINTLIBDIR could depend on MKLINT
 bmake_install_dirs += ${LINTLIBDIR}
-bmake_install_dirs += ${SHAREDIR}/doc/yajl/html
-bmake_install_dirs += ${SHAREDIR}/doc/yajl/latex
-bmake_install_dirs += ${SHAREDIR}/man
+# XXX at the moment, without Doxygen, we won't really need these...
+bmake_install_dirs += ${DOCDIR}/yajl/html
+bmake_install_dirs += ${DOCDIR}/yajl/latex
+bmake_install_dirs += ${MANDIR}
+# (in general though it is safest to always make them all)
 
 beforeinstall: _bmake_install_dirs
 
@@ -120,10 +140,8 @@ _bmake_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
-# this creates 'html', 'latex-, and 'man' sub-directories with generated
-# documentation
-#
-# xxx as-is this will always be executed since there are no real sources or targets
+# If you have "doxygen" installed then this creates 'html', 'latex-, and 'man'
+# sub-directories with generated documentation.
 #
 # XXX with different versions of BSDMake we end up needing ${.CURDIR} or similar
 # in the environment but we're safest to do that explicitly on the command line,
@@ -139,8 +157,16 @@ docs: .PHONY
 
 install-docs: .PHONY beforeinstall .WAIT docs
 	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/yajl/
-	cp -R $(MAKEOBJDIRPREFIX:Q)/html ${DESTDIR}${SHAREDIR}/doc/yajl/html/
-	cp -R $(MAKEOBJDIRPREFIX:Q)/latex ${DESTDIR}${SHAREDIR}/doc/yajl/latex/
+	cp -R $(MAKEOBJDIRPREFIX:Q)/html ${DESTDIR}${SHAREDIR}/doc/yajl/
+	cp -R $(MAKEOBJDIRPREFIX:Q)/latex ${DESTDIR}${SHAREDIR}/doc/yajl/
 	cp -R $(MAKEOBJDIRPREFIX:Q)/man ${DESTDIR}${SHAREDIR}/
 
 .include <bsd.subdir.mk>
+
+
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "mkdir -p build; " (default-value 'compile-command) " MAKEOBJDIRPREFIX=$(pwd)/build")
+# End:
+#

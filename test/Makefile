@@ -1,5 +1,7 @@
 # -*-makefile-bsdmake-*-
 
+bmake_topdir = ..
+
 SUBDIR =	api
 SUBDIR +=	parsing
 

@@ -1,3 +1,7 @@
+# -*- makefile-bsdmake -*-
+#
+#	This should be included AFTER <bsd.prog.mk> or <bsd.lib.mk>
+
 #
 # find all CC pre-defines with:
 #
@@ -59,9 +63,6 @@ __clang_patchlevel__ !=	echo __clang_patchlevel__ | $(CC) -E -c - | sed '/\#/d;s
 __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
-
-NOGCCERROR = 1
-WARNS = 0
 
 # -Winline
 #
@@ -175,15 +176,41 @@ CWARNFLAGS += -fmessage-length=0
 . if ${__clang_major__} <= 5
 CWARNFLAGS += -fcatch-undefined-behavior
 .  if ${__clang_major__} == 4 || (${__clang_major__} == 3 && ${__clang_minor__} >= 3)
+.   if defined(USE_UBSAN)
 # i.e. clang 3.3 or clang 4.x (but not clang 5.x)
 CWARNFLAGS += -fsanitize=undefined
+.   endif
 .  endif
 . else
-# clang > 5.0
+.  if ${__clang_major__} >= 7
+.   if defined(USE_UBSAN)
+# N.B.:  It is not possible to combine more than one of the -fsanitize=address,
+# -fsanitize=thread, and -fsanitize=memory checkers in the same program.
+#xxx 'address' may not work (requires intrumentation of all program code)
+#CWARNFLAGS += -fsanitize=address
+# sadly Apple LLVM version 8.1.0 (clang-802.0.42) says:
+# clang: error: unsupported option '-fsanitize=memory' for target 'x86_64-apple-darwin16.6.0'
+#CWARNFLAGS += -fsanitize=memory
+#CWARNFLAGS += -fsanitize=thread
+CWARNFLAGS += -fsanitize=undefined
+# Apple LLVM version 8.1.0 (clang-802.0.42) says:
+# ld: file not found: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/lib/darwin/libclang_rt.safestack_osx.a
+# clang: error: linker command failed with exit code 1 (use -v to see invocation)
+#CWARNFLAGS += -fsanitize=safe-stack
+#xxx this may not be useful?
+#CWARNFLAGS += -fsanitize=dataflow --fsanitize=cfi
+.   endif
+.  else
+# clang > 5.0 < 7.x(?)
+.   if defined(USE_UBSAN)
 # Apple LLVM version 6.0 (clang-600.0.57) (based on LLVM 3.5svn) says:
 #  clang: error: unsupported argument 'undefined' to option 'fsanitize='
 #CWARNFLAGS += -fsanitize=undefined
+.   endif
+.  endif
 . endif
+# -fsanitize must also be provided to the linker (for hidden runtime libraries)
+LDFLAGS += ${CWARNFLAGS:M-fsanitize=*}
 .endif
 
 .if defined(__GNUC__) || defined(__clang__)
@@ -193,16 +220,47 @@ CWARNFLAGS += -fsanitize=undefined
 CFLAGS += -fno-strict-aliasing
 .endif
 
-DBUG ?= -g
-OPTIM ?= # empty
-LDSTATIC ?= -static
+.if defined(__GNUC__) && !defined(__clang__)
+. if defined(USE_UBSAN)
+# xxx hmmmm which, exactly?
+.  if ${__GNUC__} >= 5
+CWARNFLAGS += -fsanitize=undefined
+# -fsanitize=undefined has sub-options
+CWARNFLAGS += -fsanitize=alignment
+CWARNFLAGS += -fsanitize=bool
+CWARNFLAGS += -fsanitize=bounds
+CWARNFLAGS += -fsanitize=enum
+CWARNFLAGS += -fsanitize=float-cast-overflow
+CWARNFLAGS += -fsanitize=float-divide-by-zero
+CWARNFLAGS += -fsanitize=integer-divide-by-zero
+CWARNFLAGS += -fsanitize=null
+CWARNFLAGS += -fsanitize=object-size
+CWARNFLAGS += -fsanitize=shift
+LDFLAGS += -fsanitize=undefined -pthread
+.  endif
+. endif
+. if defined(USE_ASAN)
+.  if ${__GNUC__} > 4 || \
+	(${__GNUC__} == 4 && ${__GNUC_MINOR__} >= 8)
+CWARNFLAGS += -fsanitize=address
+CWARNFLAGS += -fsanitize=leak
+LDFLAGS += -fsanitize=address
+.  endif
+. endif
+.endif
 
 .if (defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || defined(.FreeBSD)
 # for both FreeBSD and Mac OS X....
 NO_SHARED = YES
-CFLAGS += ${DBUG}
+. if !empty(DBG) && empty(CFLAGS:M*${DBG}*)
+CFLAGS += ${DBG}
+. endif
+. if !empty(OPTIM) && empty(CFLAGS:M*${OPTIM}*)
 CFLAGS += ${OPTIM}
+. endif
+. if !empty(CPPFLAGS) && empty(CFLAGS:M*${CPPFLAGS}*)
 CFLAGS += ${CPPFLAGS}
+. endif
 .else
 NOSHARED = YES
 .endif
@@ -214,7 +272,7 @@ LDFLAGS += -Wl,--warn-common
 #LDFLAGS += -Wl,--unresolved-symbols=report-all
 #LDFLAGS += -Wl,--error-unresolved-symbols
 . else
-.  if !empty(${DBUG:M-g})
+.  if !empty(${DBG:M-g})
 # hmmm....  GNU ld(1) doesn't need -g, but some linkers do
 #LDFLAGS += -Wl,-g
 .  endif

@@ -1,0 +1,98 @@
+# -*- makefile-bsdmake -*-
+# $NetBSD$
+
+# N.B.:  though this version of YAJL is diverging from the original, as yet it
+# has no API (or, so far as is known, ABI) differences, thus is still "2.1.0"
+
+PKGNAME=	yajl-2.1.0nb1
+CATEGORIES=	devel textproc
+DISTFILES=	# empty
+#DISTFILES=	https://github.com/robohack/yajl
+
+# XXX cwrappers is currently still very buggy and elides the necessary
+# "-I${.CURDIR}/../src" which must be added by YAJL's "Makefile.inc"
+USE_CWRAPPERS=	no
+
+MAINTAINER=	pkgsrc-users@NetBSD.org
+HOMEPAGE=	http://lloyd.github.com/yajl/
+COMMENT=	Small JSON library written in ANSI C
+LICENSE=	modified-bsd
+
+USE_LANGUAGES=	c
+
+MAKE_ENV+=	MAKEOBJDIRPREFIX=${WRKSRC}/build
+MAKE_ENV+=	${BSD_MAKE_ENV}
+# override INCSDIR for the project subdir....
+MAKE_ENV+=	INCSDIR=${PREFIX}/include/yajl
+
+AUTO_MKDIRS=	yes
+
+.include "../../mk/bsd.prefs.mk"
+
+# N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
+
+PLIST_VARS+=	mklint
+.if defined(MKLINT) && ${MKLINT} != "no"
+PLIST.mklint=	yes
+.endif
+
+PLIST_VARS+=	mkdebug
+.if defined(MKDEBUG) && ${MKDEBUG} != "no"
+PLIST.mkdebug=	yes
+.endif
+
+PLIST_VARS+=	mkdebuglib
+.if defined(MKDEBUGLIB) && ${MKDEBUGLIB} != "no"
+PLIST.mkdebuglib=	yes
+.endif
+
+do-extract:
+	${MKDIR} ${WRKSRC}
+	${CP} -R ${FILESDIR}/* ${WRKSRC}/
+	${RM} -rf ${WRKSRC}/CVS
+
+do-configure:
+	${MKDIR} ${WRKSRC}/build
+
+post-build:
+	sed -e 's|$${dollar}|$$|g'					\
+	    -e 's|^prefix=.*|prefix=${PREFIX}|'				\
+	    -e 's|^libdir=.*|libdir=$${prefix}/lib|'			\
+	    -e 's|^includedir=.*|includedir=$${prefix}/include/yajl|'	\
+	    -e 's|^Version:.*|Version: ${PKGVERSION}|'			\
+	    < ${WRKSRC}/src/yajl.pc.in > ${WRKSRC}/src/yajl.pc
+
+post-install:
+	${INSTALL_DATA} ${WRKSRC}/src/yajl.pc ${DESTDIR}${PREFIX}/lib/pkgconfig
+
+
+# how to get from there to here....
+#
+# Go to where you have cloned https://github.com/robohack/yajl to, copy this
+# Makefile into your $pkgsrc/devel/yajl directory, go there, and build this
+# target:
+#
+#	cp Makefile /usr/pkgsrc/devel/yajl
+#	cd /usr/pkgsrc/devel/yajl
+#	make REPODIR=$OLDPWD setup-pkgsrc
+#
+REPODIR ?=	/work/woods/m-yajl
+setup-pkgsrc:
+	${RM} -f ${FILESDIR}/BUILDING
+	${RM} -f ${FILESDIR}/COPYING
+	${RM} -f ${FILESDIR}/ChangeLog
+	${RM} -f ${FILESDIR}/Makefile
+	${RM} -f ${FILESDIR}/Makefile.compiler
+	${RM} -f ${FILESDIR}/Makefile.inc
+	${RM} -f ${FILESDIR}/README
+	${RM} -f ${FILESDIR}/TODO
+	${RM} -rf ${FILESDIR}/example
+	${RM} -rf ${FILESDIR}/perf
+	${RM} -rf ${FILESDIR}/reformatter
+	${RM} -rf ${FILESDIR}/src
+	${RM} -rf ${FILESDIR}/test
+	${RM} -rf ${FILESDIR}/verify
+	${CP} -R ${REPODIR}/* ${FILESDIR}/
+	${RM} -rf ${FILESDIR}/build ${FILESDIR}/dist
+
+.include "../../mk/bsd.pkg.mk"

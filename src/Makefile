@@ -55,7 +55,7 @@ yajl.pc: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 # "make includes" into the build tree, not into the OBJDIR, not into the final
 # INCSDIR since we cannot have DESTDIR set when building.
 #
-beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h
+beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h showenv
 yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	sed -e 's/$${YAJL_MAJOR}/${YAJL_MAJOR}/' \
 	    -e 's/$${YAJL_MINOR}/${YAJL_MINOR}/' \
@@ -131,4 +131,21 @@ SUBDIR += yajl
 .include <bsd.subdir.mk>
 .endif
 
+# set compiler and linker flags, especially additional warnings
+#
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
+
+showenv: .PHONY
+	@echo ""
+	@echo "Vars:"
+	@echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"
+	@echo "DEBUGDIR = ${DEBUGDIR:Q}"
+	@echo "LINTLIBDIR = ${LINTLIBDIR:Q}"
+	@echo "MAKECONF = ${MAKECONF:Q}"
+	@echo "MKDEBUG = ${MKDEBUG:Q}"
+	@echo "MKDEBUGLIB = ${MKDEBUGLIB:Q}"
+	@echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"
+	@echo "MKLINT = ${MKLINT:Q}"
+	@echo ""
+	@echo "Environment:"
+	env | sort
