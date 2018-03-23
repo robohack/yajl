@@ -22,9 +22,9 @@
 #
 #	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build regress
 #
-# However doing so more or less implies always invoking the build at the top of
-# the source tree, with MAKEOBJDIRPREFIX set either on the command-line or in
-# the environment).
+# However using MAKEOBJDIRPREFIX more or less implies always invoking the build
+# at the top of the source tree, with MAKEOBJDIRPREFIX set either on the
+# command-line or in the environment).
 #
 # If you want to run make in just a sub-directory of the source tree AFTER
 # you've done an initial build then you can do so provided you always carefully
