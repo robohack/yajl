@@ -7,7 +7,8 @@
 PKGNAME=	yajl-2.1.0nb1
 CATEGORIES=	devel textproc
 DISTFILES=	# empty
-#DISTFILES=	https://github.com/robohack/yajl
+#MASTER_SITES=	${MASTER_SITE_GITHUB:=robohack/}
+#GITHUB_TAG=	v${PKGVERSION_NOREV}
 
 # XXX cwrappers is currently still very buggy and elides the necessary
 # "-I${.CURDIR}/../src" which must be added by YAJL's "Makefile.inc"
@@ -23,7 +24,7 @@ USE_LANGUAGES=	c
 MAKE_ENV+=	MAKEOBJDIRPREFIX=${WRKSRC}/build
 MAKE_ENV+=	${BSD_MAKE_ENV}
 # override INCSDIR for the project subdir....
-MAKE_ENV+=	INCSDIR=${PREFIX}/include/yajl
+MAKE_ENV+=	INCSDIR=${PREFIX}/include/${PKGBASE}
 
 AUTO_MKDIRS=	yes
 
@@ -55,15 +56,15 @@ do-configure:
 	${MKDIR} ${WRKSRC}/build
 
 post-build:
-	sed -e 's|$${dollar}|$$|g'					\
-	    -e 's|^prefix=.*|prefix=${PREFIX}|'				\
-	    -e 's|^libdir=.*|libdir=$${prefix}/lib|'			\
-	    -e 's|^includedir=.*|includedir=$${prefix}/include/yajl|'	\
-	    -e 's|^Version:.*|Version: ${PKGVERSION}|'			\
-	    < ${WRKSRC}/src/yajl.pc.in > ${WRKSRC}/src/yajl.pc
+	sed -e 's|$${dollar}|$$|g'						\
+	    -e 's|^prefix=.*|prefix=${PREFIX}|'					\
+	    -e 's|^libdir=.*|libdir=$${prefix}/lib|'				\
+	    -e 's|^includedir=.*|includedir=$${prefix}/include/${PKGBASE}|'	\
+	    -e 's|^Version:.*|Version: ${PKGVERSION}|'				\
+	    < ${WRKSRC}/src/${PKGBASE}.pc.in > ${WRKSRC}/src/${PKGBASE}.pc
 
 post-install:
-	${INSTALL_DATA} ${WRKSRC}/src/yajl.pc ${DESTDIR}${PREFIX}/lib/pkgconfig
+	${INSTALL_DATA} ${WRKSRC}/src/${PKGBASE}.pc ${DESTDIR}${PREFIX}/lib/pkgconfig
 
 
 # how to get from there to here....
@@ -72,7 +73,7 @@ post-install:
 # Makefile into your $pkgsrc/devel/yajl directory, go there, and build this
 # target:
 #
-#	cp Makefile /usr/pkgsrc/devel/yajl
+#	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
 #	cd /usr/pkgsrc/devel/yajl
 #	make REPODIR=$OLDPWD setup-pkgsrc
 #
