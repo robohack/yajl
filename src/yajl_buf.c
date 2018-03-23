@@ -33,20 +33,26 @@ static
 void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 {
     size_t need;
-    
+
     assert(buf != NULL);
 
     /* first call */
     if (buf->data == NULL) {
+        assert(buf->used == 0);
         buf->len = YAJL_BUF_INIT_SIZE;
         buf->data = (unsigned char *) YA_MALLOC(buf->alloc, buf->len);
+#if 0
+        memset((void *) buf->data, 0, buf->len);
+#else  /* it's really just a string, albiet UTF-8.... */
         buf->data[0] = 0;
+#endif
     }
 
     need = buf->len;
 
-    while (want >= (need - buf->used)) need <<= 1;
-
+    while (want >= (need - buf->used)) {
+        need <<= 1;                     /* XXX maybe this is a bit too aggressive? */
+    }
     if (need != buf->len) {
         buf->data = (unsigned char *) YA_REALLOC(buf->alloc, buf->data, need);
         buf->len = need;
@@ -64,7 +70,9 @@ yajl_buf yajl_buf_alloc(yajl_alloc_funcs * alloc)
 void yajl_buf_free(yajl_buf buf)
 {
     assert(buf != NULL);
-    if (buf->data) YA_FREE(buf->alloc, buf->data);
+    if (buf->data) {
+        YA_FREE(buf->alloc, buf->data);
+    }
     YA_FREE(buf->alloc, buf);
 }
 
@@ -82,7 +90,9 @@ void yajl_buf_append(yajl_buf buf, const void * data, size_t len)
 void yajl_buf_clear(yajl_buf buf)
 {
     buf->used = 0;
-    if (buf->data) buf->data[buf->used] = 0;
+    if (buf->data) {
+        buf->data[buf->used] = 0;
+    }
 }
 
 const unsigned char * yajl_buf_data(yajl_buf buf)

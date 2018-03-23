@@ -70,7 +70,7 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
     const char * errorType = NULL;
     const char * errorText = NULL;
     unsigned char text[72];
-    const char * arrow = "                     (right here) ------^\n";
+    const char * arrow = "                    (right here) ------^\n";
 
     if (yajl_bs_current(hand->stateStack) == yajl_state_parse_error) {
         errorType = "parse";
@@ -102,25 +102,25 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
         strcat((char *) str, "\n");
     }
 
-    /* now we append as many spaces as needed to make sure the error
-     * falls at char 41, if verbose was specified */
+    /* now, if verbose was specified, we append as many spaces as needed to make
+     * sure the error falls at char 40 */
     if (verbose) {
         size_t start, end, i;
         size_t spacesNeeded;
 
+        /* xxx this doesn't seem to be working right.... */
         spacesNeeded = (offset < 30 ? 40 - offset : 10);
         start = (offset >= 30 ? offset - 30 : 0);
         end = (offset + 30 > jsonTextLen ? jsonTextLen : offset + 30);
 
-        for (i=0;i<spacesNeeded;i++) text[i] = ' ';
+        for (i=0; i < spacesNeeded; i++) {
+            text[i] = ' ';
+        }
 
-        for (;start < end;start++, i++) {
-            if (jsonText[start] != '\n' && jsonText[start] != '\r')
-            {
+        for (; start < end; start++, i++) {
+            if (jsonText[start] != '\n' && jsonText[start] != '\r') {
                 text[i] = jsonText[start];
-            }
-            else
-            {
+            } else {
                 text[i] = ' ';
             }
         }

@@ -25,13 +25,14 @@
 static int s_streamReformat = 0;
 
 #define GEN_AND_RETURN(func)                                          \
-  {                                                                   \
-    yajl_gen_status __stat = func;                                    \
-    if (__stat == yajl_gen_generation_complete && s_streamReformat) { \
-      yajl_gen_reset(g, "\n");                                        \
-      __stat = func;                                                  \
-    }                                                                 \
-    return __stat == yajl_gen_status_ok; }
+    {                                                                 \
+        yajl_gen_status __stat = func;                                \
+        if (__stat == yajl_gen_generation_complete && s_streamReformat) { \
+            yajl_gen_reset(g, "\n");                                    \
+            __stat = func;                                              \
+        }                                                               \
+        return __stat == yajl_gen_status_ok;                            \
+    }
 
 static int reformat_null(void * ctx)
 {
@@ -168,7 +169,6 @@ main(int argc, char ** argv)
         usage(argv[0]);
     }
 
-
     for (;;) {
         rd = fread((void *) fileData, (size_t) 1, sizeof(fileData) - 1, stdin);
 
@@ -183,9 +183,9 @@ main(int argc, char ** argv)
 
         stat = yajl_parse(hand, fileData, rd);
 
-        if (stat != yajl_status_ok) break;
-
-        {
+        if (stat != yajl_status_ok) {
+            break;
+        } else {
             const unsigned char * buf;
             size_t len;
             yajl_gen_get_buf(g, &buf, &len);
@@ -194,13 +194,13 @@ main(int argc, char ** argv)
         }
     }
 
-    stat = yajl_complete_parse(hand);
-
     if (stat != yajl_status_ok) {
         unsigned char * str = yajl_get_error(hand, 1, fileData, rd);
         fprintf(stderr, "%s", (const char *) str);
         yajl_free_error(hand, str);
         retval = 1;
+    } else {
+        stat = yajl_complete_parse(hand);
     }
 
     yajl_gen_free(g);

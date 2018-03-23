@@ -97,9 +97,6 @@ main(int argc, char ** argv)
         if (stat != yajl_status_ok) break;
     }
 
-    /* parse any remaining buffered data */
-    stat = yajl_complete_parse(hand);
-
     if (stat != yajl_status_ok)
     {
         if (!quiet) {
@@ -108,6 +105,9 @@ main(int argc, char ** argv)
             yajl_free_error(hand, str);
         }
         retval = 1;
+    } else {
+        /* parse any remaining buffered data */
+        stat = yajl_complete_parse(hand);
     }
 
     yajl_free(hand);
