@@ -78,9 +78,13 @@
 SUBDIR =	src
 
 # Not all older mk-files support having a .WAIT in a SUBDIR list, but it is
-# vital and necessary for parallel builds (i.e. use of 'make -j')
+# vital and necessary for parallel builds (i.e. use of 'make -j') (.ORDER
+# doesn't quite make up for it because of the fact these directories always
+# exist prior to starting make)
 #
-#SUBDIR +=	.WAIT
+# Comment this out if your build blows up (with "XXX ??? XXX")
+#
+SUBDIR +=	.WAIT
 
 SUBDIR +=	reformatter
 SUBDIR +=	verify
@@ -89,6 +93,9 @@ SUBDIR +=	perf
 SUBDIR +=	test
 
 .ORDER: ${SUBDIR}
+
+.PHONY: docs
+TARGETS +=	docs
 
 #
 # The rest is just default boilerplate for stand-alone builds....
@@ -99,7 +106,10 @@ SUBDIR +=	test
 # existing obj* directories the second time around...
 #
 
-BUILDTARGETS =	bmake-do-obj bmake-do-depend
+BUILDTARGETS =	bmake-do-obj
+BUILDTARGETS +=	.WAIT
+BUILDTARGETS +=	bmake-do-depend
+BUILDTARGETS +=	.WAIT
 
 # this must be the first target
 #
@@ -124,8 +134,6 @@ bmake_install_dirs += ${PKGCONFIGDIR}
 bmake_install_dirs += ${DEBUGDIR}
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/bin
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/lib
-# LINTLIBDIR could depend on MKLINT
-bmake_install_dirs += ${LINTLIBDIR}
 # XXX at the moment, without Doxygen, we won't really need these...
 bmake_install_dirs += ${DOCDIR}/yajl/html
 bmake_install_dirs += ${DOCDIR}/yajl/latex
@@ -150,10 +158,9 @@ _bmake_install_dirs: .PHONY
 #
 DOXYGEN ?=	doxygen
 docs: .PHONY
-	env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy
+#	env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy
 
-# xxx you can uncomment this if you have 'doxygen' installed and can build docs
-#afterinstall: .PHONY install-docs
+afterinstall: .PHONY install-docs
 
 install-docs: .PHONY beforeinstall .WAIT docs
 	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/yajl/
