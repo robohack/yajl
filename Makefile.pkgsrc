@@ -21,14 +21,18 @@ LICENSE=	modified-bsd
 
 USE_LANGUAGES=	c
 
-MAKE_ENV+=	MAKEOBJDIRPREFIX=${WRKSRC}/build
-MAKE_ENV+=	${BSD_MAKE_ENV}
-# override INCSDIR for the project subdir....
-MAKE_ENV+=	INCSDIR=${PREFIX}/include/${PKGBASE}
+USE_BSD_MAKEFILE=	yes
+BSD_MAKE_BUILD_DIR=	${WRKSRC}/build
+BUILD_MAKE_FLAGS=	MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
+TEST_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
+INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
+INSTALL_TARGET=		includes install
 
 AUTO_MKDIRS=	yes
 
 .include "../../mk/bsd.prefs.mk"
+
+PLIST_SUBST+=	PREFIX=${PREFIX:Q}
 
 # N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
 
@@ -53,7 +57,7 @@ do-extract:
 	${RM} -rf ${WRKSRC}/CVS
 
 do-configure:
-	${MKDIR} ${WRKSRC}/build
+	${MKDIR} ${BSD_MAKE_BUILD_DIR}
 
 post-build:
 	sed -e 's|$${dollar}|$$|g'						\
@@ -73,7 +77,10 @@ post-install:
 # Makefile into your $pkgsrc/devel/yajl directory, go there, and build this
 # target:
 #
+#	rm -rf build* dest*
+#	make clean
 #	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
+#	cp PLIST.pkgsrc /usr/pkgsrc/devel/yajl/PLIST
 #	cd /usr/pkgsrc/devel/yajl
 #	make REPODIR=$OLDPWD setup-pkgsrc
 #
@@ -97,3 +104,7 @@ setup-pkgsrc:
 	${RM} -rf ${FILESDIR}/build ${FILESDIR}/dist
 
 .include "../../mk/bsd.pkg.mk"
+
+# override INCSDIR for the project subdir....
+INCSDIR=	${PREFIX}/include/${PKGBASE}
+MAKE_ENV+=	INCSDIR=${INCSDIR:Q}

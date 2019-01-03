@@ -1,0 +1,30 @@
+@comment $NetBSD$
+bin/json_reformat
+bin/json_verify
+include/yajl/yajl_common.h
+include/yajl/yajl_gen.h
+include/yajl/yajl_parse.h
+include/yajl/yajl_tree.h
+include/yajl/yajl_version.h
+lib/libyajl.a
+lib/libyajl_s.a
+lib/libyajl.so
+lib/libyajl.so.2
+lib/libyajl.so.${PKGVERSION}
+${PLIST.mkdebuglib}lib/libyajl_g.a
+${PLIST.mkdebuglib}lib/libyajl_p.a
+${PLIST.mklint}libdata/lint/llib-lyajl.ln
+@comment XXX if MKPIC
+lib/libyajl_pic.a
+lib/pkgconfig/yajl.pc
+${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_reformat.debug
+${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_verify.debug
+${PLIST.mkdebug}libdata/debug${PREFIX}/lib/libyajl.so.${PKGVERSION}.debug
+share/doc/yajl/README
+share/doc/yajl/COPYING
+share/doc/yajl/ChangeLog
+share/doc/yajl/TODO
+@comment Hmmm.... and then there are the actual docs.... but, doxygen...  blah
+@pkgdir share/doc/yajl/latex
+@pkgdir share/doc/yajl/html
+@pkgdir share/doc/yajl/man
