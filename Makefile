@@ -158,7 +158,13 @@ _bmake_install_dirs: .PHONY
 #
 DOXYGEN ?=	doxygen
 docs: .PHONY
-#	env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy
+	if [ ${DOXYGEN} -v >/dev/null ]; then \
+		env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy; \
+	else \
+		mkdir $(MAKEOBJDIRPREFIX:Q)/html; \
+		mkdir $(MAKEOBJDIRPREFIX:Q)/latex; \
+		mkdir $(MAKEOBJDIRPREFIX:Q)/man; \
+	fi
 
 afterinstall: .PHONY install-docs
 
