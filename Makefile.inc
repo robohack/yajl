@@ -107,7 +107,7 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 # xxx all this otherwise some systems won't allow unprivileged installs
 .if ${USER} != "root"
 BINOWN =	${USER}
-<BINGRP !=	id -g
+BINGRP !=	id -g
 LIBOWN =	${USER}
 LIBGRP !=	id -g
 SHAREOWN =	${USER}
