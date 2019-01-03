@@ -55,7 +55,7 @@ yajl.pc: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 # "make includes" into the build tree, not into the OBJDIR, not into the final
 # INCSDIR since we cannot have DESTDIR set when building.
 #
-beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h showenv
+beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h
 yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	sed -e 's/$${YAJL_MAJOR}/${YAJL_MAJOR}/' \
 	    -e 's/$${YAJL_MINOR}/${YAJL_MINOR}/' \
