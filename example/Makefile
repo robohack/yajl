@@ -1,4 +1,4 @@
-# -*-makefile-bsdmake-*-
+# -*- makefile-bsdmake -*-
 
 bmake_topdir = ..
 

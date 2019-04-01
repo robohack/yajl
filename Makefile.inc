@@ -10,6 +10,8 @@
 # XXX see SJG's SSLrsh release for simple portability hacks via Make
 # e.g. in particular the use of .-include "$Makefile.${MACHINE}.inc" etc.
 
+PACKAGE =	yajl
+
 INCSUBDIR =	/yajl
 
 YAJL_MAJOR =	2
@@ -58,7 +60,7 @@ WARNS = 0
 # still require adjustments after a "dist" archive is un-packed since it may not
 # have been original configured for the final installation directory).
 #
-# XXX this is, very unfortunately, project dependent!
+# XXX this is, very unfortunately, somewhat ugly and package dependent!
 #
 # program and test directories need to reference the static library, but we
 # cannot just use the portable form of "-l${LIB}_s" because LIB is not always
@@ -66,25 +68,39 @@ WARNS = 0
 #
 # see src/Makefile for where LIB is set
 #
+# So instead we refer to $PACKAGE, assuming it has the same name...
+#
 .if !defined(LIB)
 #
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
 . if exists(${.OBJDIR}/${bmake_topdir}/src)
+# .OBJDIR is from MAKEOBJDIRPREFIX
 LDADD += -L${.OBJDIR}/${bmake_topdir}/src
-DPADD = ${.OBJDIR}/${bmake_topdir}/src/libyajl.a
+DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE}.a
 . else
+# assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
 LDADD += -L../${bmake_topdir}/src/${.OBJDIR:T}
-DPADD = ${.OBJDIR}/${bmake_topdir}/src/${.OBJDIR:T}/libyajl.a
+DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE}.a
 . endif
-LDADD += -lyajl_s
-.endif
+LDADD += -l${PACKAGE}_s
+#
+.endif	# !defined(LIB)
 
 # NOTICE:  Nothing below here _should_ be project dependent
 
-# yes, always -- we force this
-OBJMACHINE =	yes
+# yes, always -- we use this because it's safer when using a shared network
+# directory for building/testing/etc.  (though it is sometimes somewhat
+# annoying)
+#
+OBJMACHINE ?=	yes
+
+# Unfortunately most MK files don't provide a "beforecleandir" or
+# "beforedistclean".
+#
+#beforecleandir: cleandir
+#	rmdir ${.OBJDIR}
 
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
 # to each of these target directories.
@@ -106,21 +122,24 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # xxx all this otherwise some systems won't allow unprivileged installs
 .if ${USER} != "root"
+USER_GRP !=	id -g
 BINOWN =	${USER}
-BINGRP !=	id -g
+BINGRP =	${USER_GRP}
 LIBOWN =	${USER}
-LIBGRP !=	id -g
+LIBGRP =	${USER_GRP}
 SHAREOWN =	${USER}
-SHAREGRP !=	id -g
+SHAREGRP =	${USER_GRP}
 FILESOWN =	${USER}
-FILESGRP !=	id -g
+FILESGRP =	${USER_GRP}
 NOBINMODE =	644		# else OSX bsdmake can't install!
 DEBUGOWN =	${USER}
-DEBUGGRP !=	id -g
+DEBUGGRP =	${USER_GRP}
+MANOWN =	${USER}
+MANGRP =	${USER_GRP}
 DOCOWN =	${USER}
-DOCGRP !=	id -g
+DOCGRP =	${USER_GRP}
 # xxx adapt for typo in mk-20150901 through at least mk-20170418
-DOGGRP !=	id -g
+DOGGRP =	${USER_GRP}
 .endif
 
 STRIP =		# empty (needed for OSX bsdmake install)
@@ -144,9 +163,9 @@ SHLIB_LDENDFILE =	# empty
 # release until 6.0.  Unfortunately there is no easy way to know definitively
 # what version of BSDMake is being used.  Simon Gerraty's bmake has
 # MAKE_VERSION, as does FreeBSD's make though they are entirely and totally
-# unrelated.  In NetBSD MAKE_VERSION was only briefly present since it
-# represented the build date, not the release date, and it was removed in order
-# to make it possible to do reproducible builds.
+# different and unrelated.  In NetBSD MAKE_VERSION was only briefly present
+# since it represented the build date, not the release date, and it was removed
+# in order to make it possible to do reproducible builds.
 #
 bmake_srcdir =	${.CURDIR}/${bmake_topdir}/src
 
@@ -157,3 +176,10 @@ CPPFLAGS +=	-I${bmake_srcdir}
 .else
 CFLAGS +=	-I${bmake_srcdir}
 .endif
+
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "mkdir -p build; MAKEOBJDIRPREFIX=$(pwd)/build " (default-value 'compile-command))
+# End:
+#

@@ -1,13 +1,12 @@
-# -*-makefile-bsdmake-*-
+# -*- makefile-bsdmake -*-
 
 bmake_topdir = ..
 
 # this must be set first to avoid the top-level LDADD
+# (it should be the same as ${PACKAGE})
 LIB =	yajl
 
 .include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
-
-.include <bsd.own.mk>
 
 # If these are set blank then no shared library is built, and so on OSX even
 # Pkgsrc bmake can then complete a successful build.
@@ -43,6 +42,10 @@ yajl.pc: ${.CURDIR}/yajl.pc.in
 yajl.pc: ${.CURDIR}/Makefile
 yajl.pc: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 
+# FILES are not't automatically added on OSX/Darwin, FreeBSD, etc.
+#
+CLEANFILES += yajl.pc
+
 # We have to do this here, not in the sub-directory, because during "make
 # depend" the local actions are done before descending into the sub-directory
 # (since it's not normal for a directory with products to also have
@@ -52,11 +55,15 @@ yajl.pc: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 # not only build this file, but to also install all of the other include files
 # as well during that step, and then we could set '-I' to point to the
 # (intermediate) "include" directory.  In a project like this we should probably
-# "make includes" into the build tree, not into the OBJDIR, not into the final
-# INCSDIR since we cannot have DESTDIR set when building.
+# "make includes" into MAKEOBJDIRPREFIX (MAKEOBJDIR may be problematic), not
+# into the final INCSDIR since we cannot have DESTDIR set when building.
 #
-beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h
-yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
+# (yajl.pc is here too because some versions of pkgsrc bootstrap-mk-files don't
+# biuld all ${FILES} with the default "all" target)
+#
+beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h yajl.pc
+
+yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in ${.OBJDIR}/yajl
 	sed -e 's/$${YAJL_MAJOR}/${YAJL_MAJOR}/' \
 	    -e 's/$${YAJL_MINOR}/${YAJL_MINOR}/' \
 	    -e 's/$${YAJL_MICRO}/${YAJL_MICRO}/' \
@@ -65,6 +72,13 @@ yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 yajl/yajl_version.h: ${.CURDIR}/Makefile
 yajl/yajl_version.h: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 
+# n.b.:  some variants of "make install" may (re)move ${FILES}, so a second
+# "make" after an install will fail!
+#
+yajl_version.o: yajl/yajl_version.h
+
+# XXX this is unfortunate... as it makes removing .OBJDIR harder.  See above.
+#
 ${.OBJDIR}/yajl:
 	mkdir ${.TARGET}
 
@@ -79,11 +93,20 @@ FILESDIR = ${INCSDIR}
 
 CLEANFILES += yajl/yajl_version.h
 # note:  cleandir doesn't remove local ${.OBJDIR} so we also won't worry about
-# removing the "yajl" sub-directory
+# removing the "yajl" sub-directory either.
+
+# xxx hmmmm.... weird!  Avoid an "don't know how to make incinstall" error on
+# macOS with Homebrew bmake-20181221:
+#
+.if !target(incinstall)
+incinstall: .PHONY
+.endif
 
 # This .if is annoying, but some older systems don't support CPPFLAGS.
 #
 # Note:  "." (in the build directory) is needed to find yajl/yajl_version.h
+#
+# XXX ideally this should just be for yajl_version.o
 #
 .if defined(CPPFLAGS)
 CPPFLAGS += -I.
@@ -102,6 +125,8 @@ CFLAGS += -I.
 # rules being used to trigger phony dependencies with action rules.  If the
 # intermediate dependency had action rules, then it would become a target, phony
 # or not.
+#
+# Note also this makes the link before the library may exist.
 #
 afterdepend: _bmake_static_lib_build_symlink
 afterinstall: _bmake_static_lib_install_symlink
@@ -137,7 +162,16 @@ SUBDIR += yajl
 
 showenv: .PHONY
 	@echo ""
+	@echo "${.OBJDIR}/${bmake_topdir}/src"
+.if exists(${.OBJDIR}/${bmake_topdir}/src)
+	@echo "the directory shown above exists!"
+.endif
+	@echo "../${bmake_topdir}/src/${.OBJDIR:T}"
+	@echo ""
 	@echo "Vars:"
+	@echo ".CURDIR = ${.CURDIR:Q}"
+	@echo ".OBJDIR = ${.OBJDIR:Q}"
+	@echo ".OBJDIR:T = ${.OBJDIR:T:Q}"
 	@echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"
 	@echo "DEBUGDIR = ${DEBUGDIR:Q}"
 	@echo "LINTLIBDIR = ${LINTLIBDIR:Q}"

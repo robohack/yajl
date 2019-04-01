@@ -5,6 +5,7 @@
 # has no API (or, so far as is known, ABI) differences, thus is still "2.1.0"
 
 PKGNAME=	yajl-2.1.0nb1
+#PKGREVISION=	1
 CATEGORIES=	devel textproc
 DISTFILES=	# empty
 #MASTER_SITES=	${MASTER_SITE_GITHUB:=robohack/}
@@ -80,28 +81,15 @@ post-install:
 #	rm -rf build* dest*
 #	make clean
 #	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
-#	cp PLIST.pkgsrc /usr/pkgsrc/devel/yajl/PLIST
 #	cd /usr/pkgsrc/devel/yajl
 #	make REPODIR=$OLDPWD setup-pkgsrc
 #
 REPODIR ?=	/work/woods/m-yajl
 setup-pkgsrc:
-	${RM} -f ${FILESDIR}/BUILDING
-	${RM} -f ${FILESDIR}/COPYING
-	${RM} -f ${FILESDIR}/ChangeLog
-	${RM} -f ${FILESDIR}/Makefile
-	${RM} -f ${FILESDIR}/Makefile.compiler
-	${RM} -f ${FILESDIR}/Makefile.inc
-	${RM} -f ${FILESDIR}/README
-	${RM} -f ${FILESDIR}/TODO
-	${RM} -rf ${FILESDIR}/example
-	${RM} -rf ${FILESDIR}/perf
-	${RM} -rf ${FILESDIR}/reformatter
-	${RM} -rf ${FILESDIR}/src
-	${RM} -rf ${FILESDIR}/test
-	${RM} -rf ${FILESDIR}/verify
-	${CP} -R ${REPODIR}/* ${FILESDIR}/
-	${RM} -rf ${FILESDIR}/build ${FILESDIR}/dist
+	find ${FILESDIR} -type d \( -name CVS -or -name .git -or -name .svn \) -prune -or -type f ! -name '.*ignore' -print0 | xargs -0 rm
+	cd ${REPODIR} && find . \( -type d \( -name CVS -or -name .git -or -name .svn -or -name build -or -name 'build-*' -or -name dest -or -name 'dest-*' \) -prune \) -or -type f ! -name '.#*' ! -name '#*#' ! -name '*~' ! -name '.*ignore' ! -name '[Tt][Aa][Gg][Ss]' -print | pax -rw ${FILESDIR}
+	mv ${FILESDIR}/Makefile.pkgsrc ${PKGDIR}/Makefile
+	mv ${FILESDIR}/PLIST.pkgsrc ${PKGDIR}/PLIST
 
 .include "../../mk/bsd.pkg.mk"
 
