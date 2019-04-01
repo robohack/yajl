@@ -31,7 +31,8 @@ PROJECT_NAME           = YAJL
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         =
+# XXX we should use sed to set this from @LIBYAJL_VERSION@
+PROJECT_NUMBER         = 2.1.0
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
@@ -1048,8 +1049,9 @@ COMPACT_LATEX          = NO
 # The PAPER_TYPE tag can be used to set the paper type that is used
 # by the printer. Possible values are: a4, a4wide, letter, legal and
 # executive. If left blank a4wide will be used.
+# Letter formatted text prints nicely on a4, but not vice versa!
 
-PAPER_TYPE             = a4wide
+PAPER_TYPE             = letter
 
 # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX
 # packages that should be included in the LaTeX output.
