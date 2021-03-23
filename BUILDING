@@ -1,18 +1,14 @@
 Short story:
 
-	bsdmake && bsdmake DESTDIR=/usr/local install
-
-A slightly cleaner way:
-
 	mkdir build
-	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build
-	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=/usr/local install
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local install
 
 WARNING:  Do not specify DESTDIR for the first (build) phase!
 
 (where "bsdmake" is of course a 'make' of the BSD persuasion,
-e.g. "make" on BSDs, "bsdmake" on Darwin/OSX, or "bmake" on other
-non-BSD-based systems.)
+e.g. "make" on BSDs, "bsdmake" on older Darwin/OSX, or "bmake" on
+other non-BSD-based systems.)
 
 See also the comments in the top-level Makefile for more hints about
 issues with various mk-files (also some more comments in Makefile.inc).
@@ -40,5 +36,5 @@ NOTES:
 - if you have "doxygen" installed you can build (and install) the
   documentation as well:
 
-	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build docs
-	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=/usr/local install-docs
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake docs
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local install-docs
