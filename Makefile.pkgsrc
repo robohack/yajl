@@ -54,7 +54,7 @@ PLIST.mkdebuglib=	yes
 
 do-extract:
 	${MKDIR} ${WRKSRC}
-	${CP} -R ${FILESDIR}/* ${WRKSRC}/
+	${CP} -Rp ${FILESDIR}/* ${WRKSRC}/
 	${RM} -rf ${WRKSRC}/CVS
 
 do-configure:
