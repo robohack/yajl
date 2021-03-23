@@ -105,6 +105,10 @@ static yajl_callbacks callbacks = {
     reformat_end_array
 };
 
+#ifndef EXIT_USAGE
+# define EXIT_USAGE	2
+#endif
+
 static void
 usage(const char * progname)
 {
@@ -115,7 +119,7 @@ usage(const char * progname)
             "    -s reformat a stream of multiple json entites\n"
             "    -u allow invalid UTF8 inside strings during parsing\n",
             progname);
-    exit(1);
+    exit(EXIT_USAGE);
 }
 
 int

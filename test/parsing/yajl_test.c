@@ -179,6 +179,10 @@ static yajl_callbacks callbacks = {
     test_yajl_end_array
 };
 
+#ifndef EXIT_USAGE
+# define EXIT_USAGE	2
+#endif
+
 static void usage(const char * progname)
 {
     fprintf(stderr,
@@ -193,7 +197,7 @@ static void usage(const char * progname)
             "   -N  do not print tokens or values\n"
             "   -p  partial JSON documents should not cause errors\n",
             progname);
-    exit(1);
+    exit(EXIT_USAGE);
 }
 
 int

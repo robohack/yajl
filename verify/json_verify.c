@@ -20,6 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef EXIT_USAGE
+# define EXIT_USAGE	2
+#endif
+
 static void
 usage(const char * progname)
 {
@@ -30,7 +34,7 @@ usage(const char * progname)
                     "    -s verify a stream of multiple json entities\n"
                     "    -u allow invalid utf8 inside strings\n",
             progname);
-    exit(1);
+    exit(EXIT_USAGE);
 }
 
 int
