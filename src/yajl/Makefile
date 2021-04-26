@@ -33,3 +33,9 @@ install:	includes
 
 .include <bsd.prog.mk>
 .sinclude <inc.mk>			# hack for crufty.net mk-files
+
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "cd ../.. && mkdir -p build && MAKEOBJDIRPREFIX=$(pwd)/build " (default-value 'compile-command))
+# End:

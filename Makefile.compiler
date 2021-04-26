@@ -35,7 +35,7 @@ __GNUC_PATCHLEVEL__ !=	echo __GNUC_PATCHLEVEL__ | $(CC) -E - | sed '/\#/d;s/__GN
 # Note: for now Clang also defines the __GNUC*__ macros above...
 
 # Note: on all recent Mac OS X (and soon FreeBSD), "cc" is "clang"
-# On Mac OS X 10.8 "gcc" is actually "llvm-gcc" too!
+# On Mac OS X 10.8 and newer "gcc" is actually "llvm-gcc" too!
 
 .if !defined(__clang__)
 __clang__ !=		echo __clang__ | $(CC) -E - | sed '/\#/d;s/__clang__//'
@@ -63,6 +63,9 @@ __clang_patchlevel__ !=	echo __clang_patchlevel__ | $(CC) -E - | sed '/\#/d;s/__
 __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
+
+# I do not use any system-supplied "WARNS" level.  Code using this helper should
+# be clean with of all the compiler-specific warnings set below!
 
 # -Winline
 #
@@ -309,11 +312,12 @@ CFLAGS +=	-fstack-protector-all
 CWARNFLAGS +=	-Wstack-protector
 .endif
 
-# this is a hack for my own NetBSD releases where older versions don't include
-# CPPFLAGS in the LINK macro, so the ".c:" rule won't get CPPFLAGS (note: it's
-# tempting to include "&& empty(LINK.c:M*CPPFLAGS*)" in the expression, but that
-# won't work because empty() expands the variable entirely before applying
-# modifiers.)
+# This is a hack for my own NetBSD releases where older versions don't include
+# CPPFLAGS in the LINK macro, so the ".c:" rule won't get CPPFLAGS..
+#
+# (Note:  it's tempting to include "&& empty(LINK.c:M*CPPFLAGS*)" in the
+# expression, but that won't work because empty() expands the variable entirely
+# before applying modifiers.)
 .if !empty(unix:M*NetBSD*) && !defined(COMPILE_LINK.c)
 LDFLAGS += ${CPPFLAGS}
 .endif

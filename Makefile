@@ -139,7 +139,6 @@ SUBDIR +=	test
 # The rest is mostly just default boilerplate for stand-alone builds....
 #
 # Yes, "make obj" is forced -- it is stupid to build in the source directory)
-# (forcing "make depend" is also good, though a bit of a waste for pkgsrc.
 #
 # This does mean nothing can be made in the top directory though.
 #
@@ -151,14 +150,16 @@ MKOBJ = yes
 # XXX "auto" is actually not yet very widely supported and may not work.
 MKOBJDIRS = auto
 
-# Comment the .WAIT's out if your build blows up
+# Comment the .WAIT's out (and avoid -j) if your build blows up
 #
 BUILDTARGETS =	bmake-do-obj
 BUILDTARGETS +=	.WAIT
+# (forcing "make depend" is also both good, and necessary (see the beforedepend
+# target in src/Makefile, though otherwise it is a bit of a waste for pkgsrc).
 BUILDTARGETS +=	bmake-do-depend
 BUILDTARGETS +=	.WAIT
 
-# this ("all") must be the VERY first target (no .includes above!)
+# this ("all") must be the VERY first target (none in .includes above!)
 # (remove the .WAIT if your build blows up)
 #
 all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
