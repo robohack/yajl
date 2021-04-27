@@ -95,13 +95,6 @@ CLEANFILES += yajl/yajl_version.h
 # note:  cleandir doesn't remove local ${.OBJDIR} so we also won't worry about
 # removing the "yajl" sub-directory either.
 
-# xxx hmmmm.... weird!  Avoid an "don't know how to make incinstall" error on
-# macOS with Homebrew bmake-20181221:
-#
-.if !target(incinstall)
-incinstall: .PHONY
-.endif
-
 # This .if is annoying, but some older systems don't support CPPFLAGS.
 #
 # Note:  "." (in the build directory) is needed to find yajl/yajl_version.h
@@ -159,6 +152,16 @@ SUBDIR += yajl
 # set compiler and linker flags, especially additional warnings
 #
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
+
+# xxx hmmmm.... weird!  Avoid a "don't know how to make incinstall" error on
+# macOS with Homebrew bmake-20181221:
+#
+# (this target is defined in <bsd.inc.mk> (on at least NetBSD and DragonflyBSD)
+# which is included in <bsd.lib.mk> and others)
+#
+.if !target(incinstall)
+incinstall: .PHONY
+.endif
 
 showenv: .PHONY
 	@echo ""
