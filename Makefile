@@ -13,8 +13,8 @@
 # Cygwin.  Simon's Bmake works on many Unix-like systems.  Note warnings about
 # FreeBSD make's stupidities below.
 #
-# You should use $MAKEOBJDIRPREFIX as so to build everything elsewhere, such as
-# within a single sub-directory of the top of the source tree (i.e. instead of
+# You should use $MAKEOBJDIRPREFIX so as to build everything elsewhere outside
+# of, or within a single sub-director, of the source tree; (i.e. instead of
 # polluting the rest of the source tree with "obj" sub-directories).
 #
 #	mkdir build
@@ -22,8 +22,8 @@
 #	export WITH_AUTO_OBJ=yes		# just for FreeBSD, sigh.
 #	bsdmake					# or just "make" where possible!
 #
-# (Use just "make" on non-GNU systems, or "bmake" or "bsdmake" as appropriate on
-# other systems.)
+# (I.e. use just "make" on non-GNU systems where it is Bmake; or use "bmake" or
+# "bsdmake" as needed on other systems.)
 #
 # Then if the build succeeds (and assuming you're not cross-compiling) you can
 # run the regression tests to see if the results are correct.
@@ -159,8 +159,10 @@ BUILDTARGETS +=	.WAIT
 BUILDTARGETS +=	bmake-do-depend
 BUILDTARGETS +=	.WAIT
 
-# this ("all") must be the VERY first target (none in .includes above!)
-# (remove the .WAIT if your build blows up)
+# this ("all") must be the VERY first target
+# (there shouldn't be any .includes above!)
+#
+# (Remove the .WAIT if your build blows up.)
 #
 all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 
