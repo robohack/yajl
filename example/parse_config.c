@@ -28,7 +28,7 @@ main(void)
     yajl_val node;
     char errbuf[1024];
 
-    /* null plug buffers */
+    /* NUL plug the buffers */
     fileData[0] = '\0';
     errbuf[0] = '\0';
 
