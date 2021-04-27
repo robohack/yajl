@@ -2,8 +2,14 @@
 #
 #	This should be included AFTER <bsd.prog.mk> or <bsd.lib.mk>
 
-#
-# find all CC pre-defines with:
+# You can define USE_UBSAN or USE_ASAN on the command line to enable the
+# Undefined or Address sanitizers with recent enough Clang or GCC.  Note if your
+# system supports these you may of course use its way of enabling them instead
+# (e.g. on NetBSD set "MKSANITIZER=yes USE_SANITIZER=address").  (N.B.:  The
+# address sanitizer is not available when the PaX ASLR (Address Space Layout
+# Randomization) feature is enabled.)
+
+# You can usually find all CC pre-defines with:
 #
 #	echo "" | cc -E -dM -x c - | sort
 #
@@ -186,11 +192,9 @@ CWARNFLAGS += -fsanitize=undefined
 .  endif
 . else
 .  if ${__clang_major__} >= 7
-.   if defined(USE_UBSAN)
 # N.B.:  It is not possible to combine more than one of the -fsanitize=address,
 # -fsanitize=thread, and -fsanitize=memory checkers in the same program.
-#xxx 'address' may not work (requires intrumentation of all program code)
-#CWARNFLAGS += -fsanitize=address
+.   if defined(USE_UBSAN)
 # sadly Apple LLVM version 8.1.0 (clang-802.0.42) says:
 # clang: error: unsupported option '-fsanitize=memory' for target 'x86_64-apple-darwin16.6.0'
 #CWARNFLAGS += -fsanitize=memory
@@ -203,12 +207,22 @@ CWARNFLAGS += -fsanitize=undefined
 #xxx this may not be useful?
 #CWARNFLAGS += -fsanitize=dataflow --fsanitize=cfi
 .   endif
+.   if defined(USE_ASAN)
+#xxx 'address' may not work (requires intrumentation of all program code)
+CWARNFLAGS += -fsanitize=address
+# (may also require setting ASAN_OPTIONS in the runtime environment,
+# e.g. ASAN_OPTIONS=detect_leaks=1)
+.   endif
 .  else
 # clang > 5.0 < 7.x(?)
 .   if defined(USE_UBSAN)
 # Apple LLVM version 6.0 (clang-600.0.57) (based on LLVM 3.5svn) says:
 #  clang: error: unsupported argument 'undefined' to option 'fsanitize='
 #CWARNFLAGS += -fsanitize=undefined
+.   endif
+.   if defined(USE_ASAN)
+# ???
+#CWARNFLAGS += -fsanitize=address
 .   endif
 .  endif
 . endif
@@ -240,15 +254,26 @@ CWARNFLAGS += -fsanitize=null
 CWARNFLAGS += -fsanitize=object-size
 CWARNFLAGS += -fsanitize=shift
 LDFLAGS += -fsanitize=undefined -pthread
+# xxx adding these _almost_ allows static linking on NetBSD, but for shm_open()
+# and shm_unlink() not being resolved from librt even when it is specified
+#LDADD += -lrt
+#LDADD += -pthread
+LDSTATIC := # empty -- undefined sanitizer effectively does not support static linking
 .  endif
 . endif
 . if defined(USE_ASAN)
 .  if ${__GNUC__} > 4 || \
 	(${__GNUC__} == 4 && ${__GNUC_MINOR__} >= 8)
 CWARNFLAGS += -fsanitize=address
-CWARNFLAGS += -fsanitize=leak
 LDFLAGS += -fsanitize=address
+LDSTATIC := # empty -- address sanitizer does not support static linking
 .  endif
+. endif
+# N.B.:  LeakSanitizer is incompatible with -fsanitize=address and -fsanitize=thread
+# (may also require setting LSAN_OPTIONS in the runtime environment)
+. if defined(USE_LEAKSAN)
+LDFLAGS += -fsanitize=leak
+LDSTATIC := # empty -- leak sanitizer does not support static linking
 . endif
 .endif
 
