@@ -50,8 +50,11 @@ main(void)
     /* parse error handling */
     if (node == NULL) {
         fprintf(stderr, "parse_error: ");
-        if (strlen(errbuf)) fprintf(stderr, " %s", errbuf);
-        else fprintf(stderr, "unknown error");
+        if (strlen(errbuf)) {
+            fprintf(stderr, "%s", errbuf);
+        } else {
+            fprintf(stderr, "unknown error");
+        }
         fprintf(stderr, "\n");
         return 1;
     }
@@ -59,9 +62,14 @@ main(void)
     /* ... and extract a nested value from the config file */
     {
         const char * path[] = { "Logging", "timeFormat", (const char *) 0 };
+
         yajl_val v = yajl_tree_get(node, path, yajl_t_string);
-        if (v) printf("%s/%s: %s\n", path[0], path[1], YAJL_GET_STRING(v));
-        else   printf("no such node: %s/%s\n", path[0], path[1]);
+
+        if (v) {
+            printf("%s/%s: %s\n", path[0], path[1], YAJL_GET_STRING(v));
+        } else {
+            printf("no such node: %s/%s\n", path[0], path[1]);
+        }
     }
 
     yajl_tree_free(node);
