@@ -33,7 +33,7 @@ NOTES:
   work-around to avoid building a shared library -- you really don't
   need it anyway)
 
-- if you have "doxygen" installed you can build (and install) the
+- if you have "cxref" installed you can build (and install) the
   documentation as well:
 
 	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake docs
