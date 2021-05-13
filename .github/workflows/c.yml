@@ -1,0 +1,21 @@
+name: C CI
+
+on:
+  push:
+    branches: [ bsdmake ]
+  pull_request:
+    branches: [ bsdmake ]
+
+jobs:
+  build:
+
+    runs-on: netbsd-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: builddir
+      run: rm -rf build && mkdir build
+    - name: bmake
+      run: MAKEOBJDIRPREFIX=$(pwd)/build bmake
+    - name: bmake regress
+      run: MAKEOBJDIRPREFIX=$(pwd)/build bmake regress
