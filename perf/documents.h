@@ -17,8 +17,12 @@
 #ifndef __DOCUMENTS_H__
 #define __DOCUMENTS_H__
 
-/* a header that provides access to several json documents broken into chunks of
- * less than 4k, cause C99 says that's what we should do and YAJL likes streams */
+/**
+ * a header that provides access to several json documents broken into chunks of
+ * less than 4k, cause C99 says that's what we should do and YAJL likes streams
+ **/
+
+#include <stddef.h>
 
 extern const char ** g_documents[];
 unsigned int num_docs(void);

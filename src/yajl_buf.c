@@ -59,6 +59,7 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
     }
 }
 
+/*+ allocate a new buffer +*/
 yajl_buf yajl_buf_alloc(yajl_alloc_funcs * alloc)
 {
     yajl_buf b = YA_MALLOC(alloc, sizeof(struct yajl_buf_t));
@@ -67,6 +68,7 @@ yajl_buf yajl_buf_alloc(yajl_alloc_funcs * alloc)
     return b;
 }
 
+/*+ free the buffer +*/
 void yajl_buf_free(yajl_buf buf)
 {
     assert(buf != NULL);
@@ -76,6 +78,7 @@ void yajl_buf_free(yajl_buf buf)
     YA_FREE(buf->alloc, buf);
 }
 
+/*+ append a number of bytes to the buffer +*/
 void yajl_buf_append(yajl_buf buf, const void * data, size_t len)
 {
     yajl_buf_ensure_available(buf, len);
@@ -87,6 +90,7 @@ void yajl_buf_append(yajl_buf buf, const void * data, size_t len)
     }
 }
 
+/*+ empty the buffer +*/
 void yajl_buf_clear(yajl_buf buf)
 {
     buf->used = 0;
@@ -95,16 +99,19 @@ void yajl_buf_clear(yajl_buf buf)
     }
 }
 
+/*+ get a pointer to the beginning of the buffer +*/
 const unsigned char * yajl_buf_data(yajl_buf buf)
 {
     return buf->data;
 }
 
+/*+ get the length of the buffer +*/
 size_t yajl_buf_len(yajl_buf buf)
 {
     return buf->used;
 }
 
+/*+ truncate the buffer +*/
 void
 yajl_buf_truncate(yajl_buf buf, size_t len)
 {

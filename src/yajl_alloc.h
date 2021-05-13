@@ -15,10 +15,11 @@
  */
 
 /**
- * \file yajl_alloc.h
- * default memory allocation routines for yajl which use malloc/realloc and
- * free
- */
+ * This is the common header used to declare a yajl_alloc_funcs object and to
+ * provide helper macros for calling the memory allocation routines set within
+ * such an object, as well as the prototype for the helper function which can be
+ * used to assign the default allocator functions to such an object.
+ **/
 
 #ifndef __YAJL_ALLOC_H__
 #define __YAJL_ALLOC_H__

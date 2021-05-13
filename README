@@ -3,7 +3,7 @@
               https://github.com/lloyd/yajl/tree/1.x
 **********************************************************************
 
-Welcome to Yet Another JSON Library (YAJL)
+# Welcome to Yet Another JSON Library (YAJL)
 
 ## NOTE:  This is a forked version.
 
@@ -13,6 +13,9 @@ hosted at [robohack's GitHub][GHRY] by Greg A. Woods.
 
 [GRHY]: https://github.com/robohack/yajl/
 
+Moto:  Write Portable C without complicating the build!
+
+See, e.g.: https://nullprogram.com/blog/2017/03/30/
 
 ## Why does the world need another C library for parsing JSON?
 

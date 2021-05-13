@@ -42,6 +42,19 @@ yajl_status_to_string(yajl_status stat)
     return statStr;
 }
 
+/*+
+ * allocate a parser handle
+ *
+ *  \param callbacks  a yajl callbacks structure specifying the
+ *                    functions to call when different JSON entities
+ *                    are encountered in the input text.  May be NULL,
+ *                    which is only useful for validation.
+ *
+ *  \param afs        memory allocation functions, may be NULL for to use
+ *                    C runtime library routines (malloc and friends) 
+ *
+ *  \param ctx        a context pointer that will be passed to callbacks.
+ +*/
 yajl_handle
 yajl_alloc(const yajl_callbacks * callbacks,
            yajl_alloc_funcs * afs,
@@ -78,6 +91,12 @@ yajl_alloc(const yajl_callbacks * callbacks,
     return hand;
 }
 
+/*+
+ * allow the modification of parser options subsequent to handle allocation (via
+ * yajl_alloc)
+ *
+ *  \returns zero in case of errors, non-zero otherwise
+ +*/
 int
 yajl_config(yajl_handle h, yajl_option opt, ...)
 {
@@ -102,6 +121,7 @@ yajl_config(yajl_handle h, yajl_option opt, ...)
     return rv;
 }
 
+/*+ free a parser handle +*/
 void
 yajl_free(yajl_handle handle)
 {
@@ -114,6 +134,15 @@ yajl_free(yajl_handle handle)
     YA_FREE(&(handle->alloc), handle);
 }
 
+/*+
+ * Parse some json!
+ *
+ *  \param hand - a handle to the json parser allocated with yajl_alloc
+ *
+ *  \param jsonText - a pointer to the UTF8 json text to be parsed
+ *
+ *  \param jsonTextLength - the length, in bytes, of input text
+ +*/
 yajl_status
 yajl_parse(yajl_handle hand, const unsigned char * jsonText,
            size_t jsonTextLen)
@@ -132,6 +161,16 @@ yajl_parse(yajl_handle hand, const unsigned char * jsonText,
 }
 
 
+/*+
+ * Parse any remaining buffered json.
+ *
+ * Since yajl is a stream-based parser, without an explicit end of input, yajl
+ * sometimes can't decide if content at the end of the stream is valid or not.
+ * For example, if "1" has been fed in, yajl can't know whether another digit is
+ * next or some character that would terminate the integer token.
+ *
+ *  \param hand - a handle to the json parser allocated with yajl_alloc
+ +*/
 yajl_status
 yajl_complete_parse(yajl_handle hand)
 {
@@ -150,6 +189,15 @@ yajl_complete_parse(yajl_handle hand)
     return yajl_do_finish(hand);
 }
 
+/*+
+ * get an error string describing the state of the parse.
+ *
+ * If verbose is non-zero, the message will include the JSON text where the
+ * error occured, along with an arrow pointing to the specific char.
+ *
+ *  \returns A dynamically allocated string will be returned which should be
+ *  freed with yajl_free_error
+ +*/
 unsigned char *
 yajl_get_error(yajl_handle hand, int verbose,
                const unsigned char * jsonText, size_t jsonTextLen)
@@ -157,6 +205,18 @@ yajl_get_error(yajl_handle hand, int verbose,
     return yajl_render_error_string(hand, jsonText, jsonTextLen, verbose);
 }
 
+/*+
+ * get the amount of data consumed from the last chunk passed to YAJL.
+ *
+ * In the case of a successful parse this can help you understand if
+ * the entire buffer was consumed (which will allow you to handle
+ * "junk at end of input").
+ *
+ * In the event an error is encountered during parsing, this function
+ * affords the client a way to get the offset into the most recent
+ * chunk where the error occured.  0 will be returned if no error
+ * was encountered.
+ +*/
 size_t
 yajl_get_bytes_consumed(yajl_handle hand)
 {
@@ -165,6 +225,7 @@ yajl_get_bytes_consumed(yajl_handle hand)
 }
 
 
+/*+ free an error returned from yajl_get_error +*/
 void
 yajl_free_error(yajl_handle hand, unsigned char * str)
 {

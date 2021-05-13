@@ -1,0 +1,72 @@
+/**
+
++html+ <h1>
+Yet Another JSON Library (YAJL)
++html+ </h1>
+
+Lloyd Hilaiel
++html+ <br>
+2007-2014
++html+ <br>
+This version is maintained by Greg A. Woods
++html+ <br>
+
+Yet Another JSON Library (YAJL) is a small event-driven (SAX-style)
+JSON parser, and a small validating JSON generator, all written
+entirely in pure portable ANSI C
+
+YAJL is released under the permissive ISC license.
+
++html+ <hr>
+
++html+ <br>
++html+ <a href="yajl.apdx.html">All Files, Functions, and Types</a>
++html+ <br>
+
++html+ <hr>
+
++html+ <h2>
+Features
++html+ </h2>
+
+- Stream (incremental) parsing and generation of JSON
+
+- Plain ANSI C
+
+- Human readable error messages, complete with context
+
+- tiny
+
+- event driven
+
+- support for generating "beautified" JSON 
+
+- includes a simplified tree parser and access API
+
+- can use a custom memory allocator
+
++html+ <br>
+
+It also includes a small tree-based API for simplified parsing and
+extraction of data from smallish JSON documents.
+
++html+ <h2>
+Usage
++html+ </h2>
+
+See the following examples which demonstrate both stream based parsing
+and generation of JSON; as well as an example of the simplified tree
+interface.
+
++html+ <br>
++html+ <a href="reformatter/json_reformat.c.html#file">
+reformatter/json_reformat.c
++html+ </a><br>
+
++html+ <a href="example/parse_config.c.html#file">
+example/parse_config.c
++html+ </a><br>
+
++html+ <hr>
+
+ **/

@@ -45,6 +45,22 @@
 #
 #####################
 #
+# Building Documentation:
+#
+# The documentation is all currently within comments in the source code and we
+# use Cxref to extract it and turn it into something more useful and coherent,
+# which by default is a set of HTML pages.  This has the added advantage of
+# providing a comprehensive hyperlinked cross-reference of all the types and
+# functions in all of the source files.
+#
+# If your Bmake system defined MKDOC, but you do not have Cxref, you can disable
+# the building and installation of the HTML documentation by setting "MKDOC=no"
+# on the Bmake command line.  UTSL!
+#
+# Cxref can be found at:  https://www.gedanken.org.uk/software/cxref/
+#
+#####################
+#
 # Special Notes for Special Systems:
 #
 # OSX, aka macOS, since use of Xcode 10(?) doesn't have a working bsdmake in the
@@ -181,22 +197,18 @@ bmake-test-obj: .PHONY
 # but we need to build everything before we can do any testing
 #
 regress: all
-
-.PHONY: docs regress
+.PHONY: regress
 
 bmake_install_dirs += ${BINDIR}
 bmake_install_dirs += ${INCSDIR}
 bmake_install_dirs += ${LIBDIR}
 bmake_install_dirs += ${PKGCONFIGDIR}
-# the DEBUGDIR ones could/should maybe depend on MKDEBUGLIB
-bmake_install_dirs += ${DEBUGDIR}
+# these DEBUGDIR ones could/should maybe depend on MKDEBUGLIB, but that's only
+# defined after a .include <bsd.*.mk> below....
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/bin
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/lib
 bmake_install_dirs += ${DOCDIR}/${PACKAGE}
-# XXX at the moment, without Doxygen, we won't really need these...
-bmake_install_dirs += ${DOCDIR}/${PACKAGE}/html
-bmake_install_dirs += ${DOCDIR}/${PACKAGE}/latex
-bmake_install_dirs += ${MANDIR}
+#bmake_install_dirs += ${MANDIR} # xxx there are no manual pages yet...
 # (in general though it is safest to always make them all)
 
 beforeinstall: _bmake_install_dirs
@@ -207,27 +219,68 @@ _bmake_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
-# If you have "doxygen" installed then this creates 'html', 'latex-, and 'man'
-# sub-directories with generated documentation.
+# N.B.:  Cxref requires two passes of each file, the first to build up the cross
+#        referencing files and the second to use them.  Headers have to be done
+#        first to avoid warnings about missing prototypes, and warnings should
+#        be generated on the second pass.  A final index can be generated after
+#        the first two passes over all the files.  Note we put the Cxref
+#        database in the HTML output directory because there isn't any way to
+#        tell cxref to read it from anywhere but where except where it also
+#        writes it HTML output files in the second pass.  Sadly this means one
+#        cannot easily share the results of the first pass with any additional
+#        "2nd" passes to generate other forms of output (e.g. RTF or LaTeX).
 #
-# XXX with different versions of BSDMake we end up needing ${.CURDIR} or similar
-# in the environment but we're safest to do that explicitly on the command line,
-# and also some (older) versions of doxygen don't allow "." in environment
-# variable names, so we have to be careful how we do it.
+# XXX because we process two example programs, each with definitions for main(),
+# only the first found main() is included in the Appendix section.
 #
-DOXYGEN ?=	doxygen
-docs: .PHONY
-	${DOXYGEN} -v >/dev/null && env MAKEOBJDIRPREFIX=$(MAKEOBJDIRPREFIX:Q) CURDIR=${.CURDIR:Q} ${DOXYGEN} ${.CURDIR:Q}/src/YAJL.dxy
+# Note RoboDoc (textproc/robodoc, https://www.xs4all.nl/~rfsber/Robo/,
+# https://github.com/gumpu/ROBODoc/) might be a viable alternative for cxref,
+# and the most recent releases have the advantage of being able to produce troff
+# output.  However it is even more ugly and much more difficult to use, and
+# doesn't actually cross-reference C code so well.
+#
+CXREF ?= cxref
+docs: .PHONY ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
 
+${MAKEOBJDIRPREFIX:Q}/doc/html:
+	-mkdir -p ${MAKEOBJDIRPREFIX:Q}/doc/html
+
+# XXX this should also depend on all the $${files} found herein....
+#
+${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html yajl.cxref
+	cd ${.CURDIR} && \
+	files=$$(find ./src -depth -type d \( -name CVS -or -name .git -or -name .svn -or -name build \) -prune -or -type f \( -name '*.[ch]' -o -name '*.cxref' \) -print); \
+	files="yajl.cxref $${files} reformatter/json_reformat.c example/parse_config.c"; \
+	for file in $${files}; do \
+		${CXREF} -xref-all -block-comments -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${MAKEOBJDIRPREFIX:Q}${.CURDIR}/src -CPP 'cc -E -CC -x c' $${file}; \
+	done;\
+	for file in $${files}; do \
+		${CXREF} -warn-all -xref-all -block-comments -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${MAKEOBJDIRPREFIX:Q}${.CURDIR}/src -CPP 'cc -E -CC -x c' $${file}; \
+	done; \
+	${CXREF} -index-all -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html
+	ln -fhs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
+
+install-docs:: .PHONY beforeinstall .WAIT docs # .WAIT maninstall
+	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
+
+# this is how we hook in the "docs" install...
+#
 afterinstall: .PHONY install-docs
 
-install-docs: .PHONY beforeinstall .WAIT docs
-	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
-	-cp -R $(MAKEOBJDIRPREFIX:Q)/html ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
-	-cp -R $(MAKEOBJDIRPREFIX:Q)/latex ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
-	-cp -R $(MAKEOBJDIRPREFIX:Q)/man ${DESTDIR}${SHAREDIR}/
-
 .include <bsd.subdir.mk>
+
+# This block must come after some <bsd.*.mk> in order to (maybe) set MKDOC
+#
+.if ${MKDOC:Uno} != "no"
+#
+# add docs to the prerequisites for "all"
+#
+BUILDTARGETS +=	bmake-do-docs
+bmake-do-docs: .PHONY docs
+all: bmake-do-docs
+install-docs::
+	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
+.endif
 
 # set compiler and linker flags, especially additional warnings
 # (here for supporting "regress")

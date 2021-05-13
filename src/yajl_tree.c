@@ -14,6 +14,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/**
+ * Parses JSON data and returns the data in tree form.
+ *
+ * Writtan by Florian Forster
+ *
+ * August 2010
+ *
+ * This interface makes quick parsing and extraction of smallish JSON docs
+ * trivial, as shown in the following example:
+ *
+ * +html+ <a href="../example/parse_config.c.html#file">example/parse_config.c</a><br>
+ **/
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -402,9 +415,37 @@ static int handle_null (void *ctx)
 /*
  * Public functions
  */
-yajl_val yajl_tree_parse (const char *input,
-                          char *error_buffer, size_t error_buffer_size)
+/*+
+ * Parse a string.
+ *
+ * Parses a null-terminated string containing JSON data.
+ *
+ * Returns a pointer to a yajl_val object which is the top-level value (root of
+ * the parse tree) or NULL on error.
+ *
+ * The memory pointed to must be freed using yajl_tree_free().  In case of an
+ * error, a null terminated message describing the error in more detail is
+ * stored in error_buffer if it is not NULL.
+ +*/
+yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
+                                              *  utf8 string containing JSON
+                                              *  data. +*/
+                          char *error_buffer, /*+ Pointer to a buffer in which
+                                               * an error message will be stored
+                                               * if yajl_tree_parse() fails, or
+                                               * NULL. The buffer will be
+                                               * initialized before parsing, so
+                                               * its content will be destroyed
+                                               * even if yajl_tree_parse()
+                                               * succeeds. +*/
+                          size_t error_buffer_size) /*+ Size of the memory area
+                                                     * pointed to by
+                                                     * error_buffer_size.  If
+                                                     * error_buffer_size is
+                                                     * NULL, this argument is
+                                                     * ignored. +*/
 {
+    /* pointers to parsing callbacks */
     static const yajl_callbacks callbacks =
         {
             /* null        = */ handle_null,
@@ -445,6 +486,9 @@ yajl_val yajl_tree_parse (const char *input,
              snprintf(error_buffer, error_buffer_size, "%s", internal_err_str);
              YA_FREE(&(handle->alloc), internal_err_str);
         }
+        while (ctx.stack) {             /* from pull req. #168 */
+            yajl_tree_free (context_pop(&ctx));
+        }
         yajl_free (handle);
         return NULL;
     }
@@ -454,7 +498,20 @@ yajl_val yajl_tree_parse (const char *input,
     return (ctx.root);
 }
 
-yajl_val yajl_tree_get(yajl_val n, const char ** path, yajl_type type)
+/*+
+ * Access a nested value inside a tree.
+ *
+ * Returns a pointer to the found value, or NULL if we came up empty.
+ +*/
+/*
+ * Future Ideas:  it'd be nice to move path to a string and implement support for
+ * a teeny tiny micro language here, so you can extract array elements, do things
+ * like .first and .last, even .length.  Inspiration from JSONPath and css selectors?
+ * No it wouldn't be fast, but that's not what this API is about.
+ */
+yajl_val yajl_tree_get(yajl_val n,      /*+ the node under which you'd like to extract values. +*/
+                       const char ** path, /*+ A null terminated array of strings, each the name of an object key +*/
+                       yajl_type type)     /*+ the yajl_type of the object you seek, or yajl_t_any if any will do. +*/
 {
     if (!path) return NULL;
     while (n && *path) {
@@ -476,7 +533,12 @@ yajl_val yajl_tree_get(yajl_val n, const char ** path, yajl_type type)
     return n;
 }
 
-void yajl_tree_free (yajl_val v)
+/*+
+ * Free a parse tree returned by yajl_tree_parse().
+ +*/
+void yajl_tree_free (yajl_val v)        /*+ Pointer to a JSON value returned by
+                                         * "yajl_tree_parse".  Passing NULL is
+                                         * valid and results in a no-op. +*/
 {
     if (v == NULL) return;
 

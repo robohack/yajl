@@ -24,7 +24,3 @@ share/doc/yajl/README
 share/doc/yajl/COPYING
 share/doc/yajl/ChangeLog
 share/doc/yajl/TODO
-@comment Hmmm.... and then there are the actual docs.... but, doxygen...  blah
-@pkgdir share/doc/yajl/latex
-@pkgdir share/doc/yajl/html
-@pkgdir share/doc/yajl/man

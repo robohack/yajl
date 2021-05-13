@@ -14,6 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/**
+ * Interface to YAJL's JSON generation facilities.
+ **/
+
 #include "yajl/yajl_gen.h"
 #include "yajl_buf.h"
 #include "yajl_encode.h"
@@ -47,6 +51,12 @@ struct yajl_gen_t
     yajl_alloc_funcs alloc;
 };
 
+/*+
+ *  allow the modification of generator options subsequent to handle
+ *  allocation (via yajl_alloc)
+ *
+ *  \returns zero in case of errors, non-zero otherwise
+ +*/
 int
 yajl_gen_config(yajl_gen g, yajl_gen_option opt, ...)
 {
@@ -94,6 +104,15 @@ yajl_gen_config(yajl_gen g, yajl_gen_option opt, ...)
 
 
 
+/*+ allocate a generator handle
+ *
+ *  \param allocFuncs an optional pointer to a structure which allows
+ *                    the client to overide the memory allocation
+ *                    used by yajl.  May be NULL, in which case
+ *                    malloc/free/realloc will be used.
+ *
+ *  \returns an allocated handle on success, NULL on failure (bad params)
+ +*/
 yajl_gen
 yajl_gen_alloc(const yajl_alloc_funcs * afs)
 {
@@ -125,6 +144,16 @@ yajl_gen_alloc(const yajl_alloc_funcs * afs)
     return g;
 }
 
+/*+
+ *  Reset the generator state.  Allows a client to generate multiple json
+ *  entities in a stream. The "sep" string will be inserted to separate the
+ *  previously generated entity from the current, NULL means *no separation* of
+ *  entites (clients beware, generating multiple JSON numbers without a
+ *  separator, for instance, will result in ambiguous output)
+ *
+ *  Note: this call will not clear yajl's output buffer.  This may be
+ *  accomplished explicitly by calling yajl_gen_clear()
+ +*/
 void
 yajl_gen_reset(yajl_gen g, const char * sep)
 {
@@ -135,6 +164,7 @@ yajl_gen_reset(yajl_gen g, const char * sep)
     }
 }
 
+/*+ free a generator handle +*/
 void
 yajl_gen_free(yajl_gen g)
 {
@@ -246,7 +276,11 @@ yajl_gen_integer(yajl_gen g, long long int number)
 # endif
 #endif
 
-
+/*+
+ *  generate a floating point number.  number may not be infinity or
+ *  NaN, as these have no representation in JSON.  In these cases the
+ *  generator will return 'yajl_gen_invalid_number'
+ +*/
 yajl_gen_status
 yajl_gen_double(yajl_gen g, double number)
 {
@@ -254,7 +288,15 @@ yajl_gen_double(yajl_gen g, double number)
     ENSURE_VALID_STATE; ENSURE_NOT_KEY;
     if (isnan(number) || isinf(number)) return yajl_gen_invalid_number;
     INSERT_SEP; INSERT_WHITESPACE;
-    sprintf(i, "%.*g", DBL_DIG, number);
+    sprintf(i, "%.*g", DBL_DIG, number); /* xxx in theory we could/should use
+                                          * DBL_DECIMAL_DIG for pure
+                                          * serialization, but what about to
+                                          * JSON readers that might not be using
+                                          * IEEE 754 binary64 for numbers? */
+    /*
+     * xxx perhaps this should be controlled by a runtime-configurable
+     * option?
+     */
     if (strspn(i, "0123456789-") == strlen(i)) {
         strcat(i, ".0");
     }
@@ -377,6 +419,11 @@ yajl_gen_array_close(yajl_gen g)
     return yajl_gen_status_ok;
 }
 
+/*+
+ *  access the null terminated generator buffer.  If incrementally
+ *  outputing JSON, one should call yajl_gen_clear to clear the
+ *  buffer.  This allows stream generation.
+ +*/
 yajl_gen_status
 yajl_gen_get_buf(yajl_gen g, const unsigned char ** buf,
                  size_t * len)
@@ -389,6 +436,12 @@ yajl_gen_get_buf(yajl_gen g, const unsigned char ** buf,
     return yajl_gen_status_ok;
 }
 
+
+/*+
+ *  clear yajl's output buffer, but maintain all internal generation
+ *  state.  This function will not "reset" the generator state, and is
+ *  intended to enable incremental JSON outputing.
+ +*/
 void
 yajl_gen_clear(yajl_gen g)
 {

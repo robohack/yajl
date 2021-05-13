@@ -20,6 +20,8 @@ HOMEPAGE=	http://lloyd.github.com/yajl/
 COMMENT=	Small JSON library written in ANSI C
 LICENSE=	modified-bsd
 
+BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
+
 USE_LANGUAGES=	c
 
 USE_BSD_MAKEFILE=	yes
@@ -30,6 +32,14 @@ INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
 INSTALL_TARGET=		includes install
 
 AUTO_MKDIRS=	yes
+
+# totally automatic PLIST generation -- probably preferable?
+#
+#GENERATE_PLIST=	cd ${DESTDIR}${PREFIX}; \
+#		${FIND} * \( -type f -or -type l \) | ${SORT};
+#
+GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
+		${FIND} share/doc/yajl/html \( -type f -or -type l \) | ${SORT};
 
 .include "../../mk/bsd.prefs.mk"
 
