@@ -18,6 +18,7 @@ USE_CWRAPPERS=	no
 MAINTAINER=	pkgsrc-users@NetBSD.org
 HOMEPAGE=	http://lloyd.github.com/yajl/
 COMMENT=	Small JSON library written in ANSI C
+# "YAJL is released under the permissive ISC license."
 LICENSE=	modified-bsd
 
 BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
