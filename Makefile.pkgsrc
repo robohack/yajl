@@ -46,20 +46,30 @@ GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
 PLIST_SUBST+=	PREFIX=${PREFIX:Q}
 
 # N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
-
-PLIST_VARS+=	mklint
-.if defined(MKLINT) && ${MKLINT} != "no"
-PLIST.mklint=	yes
-.endif
+# xxx they are also not needed if pkgsrc is properly patched to do this itself!
 
 PLIST_VARS+=	mkdebug
-.if defined(MKDEBUG) && ${MKDEBUG} != "no"
+.if ${MKDEBUG:Uno} != "no" && !defined(NODEBUG)
 PLIST.mkdebug=	yes
+INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/bin
+INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/libexec
+INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/sbin
 .endif
 
 PLIST_VARS+=	mkdebuglib
-.if defined(MKDEBUGLIB) && ${MKDEBUGLIB} != "no"
+.if ${MKDEBUGLIB:Uno} != "no"
 PLIST.mkdebuglib=	yes
+INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/lib
+.endif
+
+PLIST_VARS+=	mklint
+.if ${MKLINT:Uno} != "no"
+PLIST.mklint=	yes
+.endif
+
+PLIST_VARS+=	mkpic
+.if ${MKPIC:Uno} != "no"
+PLIST.mkpic=	yes
 .endif
 
 do-extract:

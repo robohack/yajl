@@ -14,8 +14,7 @@ lib/libyajl.so.${PKGVERSION}
 ${PLIST.mkdebuglib}lib/libyajl_g.a
 ${PLIST.mkdebuglib}lib/libyajl_p.a
 ${PLIST.mklint}libdata/lint/llib-lyajl.ln
-@comment XXX if MKPIC
-lib/libyajl_pic.a
+${PLIST.mkpic}lib/libyajl_pic.a
 lib/pkgconfig/yajl.pc
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_reformat.debug
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_verify.debug
