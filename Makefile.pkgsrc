@@ -2,10 +2,11 @@
 # $NetBSD$
 
 # N.B.:  though this version of YAJL is diverging from the original, as yet it
-# has no API (or, so far as is known, ABI) differences, thus is still "2.1.0"
+# has no API (nor, so far as is known, any ABI) differences, thus is still
+# "2.1.0"
 
-PKGNAME=	yajl-2.1.0nb1
-#PKGREVISION=	1
+PKGNAME=	yajl-2.1.0
+PKGREVISION=	2
 CATEGORIES=	devel textproc
 DISTFILES=	# empty
 #MASTER_SITES=	${MASTER_SITE_GITHUB:=robohack/}
