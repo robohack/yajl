@@ -15,7 +15,7 @@ issues with various mk-files (also some more comments in Makefile.inc).
 
 When things go wrong:
 
-Acquire and install bmake and mk-files and try again.
+Acquire and install bmake and its mk-files and try again.
 
         http://www.crufty.net/ftp/pub/sjg/bmake.tar.gz
         http://www.crufty.net/ftp/pub/sjg/mk.tar.gz
