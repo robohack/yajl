@@ -2,9 +2,11 @@
 
 ## NOTE:  This is a forked version.
 
-This is a fork of Lloyd's version which uses BSDMake for building, and
-which includes a few minor bug fixes.  See the ChangeLog.  This fork is
-hosted at [robohack's GitHub][GHRY] by Greg A. Woods.
+This is a fork of Lloyd's version which uses BSDMake for building, CXref
+for documentation, and which includes a few minor bug fixes.  See the
+Git history.
+
+This fork is hosted at [robohack's GitHub][GHRY] by Greg A. Woods.
 
 [GRHY]: https://github.com/robohack/yajl/
 
