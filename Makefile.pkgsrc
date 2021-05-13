@@ -105,12 +105,14 @@ do-configure:
 #	cd /usr/pkgsrc/devel/yajl
 #	make REPODIR=$OLDPWD setup-pkgsrc
 #
-REPODIR ?=	/work/woods/m-yajl
+REPODIR ?=	/work/woods/f-yajl
 setup-pkgsrc:
 	find ${FILESDIR} -type d \( -name CVS -or -name .git -or -name .svn \) -prune -or -type f ! -name '.*ignore' -print0 | xargs -0 rm
 	cd ${REPODIR} && find . \( -type d \( -name CVS -or -name .git -or -name .svn -or -name build -or -name 'build-*' -or -name dest -or -name 'dest-*' \) -prune \) -or -type f ! -name '.#*' ! -name '#*#' ! -name '*~' ! -name '.*ignore' ! -name '[Tt][Aa][Gg][Ss]' -print | pax -rw ${FILESDIR}
+	mv ${FILESDIR}/DESCR.pkgsrc ${PKGDIR}/DESCR
 	mv ${FILESDIR}/Makefile.pkgsrc ${PKGDIR}/Makefile
 	mv ${FILESDIR}/PLIST.pkgsrc ${PKGDIR}/PLIST
+	mv ${FILESDIR}/buildlink3.mk.pkgsrc ${PKGDIR}/buildlink3.mk
 
 .include "../../mk/bsd.pkg.mk"
 
