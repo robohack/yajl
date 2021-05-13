@@ -105,6 +105,8 @@ OBJMACHINE ?=	yes
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
 # to each of these target directories.
 #
+# XXX I wonder -- should we use $PREFIX like other 3rd-party projects?
+#
 INSTALL_OPTS =	# for specific ownerships
 # these will be over-ridden by pkgsrc
 BINDIR ?= /bin

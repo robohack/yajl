@@ -5,7 +5,7 @@
 # This Makefile (and its associated include files) works with NetBSD Make and
 # Simon Gerraty's Bmake & Mk-files from http://www.crufty.net/FreeWare/, and
 # with FreeBSD make with caveats.  For many systems the bmake included in pkgsrc
-# will also work.
+# will also work (see https://pkgsrc.org/).
 #
 # See:  http://www.crufty.net/ftp/pub/sjg/help/bmake.htm
 #
@@ -22,7 +22,7 @@
 #	export WITH_AUTO_OBJ=yes		# just for FreeBSD, sigh.
 #	bsdmake					# or just "make" where possible!
 #
-# (I.e. use just "make" on non-GNU systems where it is Bmake; or use "bmake" or
+# (I.e. use "make" on non-GNU systems where it is Bmake; or use "bmake" or
 # "bsdmake" as needed on other systems.)
 #
 # Then if the build succeeds (and assuming you're not cross-compiling) you can
@@ -58,7 +58,7 @@
 # library then one can use the pkgsrc bmake on macOS by passing "SHLIB_MAJOR=
 # SHLIB_MINOR= SHLIB_TEENY=" on the command line or in Makefile.inc.
 #
-# FreeBSD's make (up to and as of 12.0) is extremely beligerent about having
+# FreeBSD's make (up to and including 12.0) is extremely beligerent about having
 # $MAKEOBJDIRPREFIX set in the environment and only in the environment -- it
 # refuses to even peek at it if it has only been set on the command line (and
 # their manual page lies in its second mention of this, claiming it can be set
@@ -68,7 +68,7 @@
 # FreeBSD's make is also too broken to do the right thing with "obj" in the
 # target list for "all".  Their saving grace (as of at least 12.0) is they've
 # implemented WITH_AUTO_OBJ, and it works, BUT ONLY IF YOU PUT IT ON THE COMMAND
-# LINE OR IN THE ENVIRONMENT!  Silly buggers.
+# LINE OR IN THE ENVIRONMENT!
 #
 #####################
 #
