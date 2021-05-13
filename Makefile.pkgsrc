@@ -88,7 +88,7 @@ post-install:
 # Makefile into your $pkgsrc/devel/yajl directory, go there, and build this
 # target:
 #
-#	rm -rf build* dest*
+#	rm -rf build* dist*
 #	make clean
 #	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
 #	cd /usr/pkgsrc/devel/yajl
