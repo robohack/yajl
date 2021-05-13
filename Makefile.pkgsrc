@@ -25,11 +25,23 @@ BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 USE_LANGUAGES=	c
 
 USE_BSD_MAKEFILE=	yes
-BSD_MAKE_BUILD_DIR=	${WRKSRC}/build
+BSD_MAKE_BUILD_DIR=	${WRKDIR}/build
 BUILD_MAKE_FLAGS=	MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
 TEST_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
 INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
 INSTALL_TARGET=		includes install
+
+# xxx this use of ${VAR:!cmd!} is quite ugly to have to do, but because it is
+# evaluated lazily it deals the use, by the package's BSD Makefile, of the
+# canonical form of ${WRKSRC} as a sub-directory of MAKEOBJDIRPREFIX.
+#
+# XXX Normally ${WRKSRC} would be canonicalised, but it may not be if
+# ${WRKOBJDIR} is set, but not to a canonical path.  XXX Maybe ${WRKOBJDIR}
+# should be forced into canonical form similarly....
+#
+CANONICAL_WRKSRC=		${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
+PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/yajl.pc
+PKGCONFIG_OVERRIDE_STAGE=	post-build
 
 AUTO_MKDIRS=	yes
 
@@ -79,18 +91,6 @@ do-extract:
 
 do-configure:
 	${MKDIR} ${BSD_MAKE_BUILD_DIR}
-
-post-build:
-	sed -e 's|$${dollar}|$$|g'						\
-	    -e 's|^prefix=.*|prefix=${PREFIX}|'					\
-	    -e 's|^libdir=.*|libdir=$${prefix}/lib|'				\
-	    -e 's|^includedir=.*|includedir=$${prefix}/include/${PKGBASE}|'	\
-	    -e 's|^Version:.*|Version: ${PKGVERSION}|'				\
-	    < ${WRKSRC}/src/${PKGBASE}.pc.in > ${WRKSRC}/src/${PKGBASE}.pc
-
-post-install:
-	${INSTALL_DATA} ${WRKSRC}/src/${PKGBASE}.pc ${DESTDIR}${PREFIX}/lib/pkgconfig
-
 
 # how to get from there to here....
 #
