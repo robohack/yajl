@@ -7,15 +7,51 @@ on:
     branches: [ bsdmake ]
 
 jobs:
-  build:
-
-    runs-on: netbsd-latest
+  regressionTest:
+    name: "${{ matrix.os }} ${{ matrix.cc }} ${{ matrix.make }} ${{ matrix.sanitizer }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+      os: [ netbsd, netbsd-latest, ubuntu, ubuntu-latest, macOS, macOS-latest ]
+      cc: [ gcc, clang ]
+      make: [ bmake, pmake, make ]
+      sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
+      exclude:
+      - os: macOS, macOS-latest
+        cc: gcc # it's clang anyway
+        make: pmake, make # it's gmake
+      - os: netbsd, netbsd-latest
+        make: pmake, bmake
+        sanitizer: USE_ASAN # incompatible with ASLR
+      - os: ubuntu, ubuntu-latest
+        make: make # it's gmake
 
     steps:
     - uses: actions/checkout@v2
+    - name: dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu'
+      run: |
+        uname -a
+        sudo apt-get install pmake bmake cxref
+        ${{ matrix.cc }} --version
+    - name: dependencies (MacOS)
+      if: matrix.os == 'macOS'
+      run: |
+        uname -a
+        brew install bmake cxref
+        ${{ matrix.cc }} --version
+    - name: dependencies (NetBSD)
+      if: matrix.os == 'netbsd'
+      run: |
+        uname -a
+        pkgin install cxref clang
+        ${{ matrix.cc }} --version
     - name: builddir
       run: rm -rf build && mkdir build
-    - name: bmake
-      run: MAKEOBJDIRPREFIX=$(pwd)/build bmake
-    - name: bmake regress
-      run: MAKEOBJDIRPREFIX=$(pwd)/build bmake regress
+    - name: build
+      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes
+    - name: distribution
+      run: MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist ${{ matrix.make }} -j 3 install
+    - name: regression
+      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes
