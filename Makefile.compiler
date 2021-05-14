@@ -5,9 +5,11 @@
 # You can define USE_UBSAN or USE_ASAN on the command line to enable the
 # Undefined or Address sanitizers with recent enough Clang or GCC.  Note if your
 # system supports these you may of course use its way of enabling them instead
-# (e.g. on NetBSD set "MKSANITIZER=yes USE_SANITIZER=address").  (N.B.:  The
-# address sanitizer is not available when the PaX ASLR (Address Space Layout
-# Randomization) feature is enabled.)
+# (e.g. on NetBSD set "MKSANITIZER=yes USE_SANITIZER=address").
+#
+# N.B.:  The address sanitizer is not available when the PaX ASLR (Address Space
+# Layout Randomization) feature is enabled on a given system, but it can be
+# disabled for a given binary with paxctl(8):  paxctl +a ${prog}
 
 # You can usually find all CC pre-defines with:
 #

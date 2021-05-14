@@ -15,7 +15,12 @@ proginstall:
 # them up properly if all goes well and it is not interrupted.
 #
 regress:
+.if defined(USE_ASAN)
+	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
+	ulimit -v unlimited && cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} sh ./run_tests.sh
+.else
 	cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} sh ./run_tests.sh
+.endif
 
 .include <bsd.prog.mk>
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

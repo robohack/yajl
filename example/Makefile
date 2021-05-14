@@ -12,7 +12,12 @@ MAN =	# empty
 proginstall:
 
 regress:
+.if defined(USE_ASAN)
+	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ./parse_config; fi
+	ulimit -v unlimited && [ "$$(./parse_config < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
+.else
 	[ "$$(./parse_config < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
+.endif
 
 .include <bsd.prog.mk>
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

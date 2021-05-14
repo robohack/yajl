@@ -15,6 +15,9 @@ proginstall:
 # broken and useless and unnecessary
 #
 regress:
+.if defined(USE_ASAN)
+	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ./${PROG}; fi
+.endif
 	@echo Not running: ./${PROG}, because it is broken.
 
 .include <bsd.prog.mk>
