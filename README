@@ -2,7 +2,7 @@
 
 ## NOTE:  This is a forked version.
 
-This is a fork of Lloyd's version which uses BSDMake for building, CXref
+This is a fork of Lloyd's version which uses BSDMake for building, Cxref
 for documentation, and which includes a few minor bug fixes.  See the
 Git history.
 

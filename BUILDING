@@ -33,8 +33,12 @@ NOTES:
   work-around to avoid building a shared library -- you really don't
   need it anyway)
 
-- if you have "cxref" installed you can build (and install) the
-  documentation as well:
+- Cxref is used to build the documentation from comments in the source
+  code.  Cxref is in pkgsrc in the devel/cxref module and can also be
+  found at https://www.gedanken.org.uk/software/cxref/
 
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake docs
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local install-docs
+  If you do not have "cxref" installed you can disable the build (and
+  install) of the documentation by setting "MKDOC=no":
+
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake MKDOC=no
+	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local MKDOC=no
