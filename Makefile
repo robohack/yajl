@@ -204,12 +204,6 @@ ${targ}: .PHONY ${targ:S/bmake-do-//}
 bmake-test-obj: .PHONY
 	@if [ $$(pwd -P) = ${.CURDIR:Q} -a ! -z ${MAKEOBJDIRPREFIX:Q} -a ! -d ${MAKEOBJDIRPREFIX:Q} ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
 
-# most implementations do not make 'regress' depend on first building everything
-# but we need to build everything before we can do any testing
-#
-regress: all .WAIT
-.PHONY: regress
-
 bmake_install_dirs += ${BINDIR}
 bmake_install_dirs += ${INCSDIR}
 bmake_install_dirs += ${LIBDIR}
@@ -230,9 +224,15 @@ _bmake_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
+# XXX This, along with the dependency of install-docs on the HTML directory,
+# seems necessary for Bmake (in pkgsrc and on Linux) to avoid parallel jobs
+# during install from running ahead of the install directories being made....
+#
+${bmake_install_dirs:S|^|${DESTDIR}|}: _bmake_install_dirs
+
 # See below for additional, optional, rules for HTML docs
 #
-install-docs:: .PHONY beforeinstall .WAIT docs # .WAIT maninstall
+install-docs:: .PHONY beforeinstall docs # maninstall
 	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
 
 # this is how we hook in the "docs" install...
@@ -279,7 +279,36 @@ ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html ya
 	${CXREF} -index-all -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html
 	ln -fs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
 
+# XXX from here to <bsd.subdir.mk> should be in a separate, common, include
+
+# xxx this doesn't actually set SUBDIR_TARGETS for Bmake...
+.include <bsd.own.mk>
+
+# GAK!  So many differences in implementations!
+.if !empty(TARGETS)
+. if empty(TARGETS:Mdocs)
+TARGETS +=	docs
+. endif
+. if empty(TARGETS:Mregress)
+TARGETS +=	regress
+. endif
+.else
+# For FreeBSD SUBDIR_TARGETS is first appended to in <bsd.subdir.mk>, but cannot
+# be appended to afterwards (though could be appended to in something included
+# by <bsd.init.mk>, such as "local.init.mk", "../Makefile.inc", or
+# "/etc/make.conf", but since local.init.mk isn't portable then none of these
+# are useful to us here, and so we cannot check to see if it includes a value
+# already or not.
+SUBDIR_TARGETS +=	docs
+SUBDIR_TARGETS +=	regress
+.endif
+
 .include <bsd.subdir.mk>
+
+# set compiler and linker flags, especially additional warnings
+# (also adds some additional useful default targets)
+#
+.include "${.CURDIR}/Makefile.compiler"
 
 # This block must come after some <bsd.*.mk> in order to use MKDOC
 #
@@ -290,14 +319,9 @@ ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html ya
 # standard use, but we're really only using it to avoid needing Cxref to build.
 #
 docs: ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
-install-docs::
+install-docs:: ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
 	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
 .endif
-
-# set compiler and linker flags, especially additional warnings
-# (here for supporting "regress")
-#
-.include "${.CURDIR}/Makefile.compiler"
 
 #
 # Local Variables:

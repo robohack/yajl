@@ -376,25 +376,12 @@ TAGS: ${SRCS}
 docs:
 .endif
 
-# xxx this doesn't actually set SUBDIR_TARGETS for Bmake...
-.include <bsd.own.mk>
-
+.if !target(regress)
 .PHONY: regress
 .NOTMAIN: regress
-
-# GAK!  So many differences, even with Bmake!
-.if !empty(TARGETS)
-. if empty(TARGETS:Mdocs)
-TARGETS +=	docs
-. endif
-. if empty(TARGETS:Mregress)
-TARGETS +=	regress
-. endif
-.else
-. if empty(SUBDIR_TARGETS:Mdocs)
-SUBDIR_TARGETS +=	docs
-. endif
-. if empty(SUBDIR_TARGETS:Mregress)
-SUBDIR_TARGETS +=	regress
-. endif
 .endif
+#
+# Most implementations do not make 'regress' depend on first building everything
+# but we need to build everything before we can do any testing.
+#
+regress: all .WAIT
