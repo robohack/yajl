@@ -20,7 +20,7 @@ jobs:
 #        sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
         sanitizer: [ NO_SANI ]
         # XXX this isn't the ideal way to handle a binary option?
-        docs: [ yes no ]
+        docs: [ yes, no ]
         exclude:
         - os: macOS-latest
           # it's clang anyway
