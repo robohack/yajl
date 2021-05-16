@@ -219,8 +219,8 @@ bmake_install_dirs += ${PKGCONFIGDIR}
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/bin
 bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/lib
 bmake_install_dirs += ${DOCDIR}/${PACKAGE}
-#bmake_install_dirs += ${MANDIR} # xxx there are no manual pages yet...
-# (in general though it is safest to always make them all)
+#bmake_install_dirs += ${MANDIR} # xxx there are no manual pages, yet...
+bmake_install_dirs += ${SHAREDIR}/doc/${PACKAGE}/html/
 
 beforeinstall: _bmake_install_dirs
 
@@ -292,7 +292,6 @@ ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html ya
 docs: ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
 install-docs::
 	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
-bmake_install_dirs += ${SHAREDIR}/doc/${PACKAGE}/html/
 .endif
 
 # set compiler and linker flags, especially additional warnings
