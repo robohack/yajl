@@ -79,4 +79,4 @@ jobs:
     - name: distribution
       run: MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist ${{ matrix.make }} -j 3 install MKDOC=${{ matrix.docs }}
     - name: regression
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d mt regress ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}

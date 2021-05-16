@@ -65,14 +65,24 @@
 #
 # OSX, aka macOS, since use of Xcode 10(?) doesn't have a working bsdmake in the
 # base system, nor does the one installable from Homebrew work.  However the
-# version of Bmake that can be installed from Homebrew does work (and presumably
-# a manual install of Simon's Bmake will also work).  Unfortunately the Bmake
-# that comes with pkgsrc does not work properly on macOS.  Pkgsrc does not
-# include Simon's MK files, but rather the bootstrap-mk-files package, which (as
-# of 20180901) is not yet fully ported to OSX/Darwin (it is more or less just a
-# copy of the non-portable NetBSD MK files).  If one can do without the shared
-# library then one can use the pkgsrc bmake on macOS by passing "SHLIB_MAJOR=
-# SHLIB_MINOR= SHLIB_TEENY=" on the command line or in Makefile.inc.
+# version of Bmake that can be installed from Homebrew does mostly(*) work (and
+# presumably a manual install of Simon's Bmake will also work).  Unfortunately
+# the Bmake that comes with pkgsrc does not work properly on macOS.  Pkgsrc does
+# not include Simon's MK files, but rather the bootstrap-mk-files package, which
+# (as of 20180901) are not yet fully ported to OSX/Darwin (it is more or less
+# just a copy of the non-portable NetBSD MK files).  If one can do without the
+# shared library then one can use the pkgsrc bmake on macOS by passing
+# "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY=" on the command line or in
+# Makefile.inc.
+#
+# (*) The Homebrew bmake-20200902 version does not run regress rules, and also
+# complains as follows:
+#
+# bmake: "/usr/local/Cellar/bmake/20200902/share/mk/bsd.subdir.mk" line 47: warning: Extra target ignored
+# bmake: "/usr/local/Cellar/bmake/20200902/share/mk/bsd.subdir.mk" line 47: warning: Special and mundane targets don't mix. Mundane ones ignored
+#
+# It also says:  "Skipping ===> /Users/runner/work/yajl/yajl/.WAIT", so it
+# doesn't appear to be based on Simon's Bmake, especially not one from 2020.
 #
 # FreeBSD's make (up to and including 12.0) is extremely beligerent about having
 # $MAKEOBJDIRPREFIX set in the environment and only in the environment -- it
