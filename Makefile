@@ -18,7 +18,7 @@
 # polluting the rest of the source tree with "obj" sub-directories).
 #
 #	mkdir build
-#	export MAKEOBJDIRPREFIX=$(pwd)/build
+#	export MAKEOBJDIRPREFIX=$(pwd -P)/build
 #	export WITH_AUTO_OBJ=yes		# just for FreeBSD, sigh.
 #	bsdmake					# or just "make" where possible!
 #
@@ -34,7 +34,7 @@
 # distribute as a binary distribution that can be un-packed wherever desired)
 # you can do:
 #
-#	bsdmake DESTDIR=$(pwd)/dist install
+#	bsdmake DESTDIR=$(pwd -P)/dist install
 #
 # DESTDIR can of course be any directory, e.g. /usr/local.
 #
@@ -191,12 +191,12 @@ ${targ}: .PHONY ${targ:S/bmake-do-//}
 # XXX this is just a very crude check...
 #
 bmake-test-obj: .PHONY
-	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z ${MAKEOBJDIRPREFIX:Q} -a ! -d ${MAKEOBJDIRPREFIX:Q} ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
+	@if [ $$(pwd -P) = ${.CURDIR:Q} -a ! -z ${MAKEOBJDIRPREFIX:Q} -a ! -d ${MAKEOBJDIRPREFIX:Q} ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
 
 # most implementations do not make 'regress' depend on first building everything
 # but we need to build everything before we can do any testing
 #
-regress: all
+regress: all .WAIT
 .PHONY: regress
 
 bmake_install_dirs += ${BINDIR}
@@ -290,6 +290,6 @@ install-docs::
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "mkdir -p build; MAKEOBJDIRPREFIX=$(pwd)/build " (default-value 'compile-command))
+# compile-command: (concat "mkdir -p build; MAKEOBJDIRPREFIX=$(pwd -P)/build " (default-value 'compile-command))
 # End:
 #

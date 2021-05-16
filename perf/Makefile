@@ -23,5 +23,5 @@ regress:
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "cd .. && mkdir -p build && MAKEOBJDIRPREFIX=$(pwd)/build " (default-value 'compile-command))
+# compile-command: (concat "cd .. && mkdir -p build && MAKEOBJDIRPREFIX=$(pwd -P)/build " (default-value 'compile-command))
 # End:

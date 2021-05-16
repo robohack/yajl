@@ -1,8 +1,8 @@
 Short story:
 
 	mkdir build
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local install
+	MAKEOBJDIRPREFIX=$(pwd -P)/build bsdmake
+	MAKEOBJDIRPREFIX=$(pwd -P)/build bsdmake DESTDIR=/usr/local install
 
 WARNING:  Do not specify DESTDIR for the first (build) phase!
 
@@ -40,5 +40,5 @@ NOTES:
   If you do not have "cxref" installed you can disable the build (and
   install) of the documentation by setting "MKDOC=no":
 
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake MKDOC=no
-	MAKEOBJDIRPREFIX=$(pwd)/build bsdmake DESTDIR=/usr/local MKDOC=no
+	MAKEOBJDIRPREFIX=$(pwd -P)/build bsdmake MKDOC=no
+	MAKEOBJDIRPREFIX=$(pwd -P)/build bsdmake DESTDIR=/usr/local MKDOC=no

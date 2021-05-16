@@ -182,6 +182,6 @@ CFLAGS +=	-I${bmake_srcdir}
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "mkdir -p build; MAKEOBJDIRPREFIX=$(pwd)/build " (default-value 'compile-command))
+# compile-command: (concat "mkdir -p build; MAKEOBJDIRPREFIX=$(pwd -P)/build " (default-value 'compile-command))
 # End:
 #
