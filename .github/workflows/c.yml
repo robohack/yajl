@@ -1,5 +1,6 @@
 name: C CI
 
+# xxx could be written as:  "on: [push, pull_request]"
 on:
   push:
     branches: [ bsdmake ]
@@ -13,36 +14,43 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-      os: [ netbsd, netbsd-latest, ubuntu, ubuntu-latest, macOS, macOS-latest ]
-      cc: [ gcc, clang ]
-      make: [ bmake, pmake, make ]
-      sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
-      exclude:
-      - os: macOS, macOS-latest
-        cc: gcc # it's clang anyway
-        make: pmake, make # it's gmake
-      - os: netbsd, netbsd-latest
-        make: pmake, bmake
-        sanitizer: USE_ASAN # incompatible with ASLR
-      - os: ubuntu, ubuntu-latest
-        make: make # it's gmake
+        os: [ ubuntu-18.04, ubuntu-latest, macOS-11.0, macOS-latest ] # netbsd!!!
+        cc: [ gcc, clang ]
+        make: [ bmake, pmake, make ]
+        sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
+        exclude:
+        - os: [ macOS-11.0, macOS-latest ]
+          # it's clang anyway
+          cc: gcc
+          # pmake is unavailable, make is gmake
+          make: [ pmake, make ]
+        - os: [ ubuntu-18.04, ubuntu-latest ]
+          # it's gmake
+          make: make
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: dependencies (Ubuntu)
       if: matrix.os == 'ubuntu'
       run: |
         uname -a
         sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
-    - name: dependencies (MacOS)
-      if: matrix.os == 'macOS'
+    - name: dependencies (MacOS-11.0)
+      if: matrix.os == 'macOS-11.0'
       run: |
         uname -a
         brew install bmake cxref
         ${{ matrix.cc }} --version
-    - name: dependencies (NetBSD)
-      if: matrix.os == 'netbsd'
+    - name: dependencies (MacOS-latest)
+      if: matrix.os == 'macOS-latest'
+      run: |
+        uname -a
+        brew install bmake cxref
+        ${{ matrix.cc }} --version
+    - name: dependencies (NetBSD-latest)
+      if: matrix.os == 'netbsd-latest'
       run: |
         uname -a
         pkgin install cxref clang
