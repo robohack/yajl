@@ -174,6 +174,7 @@ BUILDTARGETS +=	.WAIT
 # target in src/Makefile, though otherwise it is a bit of a waste for pkgsrc).
 BUILDTARGETS +=	bmake-do-depend
 BUILDTARGETS +=	.WAIT
+BUILDTARGETS +=	bmake-do-docs
 
 # this ("all") must be the VERY first target
 # (there shouldn't be any .includes above!)
@@ -219,6 +220,15 @@ _bmake_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
+# See below for additional, optional, rules for HTML docs
+#
+install-docs:: .PHONY beforeinstall .WAIT docs # .WAIT maninstall
+	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
+
+# this is how we hook in the "docs" install...
+#
+afterinstall: .PHONY install-docs
+
 # N.B.:  Cxref requires two passes of each file, the first to build up the cross
 #        referencing files and the second to use them.  Headers have to be done
 #        first to avoid warnings about missing prototypes, and warnings should
@@ -240,7 +250,6 @@ _bmake_install_dirs: .PHONY
 # doesn't actually cross-reference C code so well.
 #
 CXREF ?= cxref
-docs: .PHONY ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
 
 ${MAKEOBJDIRPREFIX:Q}/doc/html:
 	-mkdir -p ${MAKEOBJDIRPREFIX:Q}/doc/html
@@ -260,24 +269,17 @@ ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html ya
 	${CXREF} -index-all -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html
 	ln -fs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
 
-install-docs:: .PHONY beforeinstall .WAIT docs # .WAIT maninstall
-	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
-
-# this is how we hook in the "docs" install...
-#
-afterinstall: .PHONY install-docs
-
 .include <bsd.subdir.mk>
 
-# This block must come after some <bsd.*.mk> in order to (maybe) set MKDOC
+# This block must come after some <bsd.*.mk> in order to use MKDOC
 #
 .if ${MKDOC:Uno} != "no"
 #
-# add docs to the prerequisites for "all"
+# Note that here we're using MKDOC only to control HTML docs -- not to control
+# the install of the basic README and COPYING files, etc.  This may not be
+# standard use, but we're really only using it to avoid needing Cxref to build.
 #
-BUILDTARGETS +=	bmake-do-docs
-bmake-do-docs: .PHONY docs
-all: bmake-do-docs
+docs: ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
 install-docs::
 	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
 bmake_install_dirs += ${SHAREDIR}/doc/${PACKAGE}/html/
