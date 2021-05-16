@@ -33,7 +33,7 @@ jobs:
           # it's gmake
           make: make
     env:
-      MKDOC=yes
+      MKDOC: yes
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
         sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
       env:
-        MKDOC=no
+        MKDOC: no
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macOS-latest'
       run: |
@@ -58,7 +58,7 @@ jobs:
         brew install bmake
         ${{ matrix.cc }} --version
       env:
-        MKDOC=no
+        MKDOC: no
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
       run: |
