@@ -14,8 +14,13 @@ MAN =	# empty
 # don't install
 proginstall:
 
-regress:
-	./perftest
+regress: all .WAIT
+.if defined(USE_ASAN)
+	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
+	ulimit -v unlimited && ${.OBJDIR}/perftest
+.else
+	${.OBJDIR}/perftest
+.endif
 
 .include <bsd.prog.mk>
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

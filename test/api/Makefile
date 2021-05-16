@@ -14,11 +14,11 @@ proginstall:
 # this test seems to fail, the old run_tests script was bogus and
 # broken and useless and unnecessary
 #
-regress:
+regress: all .WAIT
 .if defined(USE_ASAN)
-	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ./${PROG}; fi
+	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
 .endif
-	@echo Not running: ./${PROG}, because it is broken.
+	@echo Not running: ${.OBJDIR}/${PROG}, because it is broken.
 
 .include <bsd.prog.mk>
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"

@@ -11,12 +11,12 @@ MAN =	# empty
 # don't install
 proginstall:
 
-regress:
+regress: all .WAIT
 .if defined(USE_ASAN)
 	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ./parse_config; fi
-	ulimit -v unlimited && [ "$$(./parse_config < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
+	ulimit -v unlimited && [ "$$(${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
 .else
-	[ "$$(./parse_config < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
+	[ "$$(${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config)" = "Logging/timeFormat: utc" ]
 .endif
 
 .include <bsd.prog.mk>
