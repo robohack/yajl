@@ -9,7 +9,7 @@ on:
 
 jobs:
   regressionTest:
-    name: "${{ matrix.os }} ${{ matrix.cc }} ${{ matrix.make }} ${{ matrix.sanitizer }}"
+    name: "${{ matrix.os }} ${{ matrix.make }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -19,21 +19,25 @@ jobs:
         make: [ bmake, pmake, make ]
 #        sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
         sanitizer: [ NO_SANI ]
+        # XXX this isn't the ideal way to handle a binary option?
+        docs: [ yes no ]
         exclude:
         - os: macOS-latest
           # it's clang anyway
           cc: gcc
-        - os: macOS-latest
           # pmake is unavailable, make is gmake
           make: [ pmake, make ]
+          docs: yes
         - os: ubuntu-18.04
           # it's gmake
           make: make
+          # errors in header files
+          docs: yes
         - os: ubuntu-latest
           # it's gmake
           make: make
-    env:
-      MKDOC: yes
+          # see if there are still errors in header files
+          docs: no
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -49,16 +53,12 @@ jobs:
         uname -a
         sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
-      env:
-        MKDOC: no
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macOS-latest'
       run: |
         uname -a
         brew install bmake
         ${{ matrix.cc }} --version
-      env:
-        MKDOC: no
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
       run: |
