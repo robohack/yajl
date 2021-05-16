@@ -32,7 +32,8 @@ jobs:
         - os: ubuntu-latest
           # it's gmake
           make: make
-
+    env:
+      MKDOC=yes
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -48,12 +49,16 @@ jobs:
         uname -a
         sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
+      env:
+        MKDOC=no
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macOS-latest'
       run: |
         uname -a
-        brew install bmake cxref
+        brew install bmake
         ${{ matrix.cc }} --version
+      env:
+        MKDOC=no
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
       run: |
@@ -63,8 +68,8 @@ jobs:
     - name: builddir
       run: rm -rf build && mkdir build
     - name: build
-      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes
+      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=$MKDOC
     - name: distribution
-      run: MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist ${{ matrix.make }} -j 3 install
+      run: MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist ${{ matrix.make }} -j 3 install MKDOC=$MKDOC
     - name: regression
-      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes
+      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes MKDOC=$MKDOC
