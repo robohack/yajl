@@ -14,34 +14,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-18.04, ubuntu-latest, macOS-11.0, macOS-latest ] # netbsd!!!
+        os: [ ubuntu-latest, macOS-latest ] # ubuntu-18.04, netbsd!!!
         cc: [ gcc, clang ]
         make: [ bmake, pmake, make ]
-        sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
+#        sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
+        sanitizer: [ NO_SANI ]
         exclude:
-        - os: [ macOS-11.0, macOS-latest ]
+        - os: macOS-latest
           # it's clang anyway
           cc: gcc
+        - os: macOS-latest
           # pmake is unavailable, make is gmake
           make: [ pmake, make ]
-        - os: [ ubuntu-18.04, ubuntu-latest ]
+        - os: ubuntu-18.04
+          # it's gmake
+          make: make
+        - os: ubuntu-latest
           # it's gmake
           make: make
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu'
+    - name: dependencies (Ubuntu-latest)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         uname -a
         sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
-    - name: dependencies (MacOS-11.0)
-      if: matrix.os == 'macOS-11.0'
+    - name: dependencies (Ubuntu-18.04)
+      if: matrix.os == 'ubuntu-18.04'
       run: |
         uname -a
-        brew install bmake cxref
+        sudo apt-get install pmake bmake cxref
         ${{ matrix.cc }} --version
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macOS-latest'
