@@ -105,16 +105,22 @@ OBJMACHINE ?=	yes
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
 # to each of these target directories.
 #
-# XXX I wonder -- should we use $PREFIX like other 3rd-party projects?
+# XXX Note that NetBSD's bsd.shlib.mk magic keys off the value of BINDIR (or
+# MKDYNAMICROOT) in order to set the location of SHLIBDIR and SHLINKDIR, which
+# in turn then determine which dynamic linker is set for the generated binaries
+# (when linking non-statically), so don't set PREFIX to an empty value if you
+# don't have /libexec/ld.elf_so and you don't have MKDYNAMICROOT=no set
+# somewhere (e.g. /etc/mk.conf)!
 #
 INSTALL_OPTS =	# for specific ownerships
 # these will be over-ridden by pkgsrc
-BINDIR ?= /bin
-INCSDIR ?= /include${INCSUBDIR}
-LIBDIR ?= /lib
-DEBUGDIR ?= /libdata/debug
-LINTLIBDIR ?= /libdata/lint
-SHAREDIR ?= /share
+PREFIX ?= /usr
+BINDIR ?= ${PREFIX}/bin
+INCSDIR ?= ${PREFIX}/include${INCSUBDIR}
+LIBDIR ?= ${PREFIX}/lib
+DEBUGDIR ?= ${PREFIX}/libdata/debug
+LINTLIBDIR ?= ${PREFIX}/libdata/lint
+SHAREDIR ?= ${PREFIX}/share
 DOCDIR ?= ${SHAREDIR}/doc
 MANDIR ?= ${SHAREDIR}/man
 
