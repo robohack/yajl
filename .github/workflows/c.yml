@@ -68,8 +68,8 @@ jobs:
     - name: builddir
       run: rm -rf build && mkdir build
     - name: build
-      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=$MKDOC
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
     - name: distribution
-      run: MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist ${{ matrix.make }} -j 3 install MKDOC=$MKDOC
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist ${{ matrix.make }} -j 3 install MKDOC=${{ matrix.docs }}
     - name: regression
-      run: MAKEOBJDIRPREFIX=$(pwd)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes MKDOC=$MKDOC
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} regress ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
