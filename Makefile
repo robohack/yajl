@@ -258,7 +258,7 @@ ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html ya
 		${CXREF} -warn-all -xref-all -block-comments -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${MAKEOBJDIRPREFIX:Q}${.CURDIR}/src -CPP 'cc -E -CC -x c' $${file}; \
 	done; \
 	${CXREF} -index-all -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html
-	ln -fhs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
+	ln -fs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
 
 install-docs:: .PHONY beforeinstall .WAIT docs # .WAIT maninstall
 	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
