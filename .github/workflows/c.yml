@@ -24,20 +24,20 @@ jobs:
         exclude:
         - os: macOS-latest
           # it's clang anyway
-          cc: gcc
+          - cc: gcc
           # pmake is unavailable, make is gmake
-          make: [ pmake, make ]
-          docs: yes
+          - make: [ pmake, make ]
+          - docs: yes
         - os: ubuntu-18.04
           # it's gmake
-          make: make
+          - make: make
           # errors in header files
-          docs: yes
+          - docs: yes
         - os: ubuntu-latest
           # it's gmake
-          make: make
+          - make: make
           # see if there are still errors in header files
-          docs: no
+          - docs: no
     steps:
     - name: Checkout
       uses: actions/checkout@v2
