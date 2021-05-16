@@ -280,6 +280,7 @@ bmake-do-docs: .PHONY docs
 all: bmake-do-docs
 install-docs::
 	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
+bmake_install_dirs += ${SHAREDIR}/doc/${PACKAGE}/html/
 .endif
 
 # set compiler and linker flags, especially additional warnings
