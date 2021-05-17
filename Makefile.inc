@@ -75,12 +75,14 @@ WARNS = 0
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
+# XXX ??? just use this: . if defined(MAKEOBJDIRPREFIX)
 . if exists(${.OBJDIR}/${bmake_topdir}/src)
 # .OBJDIR is from MAKEOBJDIRPREFIX
 LDADD += -L${.OBJDIR}/${bmake_topdir}/src
 DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE}.a
 . else
 # assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
+# XXX this probably breaks for ${MAKEOBJDIR}
 LDADD += -L../${bmake_topdir}/src/${.OBJDIR:T}
 DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE}.a
 . endif
@@ -88,7 +90,31 @@ LDADD += -l${PACKAGE}_s
 #
 .endif	# !defined(LIB)
 
+# N.B.:  Cxref requires two passes of each file, the first to build up the cross
+#        referencing files and the second to use them.  Headers have to be done
+#        first to avoid warnings about missing prototypes, and warnings should
+#        be generated on the second pass.  A final index can be generated after
+#        the first two passes over all the files.  Note we put the Cxref
+#        database in the HTML output directory because there isn't any way to
+#        tell cxref to read it from anywhere but where except where it also
+#        writes it HTML output files in the second pass.  Sadly this means one
+#        cannot easily share the results of the first pass with any additional
+#        "2nd" passes to generate other forms of output (e.g. RTF or LaTeX).
+#
+# XXX because we process two example programs, each with definitions for main(),
+# only the first found main() is included in the Appendix section.
+#
+# Note RoboDoc (textproc/robodoc, https://www.xs4all.nl/~rfsber/Robo/,
+# https://github.com/gumpu/ROBODoc/) might be a viable alternative for cxref,
+# and the most recent releases have the advantage of being able to produce troff
+# output.  However it is even more ugly and much more difficult to use, and
+# doesn't actually cross-reference C code so well.
+#
+CXREF ?= cxref
+
+#
 # NOTICE:  Nothing below here _should_ be project dependent
+#
 
 # yes, always -- we use this because it's safer when using a shared network
 # directory for building/testing/etc.  (though it is sometimes somewhat
@@ -184,6 +210,50 @@ CPPFLAGS +=	-I${bmake_srcdir}
 .else
 CFLAGS +=	-I${bmake_srcdir}
 .endif
+
+# XXX N.B.:  we cannot include <bsd.own.mk> before the default "all" target!!!
+# xxx this doesn't actually set SUBDIR_TARGETS for FreeBSD anyway...
+#
+.include <bsd.own.mk>
+
+# GAK!  So many differences in implementations!
+.if !empty(TARGETS)
+. if empty(TARGETS:Mdocs)
+TARGETS +=	docs
+. endif
+. if empty(TARGETS:Mregress)
+TARGETS +=	regress
+. endif
+. if empty(TARGETS:Mtags)
+TARGETS +=	tags
+. endif
+. if empty(TARGETS:MTAGS)
+TARGETS +=	TAGS
+. endif
+.else
+# For FreeBSD SUBDIR_TARGETS is first appended to in <bsd.subdir.mk>, but cannot
+# be appended to afterwards (though could be appended to in something included
+# by <bsd.init.mk>, such as "local.init.mk", "../Makefile.inc", or
+# "/etc/make.conf", but since local.init.mk isn't portable then none of these
+# are useful to us here, and so we cannot check to see if it includes a value
+# already or not.
+SUBDIR_TARGETS +=	docs
+SUBDIR_TARGETS +=	regress
+SUBDIR_TARGETS +=	tags
+SUBDIR_TARGETS +=	TAGS
+.endif
+
+# Most implementations do not make 'regress' depend on first building everything
+# but we need to build everything before we can do any testing.  This is done
+# because 'regress' is an optional target and meant to be called directly, and
+# so it should probably try its best to make sure everything is up to date
+# before it tries to test those things.
+#
+# XXX for some reason even NetBSD Make requires the odd trailing .WAIT
+#
+regress: all .WAIT
+
+# see Makefile.compiler for default targets for the rest of the TARGETS above
 
 #
 # Local Variables:

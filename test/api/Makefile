@@ -14,7 +14,7 @@ proginstall:
 # this test seems to fail, the old run_tests script was bogus and
 # broken and useless and unnecessary
 #
-regress: all .WAIT
+regress:
 .if defined(USE_ASAN)
 	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
 .endif

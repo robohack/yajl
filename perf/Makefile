@@ -14,7 +14,7 @@ MAN =	# empty
 # don't install
 proginstall:
 
-regress: all .WAIT
+regress:
 .if defined(USE_ASAN)
 	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
 	ulimit -v unlimited && ${.OBJDIR}/perftest

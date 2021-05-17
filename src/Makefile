@@ -85,6 +85,7 @@ ${.OBJDIR}/yajl:
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
+# XXX ??? just use this: . if !defined(MAKEOBJDIRPREFIX)
 .if !exists(${.OBJDIR}/${bmake_topdir}/src)
 FILES += yajl/yajl_version.h
 # n.b.:  FILESDIR_blah won't work because of the "yajl/" directory

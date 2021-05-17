@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-.include "${.CURDIR}/Makefile.inc"
-
 # This Makefile (and its associated include files) works with NetBSD Make and
 # Simon Gerraty's Bmake & Mk-files from http://www.crufty.net/FreeWare/, and
 # with FreeBSD make with caveats.  For many systems the bmake included in pkgsrc
@@ -81,9 +79,6 @@
 # bmake: "/usr/local/Cellar/bmake/20200902/share/mk/bsd.subdir.mk" line 47: warning: Extra target ignored
 # bmake: "/usr/local/Cellar/bmake/20200902/share/mk/bsd.subdir.mk" line 47: warning: Special and mundane targets don't mix. Mundane ones ignored
 #
-# It also says:  "Skipping ===> /Users/runner/work/yajl/yajl/.WAIT", so it
-# doesn't appear to be based on Simon's Bmake, especially not one from 2020.
-#
 # FreeBSD's make (up to and including 12.0) is extremely beligerent about having
 # $MAKEOBJDIRPREFIX set in the environment and only in the environment -- it
 # refuses to even peek at it if it has only been set on the command line (and
@@ -139,6 +134,8 @@
 
 # Now, on with the show....
 
+bmake_topdir =	.
+
 SUBDIR =	src
 
 # Not all older mk-files (e.g. Apple's for bsdmake) support having a .WAIT in a
@@ -187,13 +184,13 @@ BUILDTARGETS +=	.WAIT
 BUILDTARGETS +=	bmake-do-docs
 
 # this ("all") must be the VERY first target
-# (there shouldn't be any .includes above!)
+# (there shouldn't be any .includes above, including Makefile.inc!)
 #
 # (Remove the .WAIT if your build blows up.)
 #
 all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 
-.ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR}
+.ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR} bmake-do-docs
 
 .for targ in ${BUILDTARGETS}
 ${targ}: .PHONY ${targ:S/bmake-do-//}
@@ -202,7 +199,15 @@ ${targ}: .PHONY ${targ:S/bmake-do-//}
 # XXX this is just a very crude check...
 #
 bmake-test-obj: .PHONY
-	@if [ $$(pwd -P) = ${.CURDIR:Q} -a ! -z ${MAKEOBJDIRPREFIX:Q} -a ! -d ${MAKEOBJDIRPREFIX:Q} ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
+	@if [ $$(pwd -P) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIRPREFIX:Q}" -a ! -d "${MAKEOBJDIRPREFIX:Q}" ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
+
+# n.b.:  Makefile.inc includes <bsd.own.mk>, which defines a default "all"
+# target (amongst others), so it must come after all the above, but since it
+# also defines additionals values for variables used as .for lists it must come
+# before <bsd.subdir.mk> and before anything else that uses values it sets in
+# .for lists, e.g. the directories for bmake_install_dirs just below.
+#
+.include "${.CURDIR}/Makefile.inc"
 
 bmake_install_dirs += ${BINDIR}
 bmake_install_dirs += ${INCSDIR}
@@ -232,82 +237,15 @@ ${bmake_install_dirs:S|^|${DESTDIR}|}: _bmake_install_dirs
 
 # See below for additional, optional, rules for HTML docs
 #
-install-docs:: .PHONY beforeinstall docs # maninstall
+install-docs:: .PHONY beforeinstall docs .WAIT # maninstall
 	cp ${.CURDIR:Q}/README ${.CURDIR:Q}/COPYING ${.CURDIR:Q}/ChangeLog ${.CURDIR:Q}/TODO ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/
 
 # this is how we hook in the "docs" install...
 #
 afterinstall: .PHONY install-docs
 
-# N.B.:  Cxref requires two passes of each file, the first to build up the cross
-#        referencing files and the second to use them.  Headers have to be done
-#        first to avoid warnings about missing prototypes, and warnings should
-#        be generated on the second pass.  A final index can be generated after
-#        the first two passes over all the files.  Note we put the Cxref
-#        database in the HTML output directory because there isn't any way to
-#        tell cxref to read it from anywhere but where except where it also
-#        writes it HTML output files in the second pass.  Sadly this means one
-#        cannot easily share the results of the first pass with any additional
-#        "2nd" passes to generate other forms of output (e.g. RTF or LaTeX).
-#
-# XXX because we process two example programs, each with definitions for main(),
-# only the first found main() is included in the Appendix section.
-#
-# Note RoboDoc (textproc/robodoc, https://www.xs4all.nl/~rfsber/Robo/,
-# https://github.com/gumpu/ROBODoc/) might be a viable alternative for cxref,
-# and the most recent releases have the advantage of being able to produce troff
-# output.  However it is even more ugly and much more difficult to use, and
-# doesn't actually cross-reference C code so well.
-#
-CXREF ?= cxref
-
-${MAKEOBJDIRPREFIX:Q}/doc/html:
-	-mkdir -p ${MAKEOBJDIRPREFIX:Q}/doc/html
-
-# XXX this should also depend on all the $${files} found herein....
-#
-${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html: ${MAKEOBJDIRPREFIX:Q}/doc/html yajl.cxref
-	cd ${.CURDIR} && \
-	files=$$(find ./src -depth -type d \( -name CVS -or -name .git -or -name .svn -or -name build \) -prune -or -type f \( -name '*.[ch]' -o -name '*.cxref' \) -print); \
-	files="yajl.cxref $${files} reformatter/json_reformat.c example/parse_config.c"; \
-	for file in $${files}; do \
-		${CXREF} -xref-all -block-comments -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${MAKEOBJDIRPREFIX:Q}${.CURDIR}/src -CPP 'cc -E -CC -x c' $${file}; \
-	done;\
-	for file in $${files}; do \
-		${CXREF} -warn-all -xref-all -block-comments -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${MAKEOBJDIRPREFIX:Q}${.CURDIR}/src -CPP 'cc -E -CC -x c' $${file}; \
-	done; \
-	${CXREF} -index-all -O${MAKEOBJDIRPREFIX:Q}/doc/html -N${PACKAGE} -html
-	ln -fs ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.cxref.html ${MAKEOBJDIRPREFIX:Q}/doc/html/index.html
-
-# XXX from here to <bsd.subdir.mk> should be in a separate, common, include
-
-# xxx this doesn't actually set SUBDIR_TARGETS for Bmake...
-.include <bsd.own.mk>
-
-# GAK!  So many differences in implementations!
-.if !empty(TARGETS)
-. if empty(TARGETS:Mdocs)
-TARGETS +=	docs
-. endif
-. if empty(TARGETS:Mregress)
-TARGETS +=	regress
-. endif
-.else
-# For FreeBSD SUBDIR_TARGETS is first appended to in <bsd.subdir.mk>, but cannot
-# be appended to afterwards (though could be appended to in something included
-# by <bsd.init.mk>, such as "local.init.mk", "../Makefile.inc", or
-# "/etc/make.conf", but since local.init.mk isn't portable then none of these
-# are useful to us here, and so we cannot check to see if it includes a value
-# already or not.
-SUBDIR_TARGETS +=	docs
-SUBDIR_TARGETS +=	regress
-.endif
-
 .include <bsd.subdir.mk>
-
-# set compiler and linker flags, especially additional warnings
-# (also adds some additional useful default targets)
-#
+.include <bsd.obj.mk>	# n.b. may be needed for docs
 .include "${.CURDIR}/Makefile.compiler"
 
 # This block must come after some <bsd.*.mk> in order to use MKDOC
@@ -318,9 +256,76 @@ SUBDIR_TARGETS +=	regress
 # the install of the basic README and COPYING files, etc.  This may not be
 # standard use, but we're really only using it to avoid needing Cxref to build.
 #
-docs: ${MAKEOBJDIRPREFIX:Q}/doc/html/yajl.apdx.html
+
+# XXX Some of the futzing with .OBJDIR below would probably be avoided if we
+# didn't do it from here in the top-level directory -- I.e. consider moving the
+# main header file, i.e. yajl.cxref, to a "docs" subdir and do it all there.
+
+# Make sure make changes to the .OBJDIR properly
+#
+# This seems to be needed IFF ${.OBJDIR} didn't exist on startup, and because
+# this is the top-level Makefile, make won't have been able to chdir there yet.
+#
+# XXX this (obviously) makes print-objdir work, but it doesn't go there,
+# i.e. without the cd in doc/html???
+
+# (note that IFF .OBJDIR doesn't exist then this also leaves .OBJDIR as a
+# relative directory, not an absolute path)
+#
+# XXX this probably won't work for FreeBSD, but then again with WITH_AUTO_OBJ it
+# may not be necessary.
+#
+. if defined(__objdir) && !defined(MAKEOBJDIRPREFIX)
+# reset .OBJDIR so it expands correctly herein on first go when it doesn't exist
+.OBJDIR = ${__objdir}
+# If .OBJDIR does exist then (re)canonicalize .OBJDIR, and reset internal stuff
+# (chdir(), set $PWD, etc.)
+# (this isn't actually necessary, but it improves the possibility that use of
+# MAKEOBJDIR might work, especially on a second invocation)
+.OBJDIR: ${.OBJDIR}
+. endif
+
+# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
+# tedious.
+#
+. if defined(MAKEOBJDIRPREFIX)
+# .OBJDIR is from MAKEOBJDIRPREFIX
+GENHDIR = ${.OBJDIR}/${bmake_topdir}/src
+. else
+# assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
+#
+# XXX this probably breaks for ${MAKEOBJDIR}
+#
+# N.B.: note the inclusion of ${.OBJDIR} -- this is because the rule does a "cd"
+# Note also here in the top-level we could avoid the dance, but this form is
+# reusable in a subdir.
+GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
+. endif
+
+docs: doc/html/yajl.apdx.html
+
 install-docs:: ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
-	cd ${MAKEOBJDIRPREFIX:Q}/doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
+	cd doc/html && cp -R ./ ${DESTDIR}${SHAREDIR}/doc/${PACKAGE}/html/
+
+# XXX MAGIC!  N.B.:  The "cd ${.OBJDIR}" makes make believe ${.OBJDIR} exists!!!
+doc/html:
+	cd ${.OBJDIR} && mkdir -p doc/html
+
+# XXX this should also depend on all the $${files} found herein....
+#
+doc/html/yajl.apdx.html: doc/html yajl.cxref
+	cd ${.CURDIR} && \
+	files=$$(find ./src -depth -type d \( -name CVS -or -name .git -or -name .svn -or -name build \) -prune -or -type f \( -name '*.[ch]' -o -name '*.cxref' \) -print); \
+	files="yajl.cxref $${files} reformatter/json_reformat.c example/parse_config.c"; \
+	for file in $${files}; do \
+		${CXREF} -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -CC -x c' $${file}; \
+	done;\
+	for file in $${files}; do \
+		${CXREF} -warn-all -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -CC -x c' $${file}; \
+	done; \
+	${CXREF} -index-all -O${.OBJDIR}/doc/html -N${PACKAGE} -html
+	ln -fs ${.OBJDIR}/doc/html/yajl.cxref.html ${.OBJDIR}/doc/html/index.html
+
 .endif
 
 #

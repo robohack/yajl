@@ -371,17 +371,5 @@ TAGS: ${SRCS}
 .endif
 
 .if !target(docs)
-.PHONY: docs
-.NOTMAIN: docs
 docs:
 .endif
-
-.if !target(regress)
-.PHONY: regress
-.NOTMAIN: regress
-.endif
-#
-# Most implementations do not make 'regress' depend on first building everything
-# but we need to build everything before we can do any testing.
-#
-regress: all .WAIT
