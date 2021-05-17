@@ -245,7 +245,7 @@ install-docs:: .PHONY beforeinstall docs .WAIT # maninstall
 afterinstall: .PHONY install-docs
 
 .include <bsd.subdir.mk>
-.include <bsd.obj.mk>	# n.b. may be needed for docs
+.include <bsd.obj.mk>	# n.b. may be needed for making docs
 .include "${.CURDIR}/Makefile.compiler"
 
 # This block must come after some <bsd.*.mk> in order to use MKDOC

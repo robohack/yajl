@@ -4,11 +4,10 @@ bmake_topdir = ../..
 
 .include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
 
-.include <bsd.own.mk>
-
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX}
 # is tedious.
 #
+# XXX this works, but... just use this???: . if !defined(MAKEOBJDIRPREFIX)
 .if exists(${.OBJDIR}/${bmake_topdir}/src)
 INCS =	yajl_version.h
 .endif
@@ -33,6 +32,10 @@ install:	includes
 
 .include <bsd.prog.mk>
 .sinclude <inc.mk>			# hack for crufty.net mk-files
+
+# get additional default targets
+#
+.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
 
 #
 # Local Variables:

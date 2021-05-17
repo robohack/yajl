@@ -9,8 +9,7 @@ SUBDIR +=	parsing
 
 .include <bsd.subdir.mk>
 
-# set compiler and linker flags, especially additional warnings
-# (also adds some additional useful default targets)
+# get additional default targets
 #
 .include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
 
