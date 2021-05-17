@@ -275,7 +275,7 @@ afterinstall: .PHONY install-docs
 # XXX this probably won't work for FreeBSD, but then again with WITH_AUTO_OBJ it
 # may not be necessary.
 #
-. if defined(__objdir) && !defined(MAKEOBJDIRPREFIX)
+. if defined(__objdir)
 # reset .OBJDIR so it expands correctly herein on first go when it doesn't exist
 .OBJDIR = ${__objdir}
 # If .OBJDIR does exist then (re)canonicalize .OBJDIR, and reset internal stuff
