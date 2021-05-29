@@ -101,7 +101,7 @@ do-configure:
 # target:
 #
 #	rm -rf build dist
-#	make clean
+#	make distclean
 #	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
 #	cd /usr/pkgsrc/devel/yajl
 #	make REPODIR=$OLDPWD setup-pkgsrc
