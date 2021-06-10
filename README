@@ -1,14 +1,13 @@
 # Welcome to Yet Another JSON Library (YAJL)
 
-## NOTE:  This is a forked version.
+## NOTE:  This is a variant of the original [YAJL][LLOYD] by Lloyd Hilaiel.
 
-This is a fork of Lloyd's version which uses BSDMake for building, Cxref
-for documentation, and which includes a few minor bug fixes.  See the
-Git history.
+This variant started as a fork of Lloyd's original.  This YAJL uses
+BSDMake for building, Cxref for documentation, and it includes a few
+minor bug fixes and other enhancements.  See the Git history.  Further
+fixes or enhancements are welcome.
 
-This fork is hosted at [robohack's GitHub][GHRY] by Greg A. Woods.
-
-[GRHY]: https://github.com/robohack/yajl/
+This YAJL is maintained in [robohack's GitHub][GHRY] by Greg A. Woods.
 
 Moto:  Write Portable C without complicating the build!
 
@@ -82,3 +81,7 @@ Fat free.  No whip.
 
 enjoy,
 Lloyd - July, 2007
+
+
+[GRHY]: https://github.com/robohack/yajl/
+[LLOYD]: https://github.com/lloyd/yajl/
