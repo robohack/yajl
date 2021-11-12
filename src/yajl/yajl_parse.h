@@ -34,7 +34,7 @@ extern "C" {
         yajl_status_ok,
         /*+ a client callback returned zero, stopping the parse +*/
         yajl_status_client_canceled,
-        /*+ An error occured during the parse.  Call yajl_get_error for
+        /*+ An error occurred during the parse.  Call yajl_get_error for
          *  more information about the encountered error +*/
         yajl_status_error
     } yajl_status;
