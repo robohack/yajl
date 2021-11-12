@@ -12,7 +12,7 @@ includedir=${prefix}/include
 
 Name: Yet Another JSON Library
 Description: A small and portable JSON parsing and serialization library written in plain ANSI C
-Version: @YAJL_MAJOR@.@YAJL_MINOR@.@YAJL_MICRO@
+Version: @LIB_MAJOR@.@LIB_MINOR@.@LIB_MICRO@
 Cflags: -I${includedir}
 #
 # on some systems the linker may need either a "-Wl,-R" or a "-rpath"

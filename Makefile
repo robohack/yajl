@@ -246,7 +246,6 @@ afterinstall: .PHONY install-docs
 
 .include <bsd.subdir.mk>
 .include <bsd.obj.mk>	# n.b. may be needed for making docs
-.include "${.CURDIR}/Makefile.compiler"
 
 # This block must come after some <bsd.*.mk> in order to use MKDOC
 #
@@ -283,23 +282,6 @@ afterinstall: .PHONY install-docs
 # (this isn't actually necessary, but it improves the possibility that use of
 # MAKEOBJDIR might work, especially on a second invocation)
 .OBJDIR: ${.OBJDIR}
-. endif
-
-# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
-# tedious.
-#
-. if defined(MAKEOBJDIRPREFIX)
-# .OBJDIR is from MAKEOBJDIRPREFIX
-GENHDIR = ${.OBJDIR}/${bmake_topdir}/src
-. else
-# assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
-#
-# XXX this probably breaks for ${MAKEOBJDIR}
-#
-# N.B.: note the inclusion of ${.OBJDIR} -- this is because the rule does a "cd"
-# Note also here in the top-level we could avoid the dance, but this form is
-# reusable in a subdir.
-GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
 . endif
 
 docs: doc/html/yajl.apdx.html

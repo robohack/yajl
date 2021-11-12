@@ -10,15 +10,83 @@
 # XXX see SJG's SSLrsh release for simple portability hacks via Make
 # e.g. in particular the use of .-include "$Makefile.${MACHINE}.inc" etc.
 
+# N.B.:  all sub-directory Makefiles must set ${bmake_topdir} to be a relative
+# path to the top of the source tree.
+#
+# This is used to allow values in LDADD, DPADD, and CPPFLAGS (or CFLAGS) to
+# directly reference both products and sources in other parts of the tree,
+# especially if they are set in this file (though use directly in subdir
+# makefiles can help them be more readable).  This is particularly useful for a
+# project that builds a library used by other programs in the same project,
+# and/or which may also build header files shared by several sources in
+# different directories in the same project.
+#
+# This would not be necessary if/when all supported BSDMake versions have the
+# ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL} was first found in NetBSD-current
+# after 2009/09/08 but it is not found in any release until 6.0.  Unfortunately
+# there is no easy way to know definitively what version of BSDMake is being
+# used.  Simon Gerraty's bmake has MAKE_VERSION, as does FreeBSD's make though
+# they are entirely and totally different and unrelated.  In NetBSD MAKE_VERSION
+# was only briefly present since it represented the build date, not the release
+# date, and it was removed in order to make it possible to do reproducible
+# builds.  For example this file can be used to define the version number(s) for
+# the project, and thus sources which use these numbers (header file templates,
+# or shared library filenames, etc), can add a dependency on this file as
+# follows:
+#
+#	version.h: ${.CURDIR}/version.h.in ${.CURDIR}/${bmake_topdir}/Makefile.inc
+#
+# On the other hand this might make it possible to invoke "make" in a
+# subdirectory when _not_ using MAKEOBJDIRPREFIX.
+
+# This file is included by default from any subdirectory makefile by BSD Make's
+# standard files, or at least via any of the standard <bsd.*.mk> files which are
+# used by makefiles intended to build some actual target.  Normally this happens
+# very early on, just before <bsd.own.mk> is included, and it is done by
+# sub-directory makes.  For most implementations certain system variables must
+# be defined before <bsd.own.mk> is included, and so they can be defined here.
+# See below though for why this also includes <bsd.own.mk> itself
+# half-way-through.  As such we depend on the standard <bsd.*.mk> files
+# protecting themselves from multiple inclusions, and though this was not true
+# on the original CSRG BSD releases it has been done now in all modern releases.
+#
+# Note also that this is only included by default by makefiles using standard
+# <bsd.*.mk> files in an immediate subdirectory -- i.e. it is done as follows:
+#
+#	.include "${.CURDIR}/../Makefile.inc"
+#
+# Thus the top level makefile may need to directly include this file, but it
+# should only do so after it has defined any default target (i.e. the .MAIN
+# target).
+#
+# This also means that in any project with deeper source trees it may be
+# necessary to create a "Makefile.inc" in intermediate sub-directories in order
+# for this file to be shared to the deeper sub-directories.  The intermediate
+# "Makefile.inc" files should have the following content:
+#
+#	# -*- makefile-bsdmake -*-
+#	#
+#	# N.B.:  ${.CURDIR} here is not needed -- it's already implied because of the
+#	# include done by <bsd.prog.mk> in the subdir's Makefile
+#	.include "../Makefile.inc"
+
+
 PACKAGE =	yajl
 
+# The API says: "#include <yajl/yajl.h>"
+#
 INCSUBDIR =	/yajl
 
-YAJL_MAJOR =	2
-YAJL_MINOR =	1
-YAJL_MICRO =	0
+LIB_MAJOR =	2
+LIB_MINOR =	1
+LIB_MICRO =	0
 
-YAJL_VERSION =	${YAJL_MAJOR}.${YAJL_MINOR}.${YAJL_MICRO}
+LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
+
+#####################
+#
+# The rest is default boilerplate common to most projects....
+#
 
 # For testing and debugging -- at least on sane systems, or with 'bmake'
 #
@@ -68,15 +136,13 @@ WARNS = 0
 #
 # see src/Makefile for where LIB is set
 #
-# So instead we refer to $PACKAGE, assuming it has the same name...
+# So instead we refer to ${PACKAGE}, assuming it has the same name...
 #
-.if !defined(LIB)
-#
-# Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
+# XXX Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
-# XXX ??? just use this: . if defined(MAKEOBJDIRPREFIX)
-. if exists(${.OBJDIR}/${bmake_topdir}/src)
+.if !defined(LIB)
+. if defined(MAKEOBJDIRPREFIX)
 # .OBJDIR is from MAKEOBJDIRPREFIX
 LDADD += -L${.OBJDIR}/${bmake_topdir}/src
 DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE}.a
@@ -89,6 +155,15 @@ DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE}.a
 LDADD += -l${PACKAGE}_s
 #
 .endif	# !defined(LIB)
+
+.if defined(MAKEOBJDIRPREFIX)
+# .OBJDIR is from MAKEOBJDIRPREFIX
+GENHDIR = ${.OBJDIR}/${bmake_topdir}/src
+.else
+# assume .OBJDIR is a local directory, so look in the parent
+# XXX this probably breaks for ${MAKEOBJDIR}
+GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
+.endif
 
 # N.B.:  Cxref requires two passes of each file, the first to build up the cross
 #        referencing files and the second to use them.  Headers have to be done
@@ -189,35 +264,22 @@ LIBCRTEND =		# empty
 SHLIB_LDSTARTFILE =	# empty
 SHLIB_LDENDFILE =	# empty
 
-# Finally some common settings
+# Because we don't do "make includes" in this project, we need to allow other
+# program products to be built with reference to the original source header
+# files.
 #
-# N.B.:  all sub-directory Makefiles must set ${bmake_topdir} to be a relative
-# path to the top of the source tree.  This would not be necessary if/when all
-# supported BSDMake versions have the ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL}
-# was first found in NetBSD-current after 2009/09/08 but it is not found in any
-# release until 6.0.  Unfortunately there is no easy way to know definitively
-# what version of BSDMake is being used.  Simon Gerraty's bmake has
-# MAKE_VERSION, as does FreeBSD's make though they are entirely and totally
-# different and unrelated.  In NetBSD MAKE_VERSION was only briefly present
-# since it represented the build date, not the release date, and it was removed
-# in order to make it possible to do reproducible builds.
-#
-bmake_srcdir =	${.CURDIR}/${bmake_topdir}/src
-
-# This .if is annoying, but some older systems don't support CPPFLAGS.
+# The .if here is annoying, but some older systems don't support CPPFLAGS.
 #
 .if defined(CPPFLAGS)
-CPPFLAGS +=	-I${bmake_srcdir}
+CPPFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src
 .else
-CFLAGS +=	-I${bmake_srcdir}
+CFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src
 .endif
 
 # XXX N.B.:  we cannot include <bsd.own.mk> before the default "all" target!!!
-# xxx this doesn't actually set SUBDIR_TARGETS for FreeBSD anyway...
 #
 .include <bsd.own.mk>
 
-# GAK!  So many differences in implementations!
 .if !empty(TARGETS)
 . if empty(TARGETS:Mdocs)
 TARGETS +=	docs
@@ -231,17 +293,19 @@ TARGETS +=	tags
 . if empty(TARGETS:MTAGS)
 TARGETS +=	TAGS
 . endif
+. if empty(TARGETS:Mshowenv)
+TARGETS +=	showenv
+. endif
 .else
-# For FreeBSD SUBDIR_TARGETS is first appended to in <bsd.subdir.mk>, but cannot
-# be appended to afterwards (though could be appended to in something included
-# by <bsd.init.mk>, such as "local.init.mk", "../Makefile.inc", or
-# "/etc/make.conf", but since local.init.mk isn't portable then none of these
-# are useful to us here, and so we cannot check to see if it includes a value
-# already or not.
+# In FreeBSD the list of SUBDIR_TARGETS cannot be appended to after including
+# <bsd.subdir.mk>, but most of the interesting targets, such as some of these
+# below, are not added to the default value of SUBDIR_TARGETS until it is
+# included, so it's pointless to check here if they're already in the list.
 SUBDIR_TARGETS +=	docs
 SUBDIR_TARGETS +=	regress
 SUBDIR_TARGETS +=	tags
 SUBDIR_TARGETS +=	TAGS
+SUBDIR_TARGETS +=	showenv
 .endif
 
 # Most implementations do not make 'regress' depend on first building everything
@@ -254,7 +318,62 @@ SUBDIR_TARGETS +=	TAGS
 #
 regress: all .WAIT
 
-# see Makefile.compiler for default targets for the rest of the TARGETS above
+#
+# some default targets for the extra ones added to TARGETS above
+#
+# N.B.:  the attempt to use !target() may fail if including <bsd.own.mk> has not
+# defined the proper default targets (i.e. if they are defined somewhere later
+# after this file is already parsed), but for these this will not likely matter.
+
+.if !target(tags)
+tags: ${SRCS}
+.if defined(SRCS)
+	-cd ${.CURDIR} && ${TOOL_CTAGS:Uctags} -f /dev/stdout ${.ALLSRC:N*.h} | \
+	    ${TOOL_SED} "s;\${.CURDIR}/;;" > ${.TARGET}
+.endif
+.endif
+
+.if !target(TAGS)
+TAGS: ${SRCS}
+.if defined(SRCS)
+	-cd ${.CURDIR} && ${TOOL_ETAGS:Uetags} -I -l c -o ${.TARGET} ${.ALLSRC:N*.h}
+.endif
+.endif
+
+.if !target(docs)
+docs:
+.endif
+
+# finally we include Makefile.compiler
+#
+.include "Makefile.compiler"
+
+# Makefile debugging support
+#
+showenv: .PHONY
+	@echo ""
+	@echo "${.OBJDIR}/${bmake_topdir}/src"
+.if exists(${.OBJDIR}/${bmake_topdir}/src)
+	@echo "the directory shown above exists!"
+.endif
+	@echo "../${bmake_topdir}/src/${.OBJDIR:T}"
+	@echo ""
+	@echo "Vars:"
+	@echo ".CURDIR = ${.CURDIR:Q}"
+	@echo ".OBJDIR = ${.OBJDIR:Q}"
+	@echo ".OBJDIR:T = ${.OBJDIR:T:Q}"
+	@echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"
+	@echo "GENHDIR = ${GENHDIR:Q}"
+	@echo "DEBUGDIR = ${DEBUGDIR:Q}"
+	@echo "LINTLIBDIR = ${LINTLIBDIR:Q}"
+	@echo "MAKECONF = ${MAKECONF:Q}"
+	@echo "MKDEBUG = ${MKDEBUG:Q}"
+	@echo "MKDEBUGLIB = ${MKDEBUGLIB:Q}"
+	@echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"
+	@echo "MKLINT = ${MKLINT:Q}"
+	@echo ""
+#	@echo "Environment:"
+#	env | sort
 
 #
 # Local Variables:

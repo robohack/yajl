@@ -2,8 +2,6 @@
 
 bmake_topdir = ../..
 
-.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
-
 PROG = 	gen-extra-close
 
 MAN =	# empty
@@ -21,10 +19,8 @@ regress:
 	@echo Not running: ${.OBJDIR}/${PROG}, because it is broken.
 
 .include <bsd.prog.mk>
-.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
 
-#
-# MAKEOBJDIRPREFIX=$(pwd -P)/../../build/ make regress
+# note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../../build make
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)

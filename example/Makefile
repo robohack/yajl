@@ -2,8 +2,6 @@
 
 bmake_topdir = ..
 
-.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
-
 PROG = 	parse_config
 
 MAN =	# empty
@@ -20,10 +18,8 @@ regress:
 .endif
 
 .include <bsd.prog.mk>
-.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
 
-#
-# MAKEOBJDIRPREFIX=$(pwd -P)/../build/ make regress
+# note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)

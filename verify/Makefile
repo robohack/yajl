@@ -2,15 +2,13 @@
 
 bmake_topdir = ..
 
-.include "${.CURDIR}/${bmake_topdir}/Makefile.inc"
-
 PROG = 	json_verify
 
 MAN =	# empty
 
 .include <bsd.prog.mk>
-.include "${.CURDIR}/${bmake_topdir}/Makefile.compiler"
 
+# note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
