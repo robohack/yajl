@@ -96,23 +96,23 @@
 # More about $MAKEOBJDIRPREFIX:
 #
 # Using $MAKEOBJDIRPREFIX requires always invoking the build again with
-# $MAKEOBJDIRPREFIX set in the environment, and set to the same value if you
+# $MAKEOBJDIRPREFIX set in the environment, and set to the same directory if you
 # want to rebuild or continue a build.
 #
 # If you want to run make in just a sub-directory of the source tree AFTER
 # you've done an initial build (or at least after you've done an initial run of
-# "make obj") then you can do so provided you always carefully set
-# $MAKEOBJDIRPREFIX to the the fully qualified pathname of the initial build
-# directory you've initially created.  Remember make tried to change to
-# ${MAKEOBJDIRPREFIX}${.CURDIR} to run, so you always use the exact same
-# $MAKEOBJDIRPREFIX no matter where you are in the hierarchy.  (Yes, this is
-# unfortunately painful to do from within emacs as you cannot use a relative
-# path back to the top to specify $MAKEOBJDIRPREFIX, so you can't set it easily
-# from local variables -- and if you set it with `setenv' then you will risk
-# having the wrong value for different projects.)
+# "make obj") then you can do so provided you carefully set $MAKEOBJDIRPREFIX to
+# the the pathname of the initial build directory you've initially created.
+#
+# Remember make tries to change to ${MAKEOBJDIRPREFIX}${.CURDIR} to run, so if
+# you use a fully qualified pathname then you can use the exact same
+# $MAKEOBJDIRPREFIX no matter where you are in the project hierarchy.  If the
+# build directory is also a sub-directory of the project's source hierarchy then
+# you can also use a relative path to it from within a sub-directory.
 #
 # If you mess things up and end up with generated files in your source directory
 # then run "make cleandir" to start over.
+#
 #
 # How to do without $MAKEOBJDIRPREFIX:
 #
@@ -196,14 +196,14 @@ all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 ${targ}: .PHONY ${targ:S/bmake-do-//}
 .endfor
 
-# XXX this is just a very crude check...
+# XXX this is just a very crude check...  not as complete as the FreeBSD check
 #
 bmake-test-obj: .PHONY
 	@if [ $$(pwd -P) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIRPREFIX:Q}" -a ! -d "${MAKEOBJDIRPREFIX:Q}" ]; then echo "You must create ${MAKEOBJDIRPREFIX}!"; false; fi
 
 # n.b.:  Makefile.inc includes <bsd.own.mk>, which defines a default "all"
 # target (amongst others), so it must come after all the above, but since it
-# also defines additionals values for variables used as .for lists it must come
+# also defines additional values for variables used as .for lists it must come
 # before <bsd.subdir.mk> and before anything else that uses values it sets in
 # .for lists, e.g. the directories for bmake_install_dirs just below.
 #

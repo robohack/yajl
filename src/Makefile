@@ -140,8 +140,8 @@ _bmake_static_lib_install_symlink: .PHONY
 # directory, thus why we build yajl/yajl_version.h above.
 #
 # Ideally we would move yajl to ../include and force the "includes" target to be
-# run for "beforedepend", installing all headers into a "yajl" sub-directory of
-# the build directory.
+# run for "beforedepend", installing all headers into a "include/yajl"
+# sub-directory of ${.OBJDIR}.
 #
 SUBDIR += yajl
 

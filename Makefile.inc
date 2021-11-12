@@ -112,8 +112,9 @@ LDADD += -l${PACKAGE}_s
 #
 CXREF ?= cxref
 
+#####################
 #
-# NOTICE:  Nothing below here _should_ be project dependent
+# NOTICE:  Nothing at all below here should be project dependent
 #
 
 # yes, always -- we use this because it's safer when using a shared network

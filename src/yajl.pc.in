@@ -1,7 +1,7 @@
 #
 # 	yajl.pc: for pkgconf, or the older pkg-config (if you really must)
 #
-# If "prefix" is not set at build time it can be set at install time....
+# if "prefix" is not set at build time it can be set at install time
 #
 prefix=@PREFIX@
 # n.b. Not using LIBDIR, in case prefix is changed at install
