@@ -306,7 +306,7 @@ doc/html/yajl.apdx.html: doc/html yajl.cxref
 		${CXREF} -warn-all -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -CC -x c' $${file}; \
 	done; \
 	${CXREF} -index-all -O${.OBJDIR}/doc/html -N${PACKAGE} -html
-	ln -fs ${.OBJDIR}/doc/html/yajl.cxref.html ${.OBJDIR}/doc/html/index.html
+	ln -fs yajl.cxref.html ${.OBJDIR}/doc/html/index.html
 
 .endif
 
