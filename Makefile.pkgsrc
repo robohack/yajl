@@ -24,36 +24,39 @@ LICENSE=	modified-bsd
 
 BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 
-# XXX cwrappers is currently still buggy as it elides the necessary
-# "-I${.CURDIR}/../src" which must be added by the package's "Makefile.inc"
+# N.B.:  It may be necessary to turn off use of CWrappers in some local
+# configurations of pkgsrc.
 #
-# Presumably this happens because ${.CURDIR} does not appear by straight string
-# comparison to be within ${WRKOBJDIR} when there's a symlink involved:
+# This is because ${.CURDIR} will not appear, by straight string comparison, to
+# be within ${WRKOBJDIR} when there's a symlink involved in the path pointed to
+# by ${WRKOBJDIR}, e.g. with the following line in /etc/mk.conf:
 #
-# WRKOBJDIR?=	/var/package-obj/${USER}
+#	WRKOBJDIR?=	/var/package-obj/${USER}
+#
 # $ ls -l /var/package-obj/
 # lrwxr-xr-x  1 root  wheel  18 Jun 30  2020 /var/package-obj/ -> /build/package-obj
 #
-# So in this package's Makefile.inc we have, more or less:
-# CPPFLAGS+=  -I${.OBJDIR}/${bmake_topdir}/src
-# becomes:
-# CPPFLAGS+=  -I/var/package-obj/woods/devel/yajl/work/build/pkgbuild/package-obj/woods/devel/yajl/work/yajl-2.1.0/src/../src
+# this is because when MAKEOBJDIRPREFIX is set then make(1) gets the canonical
+# pathname for ${.CURDIR} using getcwd(3), but everthing else, including
+# cwrappers, thinks it's in the path starting with the symlink.
 #
-# And in this package's src/Makefile we have:
-# CPPFLAGS+= -I${.CURDIR}/${bmake_topdir}/src
-# becomes:
-# CPPFLAGS+= -I/build/package-obj/woods/devel/yajl/work/yajl-2.1.0/src/../src
+# This can be fixed in pkgsrc by adding the canonical path to ${WRKOBJDIR} (or
+# actually ${WRKDIR}) to the list of "protected directories" for CWrappers
+# parameter transformations.
 #
-# The latter, i.e. from CPPFLAGS, gets stripped by cwrappers.
+# This is done in "pkgsrc/mk/buildlink3/bsd.buildlink3.mk" with the addition of
+# the following two lines at about the same place where ${WRKDIR} is also added
+# to the list:
 #
-# In part this is because when MAKEOBJDIRPREFIX is set then make gets the
-# canonical pathname for ${.CURDIR} using getcwd(3), but everthing else,
-# including cwrappers, thinks it's in the path starting with the symlink.
+#	_CANONICAL_WRKDIR!=	cd ${WRKDIR} && ${PWD_CMD}
+#	_BLNK_PROTECT_DIRS+=	${_CANONICAL_WRKDIR}
 #
-USE_CWRAPPERS=	no
+# Otherwise if you have a problem then until the pkgsrc is fixed as above you
+# can ucomment the following line:
+#
+#USE_CWRAPPERS=		no
 
-USE_LANGUAGES=	c
-
+USE_LANGUAGES=		c
 USE_BSD_MAKEFILE=	yes
 BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild
 BUILD_MAKE_FLAGS=	MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
