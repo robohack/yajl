@@ -60,8 +60,8 @@ USE_LANGUAGES=		c
 USE_BSD_MAKEFILE=	yes
 BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild
 BUILD_MAKE_FLAGS=	MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
-TEST_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
-INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS}
+TEST_MAKE_FLAGS=	${BUILD_MAKE_FLAGS} # pkglint complains here, but it's not ":="!!!
+INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS} # pkglint complains here, but it's not ":="!!!
 INSTALL_TARGET=		includes install
 
 # xxx this use of ${VAR:!cmd!} is quite ugly to have to do, but because it is
@@ -72,11 +72,16 @@ INSTALL_TARGET=		includes install
 # XXX Normally ${WRKSRC} would be a canonical pathname, but it may not be if
 # ${WRKOBJDIR} is set, but not to a canonical path.
 #
-CANONICAL_WRKSRC=		${:!cd ${WRKSRC} && ${PWD_CMD}!}
+# XXX the appearance of the first word "WRKSRC" in the value below is actually
+# unnecessary for make(1), but the makefile parser in pkglint cannot handle it
+# being missing!  In other news the new pkglint(1) is both kinda stupid and
+# overly pedantic.
+#
+CANONICAL_WRKSRC=		${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
 PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/yajl.pc
 PKGCONFIG_OVERRIDE_STAGE=	post-build
 
-AUTO_MKDIRS=	yes
+AUTO_MKDIRS=		yes
 
 # totally automatic PLIST generation -- probably preferable?
 #
@@ -88,33 +93,33 @@ GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
 
 .include "../../mk/bsd.prefs.mk"
 
-PLIST_SUBST+=	PREFIX=${PREFIX:Q}
+PLIST_SUBST+=		PREFIX=${PREFIX}
 
 # N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
 # xxx they are also not needed if pkgsrc is properly patched to do this itself!
 
-PLIST_VARS+=	mkdebug
+PLIST_VARS+=		mkdebug
 .if ${MKDEBUG:Uno} != "no" && !defined(NODEBUG)
-PLIST.mkdebug=	yes
-INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/bin
-INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/libexec
-INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/sbin
+PLIST.mkdebug=		yes
+INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/bin
+INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/libexec
+INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/sbin
 .endif
 
-PLIST_VARS+=	mkdebuglib
+PLIST_VARS+=		mkdebuglib
 .if ${MKDEBUGLIB:Uno} != "no"
 PLIST.mkdebuglib=	yes
-INSTALLATION_DIRS+=	libdata/debug/${LOCALBASE}/lib
+INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/lib
 .endif
 
-PLIST_VARS+=	mklint
+PLIST_VARS+=		mklint
 .if ${MKLINT:Uno} != "no"
-PLIST.mklint=	yes
+PLIST.mklint=		yes
 .endif
 
-PLIST_VARS+=	mkpic
+PLIST_VARS+=		mkpic
 .if ${MKPIC:Uno} != "no"
-PLIST.mkpic=	yes
+PLIST.mkpic=		yes
 .endif
 
 do-extract:
