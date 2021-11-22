@@ -11,15 +11,15 @@ lib/libyajl_s.a
 lib/libyajl.so
 lib/libyajl.so.2
 lib/libyajl.so.${PKGVERSION}
+lib/pkgconfig/yajl.pc
 ${PLIST.mkdebuglib}lib/libyajl_g.a
 ${PLIST.mkdebuglib}lib/libyajl_p.a
 ${PLIST.mklint}libdata/lint/llib-lyajl.ln
 ${PLIST.mkpic}lib/libyajl_pic.a
-lib/pkgconfig/yajl.pc
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_reformat.debug
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_verify.debug
 ${PLIST.mkdebug}libdata/debug${PREFIX}/lib/libyajl.so.${PKGVERSION}.debug
-share/doc/yajl/README
 share/doc/yajl/COPYING
 share/doc/yajl/ChangeLog
+share/doc/yajl/README
 share/doc/yajl/TODO
