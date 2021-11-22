@@ -2,6 +2,8 @@
      * @robohack - convert build system to BSD Make
      * @robohack - fix rounding of double values
 
+     N.B.:  ChangeLog is no longer maintained!
+
 2.1.0
      * @nonodename, @patperry - fixed some compiler warnings
      * @yep, @emaste - documentation improvements
