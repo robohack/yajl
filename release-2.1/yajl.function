@@ -1,0 +1,93 @@
+example/parse_config.c main 2 fprintf fread printf strlen yajl_tree_free yajl_tree_get yajl_tree_parse
+reformatter/json_reformat.c $ 0 %&reformat_boolean %&reformat_end_array %&reformat_end_map %&reformat_map_key %&reformat_null %&reformat_number %&reformat_start_array %&reformat_start_map %&reformat_string
+reformatter/json_reformat.c main 2 fprintf fread fwrite strlen %usage yajl_alloc yajl_complete_parse yajl_config yajl_free yajl_free_error yajl_gen_alloc yajl_gen_clear yajl_gen_config yajl_gen_free yajl_gen_get_buf yajl_get_error yajl_parse
+reformatter/json_reformat.c reformat_boolean 1 yajl_gen_bool yajl_gen_reset
+reformatter/json_reformat.c reformat_end_array 1 yajl_gen_array_close yajl_gen_reset
+reformatter/json_reformat.c reformat_end_map 1 yajl_gen_map_close yajl_gen_reset
+reformatter/json_reformat.c reformat_map_key 1 yajl_gen_reset yajl_gen_string
+reformatter/json_reformat.c reformat_null 1 yajl_gen_null yajl_gen_reset
+reformatter/json_reformat.c reformat_number 1 yajl_gen_number yajl_gen_reset
+reformatter/json_reformat.c reformat_start_array 1 yajl_gen_array_open yajl_gen_reset
+reformatter/json_reformat.c reformat_start_map 1 yajl_gen_map_open yajl_gen_reset
+reformatter/json_reformat.c reformat_string 1 yajl_gen_reset yajl_gen_string
+reformatter/json_reformat.c usage 1 exit fprintf
+src/yajl_version.c yajl_version 2
+src/yajl_tree.c array_add_value 1 __assert13 realloc snprintf
+src/yajl_tree.c context_add_value 1 __assert13 %array_add_value free %object_add_keyval snprintf
+src/yajl_tree.c context_pop 1 free snprintf
+src/yajl_tree.c context_push 1 __assert13 malloc memset snprintf
+src/yajl_tree.c handle_boolean 1 %context_add_value snprintf %value_alloc
+src/yajl_tree.c handle_end_array 1 %context_add_value %context_pop
+src/yajl_tree.c handle_end_map 1 %context_add_value %context_pop
+src/yajl_tree.c handle_null 1 %context_add_value snprintf %value_alloc
+src/yajl_tree.c handle_number 1 __errno %context_add_value free malloc memcpy snprintf strlen strtod %value_alloc yajl_parse_integer
+src/yajl_tree.c handle_start_array 1 %context_push snprintf %value_alloc
+src/yajl_tree.c handle_start_map 1 %context_push snprintf %value_alloc
+src/yajl_tree.c handle_string 1 %context_add_value free malloc memcpy snprintf %value_alloc
+src/yajl_tree.c object_add_keyval 1 __assert13 realloc snprintf
+src/yajl_tree.c value_alloc 1 malloc memset
+src/yajl_tree.c yajl_array_free 1 free %yajl_tree_free
+src/yajl_tree.c yajl_object_free 1 free %yajl_tree_free
+src/yajl_tree.c yajl_tree_free 2 free %yajl_array_free %yajl_object_free
+src/yajl_tree.c yajl_tree_get 2 strcmp
+src/yajl_tree.c yajl_tree_parse 2 %context_pop memset snprintf strlen yajl_alloc yajl_complete_parse yajl_config yajl_free yajl_get_error yajl_parse %yajl_tree_free %&handle_boolean %&handle_end_array %&handle_end_map %&handle_null %&handle_number %&handle_start_array %&handle_start_map %&handle_string
+src/yajl_parser.c yajl_do_finish 2 __assert13 %yajl_do_parse
+src/yajl_parser.c yajl_do_parse 2 __assert13 __builtin_huge_val __errno abort strtod yajl_buf_append yajl_buf_clear yajl_buf_data yajl_buf_len yajl_lex_lex %yajl_parse_integer yajl_string_decode
+src/yajl_parser.c yajl_parse_integer 2 __errno
+src/yajl_parser.c yajl_render_error_string 2 __assert13 strcat strlen yajl_lex_error_to_string yajl_lex_get_error
+src/yajl_lex.c yajl_lex_alloc 2 memset yajl_buf_alloc
+src/yajl_lex.c yajl_lex_comment 1 yajl_buf_data yajl_buf_len
+src/yajl_lex.c yajl_lex_current_char 2
+src/yajl_lex.c yajl_lex_current_line 2
+src/yajl_lex.c yajl_lex_error_to_string 2
+src/yajl_lex.c yajl_lex_free 2 yajl_buf_free
+src/yajl_lex.c yajl_lex_get_error 2
+src/yajl_lex.c yajl_lex_lex 2 __assert13 yajl_buf_append yajl_buf_clear yajl_buf_data yajl_buf_len %yajl_lex_comment %yajl_lex_number %yajl_lex_string
+src/yajl_lex.c yajl_lex_number 1 yajl_buf_data yajl_buf_len
+src/yajl_lex.c yajl_lex_peek 2 yajl_buf_len yajl_buf_truncate %yajl_lex_lex
+src/yajl_lex.c yajl_lex_string 1 yajl_buf_data yajl_buf_len %yajl_lex_utf8_char %yajl_string_scan
+src/yajl_lex.c yajl_lex_utf8_char 1 yajl_buf_data yajl_buf_len
+src/yajl_lex.c yajl_string_scan 1
+src/yajl_gen.c yajl_gen_alloc 2 memset yajl_buf_alloc yajl_set_default_alloc_funcs &yajl_buf_append
+src/yajl_gen.c yajl_gen_array_close 2 strlen
+src/yajl_gen.c yajl_gen_array_open 2 strlen
+src/yajl_gen.c yajl_gen_bool 2 strlen
+src/yajl_gen.c yajl_gen_clear 2 yajl_buf_clear &yajl_buf_append
+src/yajl_gen.c yajl_gen_config 2 __builtin_va_arg __builtin_va_end __builtin_va_start yajl_buf_free
+src/yajl_gen.c yajl_gen_double 2 __isinfd __isinff __isinfl __isnand __isnanf __isnanl sprintf strcat strlen strspn
+src/yajl_gen.c yajl_gen_free 2 yajl_buf_free &yajl_buf_append
+src/yajl_gen.c yajl_gen_get_buf 2 yajl_buf_data yajl_buf_len &yajl_buf_append
+src/yajl_gen.c yajl_gen_integer 2 sprintf strlen
+src/yajl_gen.c yajl_gen_map_close 2 strlen
+src/yajl_gen.c yajl_gen_map_open 2 strlen
+src/yajl_gen.c yajl_gen_null 2 strlen
+src/yajl_gen.c yajl_gen_number 2 strlen
+src/yajl_gen.c yajl_gen_reset 2 memset strlen
+src/yajl_gen.c yajl_gen_string 2 strlen yajl_string_encode yajl_string_validate_utf8
+src/yajl_encode.c CharToHex 1
+src/yajl_encode.c Utf32toUtf8 1
+src/yajl_encode.c hexToDigit 1 __assert13
+src/yajl_encode.c yajl_string_decode 2 %Utf32toUtf8 __assert13 %hexToDigit strlen yajl_buf_append
+src/yajl_encode.c yajl_string_encode 2 %CharToHex strlen
+src/yajl_encode.c yajl_string_validate_utf8 2
+src/yajl_buf.c yajl_buf_alloc 2 memset
+src/yajl_buf.c yajl_buf_append 2 __assert13 memcpy %yajl_buf_ensure_available
+src/yajl_buf.c yajl_buf_clear 2
+src/yajl_buf.c yajl_buf_data 2
+src/yajl_buf.c yajl_buf_ensure_available 1 __assert13
+src/yajl_buf.c yajl_buf_free 2 __assert13
+src/yajl_buf.c yajl_buf_len 2
+src/yajl_buf.c yajl_buf_truncate 2 __assert13
+src/yajl_alloc.c yajl_internal_free 1 free
+src/yajl_alloc.c yajl_internal_malloc 1 malloc
+src/yajl_alloc.c yajl_internal_realloc 1 realloc
+src/yajl_alloc.c yajl_set_default_alloc_funcs 2 %&yajl_internal_free %&yajl_internal_malloc %&yajl_internal_realloc
+src/yajl.c yajl_alloc 2 yajl_buf_alloc yajl_set_default_alloc_funcs
+src/yajl.c yajl_complete_parse 2 yajl_do_finish yajl_lex_alloc
+src/yajl.c yajl_config 2 __builtin_va_arg __builtin_va_end __builtin_va_start
+src/yajl.c yajl_free 2 yajl_buf_free yajl_lex_free
+src/yajl.c yajl_free_error 2
+src/yajl.c yajl_get_bytes_consumed 2
+src/yajl.c yajl_get_error 2 yajl_render_error_string
+src/yajl.c yajl_parse 2 yajl_do_parse yajl_lex_alloc
+src/yajl.c yajl_status_to_string 2

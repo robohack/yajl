@@ -1,0 +1,22 @@
+example/parse_config.c /usr/include/stdio.h /usr/include/string.h %src/yajl/yajl_tree.h
+reformatter/json_reformat.c %src/yajl/yajl_parse.h %src/yajl/yajl_gen.h /usr/include/stdio.h /usr/include/stdlib.h /usr/include/string.h
+src/yajl_version.c %build/work/woods/f-yajl/src/yajl/yajl_version.h
+src/yajl_tree.c /usr/include/stdint.h /usr/include/stdio.h /usr/include/string.h /usr/include/stdlib.h /usr/include/errno.h /usr/include/assert.h %src/yajl/yajl_tree.h %src/yajl/yajl_parse.h %src/yajl_parser.h
+src/yajl_parser.h %src/yajl/yajl_parse.h %src/yajl_bytestack.h %src/yajl_buf.h %src/yajl_lex.h
+src/yajl_parser.c %src/yajl/yajl_parse.h %src/yajl_lex.h %src/yajl_parser.h %src/yajl_encode.h %src/yajl_bytestack.h /usr/include/stdlib.h /usr/include/limits.h /usr/include/errno.h /usr/include/stdio.h /usr/include/string.h /usr/include/ctype.h /usr/include/assert.h /usr/include/math.h
+src/yajl_lex.h %src/yajl/yajl_common.h
+src/yajl_lex.c %src/yajl_lex.h %src/yajl_buf.h /usr/include/stdlib.h /usr/include/stdio.h /usr/include/assert.h /usr/include/string.h
+src/yajl_gen.c %src/yajl/yajl_gen.h %src/yajl_buf.h %src/yajl_encode.h /usr/include/stdlib.h /usr/include/string.h /usr/include/stdio.h /usr/include/math.h /usr/include/stdarg.h
+src/yajl_encode.h %src/yajl_buf.h %src/yajl/yajl_gen.h
+src/yajl_encode.c %src/yajl_encode.h /usr/include/assert.h /usr/include/stdlib.h /usr/include/string.h /usr/include/stdio.h
+src/yajl_bytestack.h %src/yajl/yajl_common.h
+src/yajl_buf.h %src/yajl/yajl_common.h %src/yajl_alloc.h
+src/yajl_buf.c %src/yajl_buf.h /usr/include/assert.h /usr/include/stdlib.h /usr/include/string.h
+src/yajl_alloc.h %src/yajl/yajl_common.h
+src/yajl_alloc.c %src/yajl_alloc.h /usr/include/stdlib.h
+src/yajl.c %src/yajl/yajl_parse.h %src/yajl_lex.h %src/yajl_parser.h %src/yajl_alloc.h /usr/include/stdlib.h /usr/include/string.h /usr/include/stdarg.h /usr/include/assert.h
+src/yajl/yajl_tree.h %src/yajl/yajl_common.h
+src/yajl/yajl_parse.h %src/yajl/yajl_common.h /usr/include/stddef.h
+src/yajl/yajl_gen.h %src/yajl/yajl_common.h /usr/include/stddef.h
+src/yajl/yajl_common.h /usr/include/stddef.h
+yajl.cxref

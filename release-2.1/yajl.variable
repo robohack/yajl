@@ -1,0 +1,4 @@
+example/parse_config.c fileData 1 main
+reformatter/json_reformat.c s_streamReformat 1 main %reformat_boolean %reformat_end_array %reformat_end_map %reformat_map_key %reformat_null %reformat_number %reformat_start_array %reformat_start_map %reformat_string
+reformatter/json_reformat.c callbacks 1 main
+src/yajl_lex.c charLookupTable 1 %yajl_lex_string %yajl_string_scan
