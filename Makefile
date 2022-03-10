@@ -18,7 +18,7 @@
 #	mkdir build
 #	export MAKEOBJDIRPREFIX=$(pwd -P)/build
 #	export WITH_AUTO_OBJ=yes		# just for FreeBSD, sigh.
-#	bsdmake					# or just "make" where possible!
+#	b(sd)make				# or just "make" where possible!
 #
 # (I.e. use "make" on non-GNU systems where it is Bmake; or use "bmake" or
 # "bsdmake" as needed on other systems.)
