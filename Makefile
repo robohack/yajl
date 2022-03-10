@@ -23,6 +23,12 @@
 # (I.e. use "make" on non-GNU systems where it is Bmake; or use "bmake" or
 # "bsdmake" as needed on other systems.)
 #
+# Optionally you may change the intermediate install heriarchy from the default
+# of "/usr" to any path prefix of your choice by setting PREFIX on the bmake
+# command lines, like this:
+#
+#	bmake PREFIX=/opt/pkg
+#
 # Then if the build succeeds (and assuming you're not cross-compiling) you can
 # run the regression tests to see if the results are correct.
 #
@@ -34,10 +40,20 @@
 #
 #	bsdmake DESTDIR=$(pwd -P)/dist install
 #
-# DESTDIR can of course be any directory, e.g. /usr/local.
+# DESTDIR can of course be any directory, e.g. /usr/local, especially if PREFIX
+# is set to an empty string (PREFIX=""), but note the design is such that the
+# package can be installed at build time into a private DESTDIR (as above), then
+# archived and the resulting archive can be extracted at the root of the target
+# system's filesystem.  The default with PREFIX="/usr" will install into the
+# base of a typical unix filesystem, while something like PREFIX="/usr/pkg" will
+# install into a typical package installation direcory, and PREFIX="/usr/local"
+# (with DESTDIR=$(pwd -P)/dist) will be the equivalent of PREFIX="" and
+# DESTDIR="/usr/local", the difference being the latter does an immediate
+# install on the build system, while the former allows the DESTDIR to be
+# archived and then extracted on any suitable target system.
 #
 # (This is not the normal use of DESTDIR in BSD Make, but it is the best way for
-# out-of-tree builds, and it does not get in the way of pkgsrc either.)
+# out-of-tree builds, and it matches the way pkgsrc now works internally.)
 #
 # WARNING:  Do not specify DESTDIR for the main build nor the regress target!
 #
