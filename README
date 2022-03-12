@@ -9,7 +9,7 @@ fixes or enhancements are welcome.
 
 This YAJL is maintained in [robohack's GitHub][GHRY] by Greg A. Woods.
 
-Moto:  Write Portable C without complicating the build!
+Motto:  Write Portable C without complicating the build!
 
 See, e.g.: https://nullprogram.com/blog/2017/03/30/
 
@@ -83,5 +83,5 @@ enjoy,
 Lloyd - July, 2007
 
 
-[GRHY]: https://github.com/robohack/yajl/
+[GHRY]: https://github.com/robohack/yajl/
 [LLOYD]: https://github.com/lloyd/yajl/
