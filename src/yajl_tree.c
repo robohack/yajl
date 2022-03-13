@@ -464,10 +464,10 @@ yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
     yajl_handle handle;
     yajl_status status;
     char * internal_err_str;
-	context_t ctx = { NULL, NULL, NULL, 0 };
+    context_t ctx = { NULL, NULL, NULL, 0 };
 
-	ctx.errbuf = error_buffer;
-	ctx.errbuf_size = error_buffer_size;
+    ctx.errbuf = error_buffer;
+    ctx.errbuf_size = error_buffer_size;
 
     if (error_buffer != NULL)
         memset (error_buffer, 0, error_buffer_size);
