@@ -51,11 +51,21 @@ struct yajl_gen_t
     yajl_alloc_funcs alloc;
 };
 
-/*+
- *  allow the modification of generator options subsequent to handle
- *  allocation (via yajl_alloc)
+/*+ configure a yajl generator
  *
- *  \returns zero in case of errors, non-zero otherwise
+ * int yajl_gen_config
+ * Returns zero in case of errors, non-zero otherwise
+ *
+ * yajl_gen g
+ * handle for a generator object (from yajl_alloc())
+ *
+ * yajl_gen_option opt
+ * A generator option (see enum yajl_gen_option)
+ *
+ * ...
+ * a possible parameter for opt
+ *
+ * Allows the caller to modify the options of a yajl generator.
  +*/
 int
 yajl_gen_config(yajl_gen g, yajl_gen_option opt, ...)
@@ -106,15 +116,24 @@ yajl_gen_config(yajl_gen g, yajl_gen_option opt, ...)
 
 /*+ allocate a generator handle
  *
- *  \param allocFuncs an optional pointer to a structure which allows
- *                    the client to overide the memory allocation
- *                    used by yajl.  May be NULL, in which case
- *                    malloc/free/realloc will be used.
+ * yajl_gen yajl_gen_alloc
+ * returns an allocated generator handle on success, NULL on failure (e.g. due
+ * to invalid parameters or an allocation failure).  Must be freed by passing it
+ * to yajl_gen_free().
  *
- *  \returns an allocated handle on success, NULL on failure (bad params)
+ * const yajl_alloc_funcs *afs
+ * an optional pointer to a structure which allows the client to overide the
+ * memory allocation used by this yajl generator.  May be NULL, in which case
+ * the standard malloc(), free(), and realloc() will be used.
+ *
+ * Note:  All yajl generators assume the current locale is "C", and in
+ * particular that LC_NUMERIC is set to "C", as otherwise (e.g. if the current
+ * locale does not use a period ('.') as the "decimal_point" character) the
+ * generated JSON may not be parseable (e.g. if it contains any decimal
+ * numbers).
  +*/
 yajl_gen
-yajl_gen_alloc(const yajl_alloc_funcs * afs)
+yajl_gen_alloc(const yajl_alloc_funcs *afs)
 {
     yajl_gen g = NULL;
     yajl_alloc_funcs afsBuffer;
@@ -144,15 +163,25 @@ yajl_gen_alloc(const yajl_alloc_funcs * afs)
     return g;
 }
 
-/*+
- *  Reset the generator state.  Allows a client to generate multiple json
- *  entities in a stream. The "sep" string will be inserted to separate the
- *  previously generated entity from the current, NULL means *no separation* of
- *  entites (clients beware, generating multiple JSON numbers without a
- *  separator, for instance, will result in ambiguous output)
+/*+ Reset the generator state.
  *
- *  Note: this call will not clear yajl's output buffer.  This may be
- *  accomplished explicitly by calling yajl_gen_clear()
+ * void yajl_gen_reset
+ *
+ * yajl_gen g
+ * A handle to a yajl generator (from yajl_gen_alloc()).
+ *
+ * const char *sep
+ * An optional separator string to be inserted to separate the next entity.
+ *
+ * Allows a caller to generate multiple JSON entities in a single stream.
+ *
+ * The "sep" string will be inserted to separate the previously generated entity
+ * from the next; NULL means "no separation" of entites (callers beware,
+ * generating multiple JSON numbers without a separator, for instance, will
+ * result in ambiguous unparseble output)
+ *
+ * Note:  this call will not clear yajl's output buffer.  This may be
+ * accomplished explicitly by calling yajl_gen_clear().
  +*/
 void
 yajl_gen_reset(yajl_gen g, const char * sep)

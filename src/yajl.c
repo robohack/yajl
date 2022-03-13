@@ -42,22 +42,34 @@ yajl_status_to_string(yajl_status stat)
     return statStr;
 }
 
-/*+
- * allocate a parser handle
+/*+ allocate a parser handle
  *
- *  \param callbacks  a yajl callbacks structure specifying the
- *                    functions to call when different JSON entities
- *                    are encountered in the input text.  May be NULL,
- *                    which is only useful for validation.
+ * yajl_handle yajl_alloc
+ * Returns a handle to a newly allocated "yajl" JSON parser, or NULL on failure.
+ * Must be freed by passing it to yajl_free().
  *
- *  \param afs        memory allocation functions, may be NULL for to use
- *                    C runtime library routines (malloc and friends) 
+ * const yajl_callbacks *callbacks
+ * a yajl callbacks structure specifying the functions to call when different
+ * JSON entities are encountered in the input text.  May be NULL, which is only
+ * useful for validation.
  *
- *  \param ctx        a context pointer that will be passed to callbacks.
+ * yajl_alloc_funcs *afs
+ * memory allocation functions, may be NULL in which case the standard malloc(),
+ * free(), and realloc() will be used.
+ *
+ * void *ctx
+ * a user-specified context pointer that will be passed to the callback
+ * functions.
+ *
+ * Note:  The yajl parser assumes the locale is "C", and in particular that
+ * LC_NUMERIC is set to "C", as otherwise (e.g. if the current locale does not
+ * use a period ('.') as the "decimal_point" character) the parser may not be
+ * able to convert decimal numbers (assuming the host implementation of
+ * strtod(3) does respect the current locale settings for the process).
  +*/
 yajl_handle
 yajl_alloc(const yajl_callbacks * callbacks,
-           yajl_alloc_funcs * afs,
+           yajl_alloc_funcs * afs,      /* xxx should be const! */
            void * ctx)
 {
     yajl_handle hand = NULL;
