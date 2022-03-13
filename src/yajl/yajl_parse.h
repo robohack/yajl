@@ -95,7 +95,7 @@ extern "C" {
     } yajl_callbacks;
 
     YAJL_API yajl_handle yajl_alloc(const yajl_callbacks * callbacks,
-                                    yajl_alloc_funcs * afs,
+                                    const yajl_alloc_funcs * afs,
                                     void * ctx);
 
 

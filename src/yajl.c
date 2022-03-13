@@ -69,7 +69,7 @@ yajl_status_to_string(yajl_status stat)
  +*/
 yajl_handle
 yajl_alloc(const yajl_callbacks * callbacks,
-           yajl_alloc_funcs * afs,      /* xxx should be const! */
+           const yajl_alloc_funcs * afs,
            void * ctx)
 {
     yajl_handle hand = NULL;
