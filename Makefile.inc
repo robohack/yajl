@@ -97,8 +97,27 @@ LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
 #DBG ?= -g
 #OPTIM ?= -O0
 
-NOGCCERROR = 1
-WARNS = 0
+# Contrary to what Makefile.compiler claims, do enable system-specific warnings
+# -- this will likely double up on many of the flags added by Makefile.compiler,
+# but it may also add some target-specific flags that might be useful.
+#
+# Of course this is just for developers -- it could be commented out for users.
+#
+WARNS = 10
+
+# However do not enable -Werror, by default.
+#
+#NOGCCERROR = 1
+
+# Note that with good compiler warnings it is possible to test standards
+# compliance of this code with a build using something like the following:
+#
+# mkdir -p build ; CFLAGS=-std=c89 make MAKEOBJDIRPREFIX=$(pwd -P)/build CXREF=true
+#
+# (note how CFLAGS must be set in the environment, not on the command line, so
+# as to allow it to be appended to by Makefile.compiler and the system mk-files,
+# notably <bsd.sys.mk>)
+
 
 # N.B.:  testing in the build or 'install' (distribution) directories, or making
 # a distribution that can be un-packed on a target system in any arbitrary

@@ -31,7 +31,7 @@ Features
 
 - Stream (incremental) parsing and generation of JSON
 
-- Plain ANSI C
+- Plain Standard ANSI C (C89!)
 
 - Human readable error messages, complete with context
 
