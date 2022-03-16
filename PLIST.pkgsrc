@@ -20,6 +20,5 @@ ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_reformat.debug
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_verify.debug
 ${PLIST.mkdebug}libdata/debug${PREFIX}/lib/libyajl.so.${PKGVERSION}.debug
 share/doc/yajl/COPYING
-share/doc/yajl/ChangeLog
 share/doc/yajl/README
 share/doc/yajl/TODO
