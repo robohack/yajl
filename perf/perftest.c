@@ -21,14 +21,17 @@
 
 #include "documents.h"
 
-/* a platform specific defn' of a function to get a high res time in a
- * portable format */
+/*
+ * a platform specific definition of a function to get a reasonably high
+ * resolution "current" time representation as a simple floating point number in
+ * units of seconds
+ */
 #ifndef WIN32
 #include <sys/time.h>
 static double mygettime(void) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    return (double) now.tv_sec + (now.tv_usec / 1000000.0);
+    return (double) now.tv_sec + ((double) now.tv_usec / 1000000.0);
 }
 #else
 #define _WIN32 1
@@ -44,23 +47,23 @@ static double mygettime(void) {
 }
 #endif
 
-#define PARSE_TIME_SECS 3
+#define PARSE_TIME_SECS 3.0
 
 static int
 run(int validate_utf8)
 {
     long long unsigned times = 0;
     double starttime;
+    double now;
 
     starttime = mygettime();
 
     /* allocate a parser */
     for (;;) {
 		int i;
-        {
-            double now = mygettime();
-            if (now - starttime >= PARSE_TIME_SECS) break;
-        }
+
+        now = mygettime();
+        if (now - starttime >= PARSE_TIME_SECS) break;
 
         for (i = 0; i < 100; i++) {
             yajl_handle hand = yajl_alloc(NULL, NULL, NULL);
@@ -93,24 +96,21 @@ run(int validate_utf8)
     /* parsed doc 'times' times */
     {
         double throughput;
-        double now;
         const char * all_units[] = { "B/s", "KB/s", "MB/s", (char *) 0 };
         const char ** units = all_units;
         unsigned int i;
         size_t avg_doc_size = 0;
 
-        now = mygettime();
-
         for (i = 0; i < num_docs(); i++) avg_doc_size += doc_size(i);
         avg_doc_size /= num_docs();
 
         throughput = (double) (times * avg_doc_size) / (now - starttime);
-        
+
         while (*(units + 1) && throughput > 1024) {
             throughput /= 1024;
             units++;
         }
-        
+
         printf("Parsing speed: %g %s\n", throughput, *units);
     }
 
