@@ -1,6 +1,7 @@
 # -*- makefile-bsdmake -*-
 #
-#	This should be included AFTER <bsd.prog.mk> or <bsd.lib.mk>
+#	This should be included in your project's top-level Makefile.inc after
+#	any include of <bsd.own.mk>
 
 # You can define USE_UBSAN or USE_ASAN on the command line to enable the
 # Undefined or Address sanitizers with recent enough Clang or GCC.  Note if your

@@ -6,6 +6,8 @@
 #
 # (Some settings can be overridden on the command-line or from environment
 # variables though...)
+#
+# Note also that this file does have some unique per-project settings.
 
 # XXX see SJG's SSLrsh release for simple portability hacks via Make
 # e.g. in particular the use of .-include "$Makefile.${MACHINE}.inc" etc.
@@ -21,24 +23,22 @@
 # and/or which may also build header files shared by several sources in
 # different directories in the same project.
 #
-# This would not be necessary if/when all supported BSDMake versions have the
-# ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL} was first found in NetBSD-current
-# after 2009/09/08 but it is not found in any release until 6.0.  Unfortunately
-# there is no easy way to know definitively what version of BSDMake is being
-# used.  Simon Gerraty's bmake has MAKE_VERSION, as does FreeBSD's make though
-# they are entirely and totally different and unrelated.  In NetBSD MAKE_VERSION
-# was only briefly present since it represented the build date, not the release
-# date, and it was removed in order to make it possible to do reproducible
-# builds.  For example this file can be used to define the version number(s) for
-# the project, and thus sources which use these numbers (header file templates,
-# or shared library filenames, etc), can add a dependency on this file as
-# follows:
+# The setting of ${bmake_topdir} would not be necessary if/when all supported
+# BSDMake versions have the ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL} was first
+# found in NetBSD-current after 2009/09/08 but it is not found in any release
+# until 6.0.  Unfortunately there is no easy way to know definitively what
+# version of BSDMake is being used.  Simon Gerraty's bmake has MAKE_VERSION, as
+# does FreeBSD's make though they are entirely and totally different and
+# unrelated.  In NetBSD MAKE_VERSION was only briefly present since it
+# represented the build date, not the release date, and it was removed in order
+# to make it possible to do reproducible builds.
+#
+# For example this file can be used to define the version number(s) for the
+# project, and thus sources which use these numbers (header file templates, or
+# shared library filenames, etc), can add a dependency on this file as follows:
 #
 #	version.h: ${.CURDIR}/version.h.in ${.CURDIR}/${bmake_topdir}/Makefile.inc
 #
-# On the other hand this might make it possible to invoke "make" in a
-# subdirectory when _not_ using MAKEOBJDIRPREFIX.
-
 # This file is included by default from any subdirectory makefile by BSD Make's
 # standard files, or at least via any of the standard <bsd.*.mk> files which are
 # used by makefiles intended to build some actual target.  Normally this happens
@@ -56,7 +56,7 @@
 #	.include "${.CURDIR}/../Makefile.inc"
 #
 # Thus the top level makefile may need to directly include this file, but it
-# should only do so after it has defined any default target (i.e. the .MAIN
+# must only do so after it has defined any default target (i.e. the .MAIN
 # target).
 #
 # This also means that in any project with deeper source trees it may be
@@ -71,6 +71,12 @@
 #	.include "../Makefile.inc"
 
 
+# The common name of the package.
+#
+# For a library package this is either the library's simple name, else it is the
+# library's simple name prefixed by "lib".  Ideally it is the same as the base
+# of PKGNAME in the pkgsrc module.
+#
 PACKAGE =	yajl
 
 # The API says: "#include <yajl/yajl.h>"
@@ -87,6 +93,35 @@ LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
 #
 # The rest is default boilerplate common to most projects....
 #
+# XXX it should probably be in another file, and indeed it should probably be
+# part of the pkgsrc infrastructure, especially if using crufty.net mk-files.
+#
+
+# N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
+# to each of these target directories for actual installation targets.
+#
+# XXX Note that NetBSD's bsd.shlib.mk magic keys off the value of BINDIR (or
+# MKDYNAMICROOT) in order to set the location of SHLIBDIR and SHLINKDIR, which
+# in turn then determine which dynamic linker is set for the generated binaries
+# (when linking non-statically), so don't set PREFIX to an empty value if you
+# don't have /libexec/ld.elf_so and you don't have MKDYNAMICROOT=no set
+# somewhere (e.g. /etc/mk.conf)!
+#
+INSTALL_OPTS =	# for specific ownerships
+# these will be over-ridden by pkgsrc
+PREFIX ?= /usr
+BINDIR ?= ${PREFIX}/bin
+INCSDIR ?= ${PREFIX}/include${INCSUBDIR}
+LIBDIR ?= ${PREFIX}/lib
+DEBUGDIR ?= ${PREFIX}/libdata/debug
+LINTLIBDIR ?= ${PREFIX}/libdata/lint
+SHAREDIR ?= ${PREFIX}/share
+DOCDIR ?= ${SHAREDIR}/doc
+MANDIR ?= ${SHAREDIR}/man
+
+# hmmmm....  This apparently has no precedent in the world of BSD Make.  Base it
+# off of LIBDIR....
+PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # For testing and debugging -- at least on sane systems, or with 'bmake'
 #
@@ -109,15 +144,17 @@ WARNS = 10
 #
 #NOGCCERROR = 1
 
-# Note that with good compiler warnings it is possible to test standards
-# compliance of this code with a build using something like the following:
+# Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly
 #
-# mkdir -p build ; CFLAGS=-std=c89 make MAKEOBJDIRPREFIX=$(pwd -P)/build CXREF=true
-#
-# (note how CFLAGS must be set in the environment, not on the command line, so
-# as to allow it to be appended to by Makefile.compiler and the system mk-files,
-# notably <bsd.sys.mk>)
+CSTD = c89
 
+.if empty(CFLAGS:M*-std=${CSTD}*)
+CFLAGS += -std=${CSTD}
+.endif
+.if !empty(unix:M*NetBSD*)
+# prevent NetBSD's mk-files from adding -std=gnu99 to CFLAGS
+COVERITY_TOP_CONFIG =	1
+.endif
 
 # N.B.:  testing in the build or 'install' (distribution) directories, or making
 # a distribution that can be un-packed on a target system in any arbitrary
@@ -132,9 +169,9 @@ WARNS = 10
 #
 # However, sadly, OS X does not support a command-line way of forcing static
 # linking.  As a result on OS X if you want to test programs without first
-# installing the library in a system directory then it is necessary to set the
-# variable DYLD_LIBRARY_PATH in the environment to include the location of the
-# library to be tested against.
+# installing the library in its final destination directory then it is necessary
+# to set the variable DYLD_LIBRARY_PATH in the environment to include the
+# location of the library to be tested against.
 #
 # So, instead of making testing onerous for OS X we use a common trick of giving
 # the static library a unique name, such as by appending "_s" or similar to it,
@@ -149,31 +186,32 @@ WARNS = 10
 #
 # XXX this is, very unfortunately, somewhat ugly and package dependent!
 #
-# program and test directories need to reference the static library, but we
-# cannot just use the portable form of "-l${LIB}_s" because LIB is not always
-# set and cannot always be set
+# Program and test directories need to reference the static library so that they
+# can be run from their build directory without the library having yet been
+# installed, so we use "-l${PACKAGE:S/^lib//}_s" to do the linking.
 #
 # see src/Makefile for where LIB is set
-#
-# So instead we refer to ${PACKAGE}, assuming it has the same name...
 #
 # XXX Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
+# Note:  In order to avoid problems with parallel builds LDADD and DPADD should
+# not be set in src/Makefile, thus this .if:
+#
 .if !defined(LIB)
 . if defined(MAKEOBJDIRPREFIX)
-# .OBJDIR is from MAKEOBJDIRPREFIX
+# then .OBJDIR is from MAKEOBJDIRPREFIX
 LDADD += -L${.OBJDIR}/${bmake_topdir}/src
-DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE}.a
+DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE:S/^lib//}.a
 . else
 # assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
 # XXX this probably breaks for ${MAKEOBJDIR}
 LDADD += -L../${bmake_topdir}/src/${.OBJDIR:T}
-DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE}.a
+DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE:S/^lib//}.a
 . endif
-LDADD += -l${PACKAGE}_s
+LDADD += -l${PACKAGE:S/^lib//}_s
 #
-.endif	# !defined(LIB)
+.endif # !defined(LIB)
 
 .if defined(MAKEOBJDIRPREFIX)
 # .OBJDIR is from MAKEOBJDIRPREFIX
@@ -210,6 +248,9 @@ CXREF ?= cxref
 #
 # NOTICE:  Nothing at all below here should be project dependent
 #
+# XXX it should probably be in another file, and indeed it should probably be
+# part of the pkgsrc infrastructure, especially if using crufty.net mk-files.
+#
 
 # yes, always -- we use this because it's safer when using a shared network
 # directory for building/testing/etc.  (though it is sometimes somewhat
@@ -222,32 +263,6 @@ OBJMACHINE ?=	yes
 #
 #beforecleandir: cleandir
 #	rmdir ${.OBJDIR}
-
-# N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
-# to each of these target directories.
-#
-# XXX Note that NetBSD's bsd.shlib.mk magic keys off the value of BINDIR (or
-# MKDYNAMICROOT) in order to set the location of SHLIBDIR and SHLINKDIR, which
-# in turn then determine which dynamic linker is set for the generated binaries
-# (when linking non-statically), so don't set PREFIX to an empty value if you
-# don't have /libexec/ld.elf_so and you don't have MKDYNAMICROOT=no set
-# somewhere (e.g. /etc/mk.conf)!
-#
-INSTALL_OPTS =	# for specific ownerships
-# these will be over-ridden by pkgsrc
-PREFIX ?= /usr
-BINDIR ?= ${PREFIX}/bin
-INCSDIR ?= ${PREFIX}/include${INCSUBDIR}
-LIBDIR ?= ${PREFIX}/lib
-DEBUGDIR ?= ${PREFIX}/libdata/debug
-LINTLIBDIR ?= ${PREFIX}/libdata/lint
-SHAREDIR ?= ${PREFIX}/share
-DOCDIR ?= ${SHAREDIR}/doc
-MANDIR ?= ${SHAREDIR}/man
-
-# hmmmm....  This apparently has no precedent in the world of BSD Make.  Base it
-# off of LIBDIR....
-PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # xxx all this otherwise some systems won't allow unprivileged installs
 .if ${USER} != "root"
