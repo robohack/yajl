@@ -23,7 +23,9 @@ FILES +=		yajl.pc
 FILESDIR_yajl.pc =	${PKGCONFIGDIR}
 FILESBUILD_yajl.pc =	yes
 yajl.pc: ${.CURDIR}/yajl.pc.in
-	sed -e 's/@LIB_MAJOR@/${LIB_MAJOR}/' \
+	sed -e 's/@FULLNAME@/${PACKAGE}/' \
+	    -e 's/@LIB@/${LIB}/' \
+	    -e 's/@LIB_MAJOR@/${LIB_MAJOR}/' \
 	    -e 's/@LIB_MINOR@/${LIB_MINOR}/' \
 	    -e 's/@LIB_MICRO@/${LIB_MICRO}/' \
 	    -e 's|@PREFIX@|${PREFIX}|' \

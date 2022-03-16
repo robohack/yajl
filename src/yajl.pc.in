@@ -7,10 +7,11 @@ prefix=@PREFIX@
 # n.b. Not using LIBDIR, in case prefix is changed at install
 libdir=${prefix}/lib
 # n.b.:  INCSDIR is not used here as it includes INCSUBDIR but the API
-# says includes are <yahl/yajl_blah.h>, not <yajl_blah.h>
+# says includes are <yahl/yajl_blah.h>, not <yajl_blah.h> (and it
+# might change at install)
 includedir=${prefix}/include
 
-Name: Yet Another JSON Library
+Name: @FULLNAME@: Yet Another JSON Library
 Description: A small and portable JSON parsing and serialization library written in plain ANSI C
 Version: @LIB_MAJOR@.@LIB_MINOR@.@LIB_MICRO@
 Cflags: -I${includedir}
@@ -18,4 +19,4 @@ Cflags: -I${includedir}
 # on some systems the linker may need either a "-Wl,-R" or a "-rpath"
 # option... (pkgsrc will add it automatically at install time)
 #
-Libs: -L${libdir} -lyajl
+Libs: -L${libdir} -l@LIB@
