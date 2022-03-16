@@ -169,7 +169,7 @@ CWARNFLAGS += -Wformat=2 -Wno-format-y2k
 
 . if(${__GNUC_MINOR__} >= 4)
 # hmmm...  this can sometimes be annoying, but....
-#CWARNFLAGS += -Wtraditional-conversion
+CWARNFLAGS += -Wtraditional-conversion
 . endif
 CWARNFLAGS += -Wunreachable-code
 .endif
