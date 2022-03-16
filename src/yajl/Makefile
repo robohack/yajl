@@ -16,13 +16,13 @@ INCS += ${yajl_INCS}
 INCS +=		yajl_version.h
 CLEANFILES +=	yajl_version.h
 
+.include <bsd.prog.mk>			# bsd.inc.mk is insufficient (no ../Makefile.inc)
+.sinclude <inc.mk>			# hack for crufty.net mk-files
+
 .if target(install)
 # get includes to install at install time
 install:	includes
 .endif
-
-.include <bsd.prog.mk>			# bsd.inc.mk is insufficient (no ../Makefile.inc)
-.sinclude <inc.mk>			# hack for crufty.net mk-files
 
 #
 # Local Variables:

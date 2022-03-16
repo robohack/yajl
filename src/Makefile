@@ -48,7 +48,9 @@ CLEANFILES += yajl.pc
 # N.B.:  The true BSD way to do this would be with a "make includes" step before
 # building and to not only build this file, but to also install all of the other
 # include files as well during that step, and then we could set '-I' to point to
-# the (intermediate) "include" directory, e.g. ${.OBJDIR}/include.
+# the (intermediate) "include" directory, e.g. ${.OBJDIR}/include.  Doing so now
+# though would complicate the trick of getting the includes into their final
+# directory (${INCDIR}) during "make install".
 #
 # (yajl.pc is here too because some versions of pkgsrc bootstrap-mk-files don't
 # build all ${FILES} with the default "all" target)
@@ -142,8 +144,16 @@ _bmake_static_lib_install_symlink: .PHONY
 SUBDIR += yajl
 
 .include <bsd.lib.mk>
-.if !defined(DISTRIBUTION)	# avoid dup include on some systems
+.if !defined(DISTRIBUTION)	# avoid a duplicate include on some systems
 .include <bsd.subdir.mk>
+.endif
+.sinclude <inc.mk>			# hack for crufty.net mk-files
+
+# this has to come after to avoid upsetting the check in any system mk-file
+#
+.if target(install)
+# get includes to install at install time
+install:	includes
 .endif
 
 # xxx hmmmm.... weird!  Avoid a "don't know how to make incinstall" error on
