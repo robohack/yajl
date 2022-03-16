@@ -309,8 +309,6 @@ LDFLAGS += -Wl,--warn-common
 . endif
 .endif
 
-MAN =	# empty
-
 .if (defined(__GNUC__) && ${__GNUC__} >= 1) || \
 	(defined(__clang__) && ${__clang__} >= 1)
 . if empty(CFLAGS:M*-pipe*)
