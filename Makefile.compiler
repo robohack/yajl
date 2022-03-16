@@ -141,7 +141,8 @@ CWARNFLAGS += -Wformat-extra-args
 # -Wundef isn't in 2.7.2, but then again if you're still using 2.7.2 you may be
 # suffering from far more code generation bugs and other compiler problems than
 # you might know!
-CWARNFLAGS += -Wundef
+# XXX however it may cause many warnings in system headers!
+#CWARNFLAGS += -Wundef
 # we may intentionally have large arrays
 #CWARNFLAGS += -Wlarger-than-65536
 CWARNFLAGS += -Wbad-function-cast
