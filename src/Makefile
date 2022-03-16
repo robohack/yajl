@@ -9,8 +9,6 @@ SHLIB_MAJOR ?=   ${LIB_MAJOR}
 SHLIB_MINOR ?=   ${LIB_MINOR}
 SHLIB_TEENY ?=   ${LIB_MICRO}
 
-#WARNS =	3
-
 SRCS +=	yajl.c
 SRCS +=	yajl_alloc.c
 SRCS +=	yajl_buf.c
