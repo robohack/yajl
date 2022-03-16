@@ -206,6 +206,12 @@ BUILDTARGETS +=	bmake-do-docs
 #
 all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 
+# just in case old habits prevail -- this should generally work to do everything
+# in the right order with the right .WAITs for parallel builds, assuming .WAIT
+# support does work in ${SUBDIR} at all.
+#
+dependall: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
+
 .ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR} bmake-do-docs
 
 .for targ in ${BUILDTARGETS}
