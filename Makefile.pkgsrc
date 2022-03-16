@@ -89,17 +89,17 @@ AUTO_MKDIRS=		yes
 #		${FIND} * \( -type f -or -type l \) | ${SORT};
 #
 GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
-		${FIND} share/doc/yajl/html \( -type f -or -type l \) | ${SORT};
+		${FIND} ${DOCDIR:S|^${PREFIX}||}/${PKGBASE}/html \( -type f -or -type l \) | ${SORT};
 
 .include "../../mk/bsd.prefs.mk"
 
-PLIST_SUBST+=		PREFIX=${PREFIX}
+PLIST_SUBST+=	PREFIX=${PREFIX:Q}
 
 # N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
 # xxx they are also not needed if pkgsrc is properly patched to do this itself!
 
 PLIST_VARS+=		mkdebug
-.if ${MKDEBUG:Uno} != "no" && !defined(NODEBUG)
+.if ${MKDEBUG:Uno:tl} != "no" && !defined(NODEBUG)
 PLIST.mkdebug=		yes
 INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/bin
 INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/libexec
@@ -107,19 +107,24 @@ INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/sbin
 .endif
 
 PLIST_VARS+=		mkdebuglib
-.if ${MKDEBUGLIB:Uno} != "no"
+.if ${MKDEBUGLIB:Uno:tl} != "no"
 PLIST.mkdebuglib=	yes
 INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/lib
 .endif
 
 PLIST_VARS+=		mklint
-.if ${MKLINT:Uno} != "no"
+.if ${MKLINT:Uno:tl} != "no"
 PLIST.mklint=		yes
 .endif
 
 PLIST_VARS+=		mkpic
-.if ${MKPIC:Uno} != "no"
+.if ${MKPIC:Uno:tl} != "no"
 PLIST.mkpic=		yes
+.endif
+
+PLIST_VARS+=		mkprofile
+.if ${MKPROFILE:Uno:tl} != "no"
+PLIST.mkprofile= yes
 .endif
 
 do-extract:
