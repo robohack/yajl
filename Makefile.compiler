@@ -72,8 +72,15 @@ __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
 
-# I do not use any system-supplied "WARNS" level.  Code using this helper should
-# be clean with of all the compiler-specific warnings set below!
+#
+# Set ${CWARNFLAGS} based on the detected compiler and its version.
+#
+# Note we do depend on the mk-files (notably <bsd.sys.mk>) to add ${CWARNFLAGS}
+# to ${CFLAGS}, but so far this is universally portable.
+#
+
+# I do not usually use any system-supplied "WARNS" level.  Code using this
+# helper should be clean with of all the compiler-specific warnings set below!
 
 # -Winline
 #
