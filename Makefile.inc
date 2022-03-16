@@ -345,17 +345,29 @@ regress: all .WAIT
 # after this file is already parsed), but for these this will not likely matter.
 
 .if !target(tags)
+# avoid :U for older bmakes
+.if !defined(TOOL_CTAGS)
+_TOOL_CTAGS = ctags
+.else
+_TOOL_CTAGS = ${TOOL_CTAGS}
+.endif
 tags: ${SRCS}
 .if defined(SRCS)
-	-cd ${.CURDIR} && ${TOOL_CTAGS:Uctags} -f /dev/stdout ${.ALLSRC:N*.h} | \
+	-cd ${.CURDIR} && ${_TOOL_CTAGS} -f /dev/stdout ${.ALLSRC:N*.h} | \
 	    ${TOOL_SED} "s;\${.CURDIR}/;;" > ${.TARGET}
 .endif
 .endif
 
 .if !target(TAGS)
+# avoid :U for older bmakes
+.if !defined(TOOL_ETAGS)
+_TOOL_ETAGS = etags
+.else
+_TOOL_ETAGS = ${TOOL_ETAGS}
+.endif
 TAGS: ${SRCS}
 .if defined(SRCS)
-	-cd ${.CURDIR} && ${TOOL_ETAGS:Uetags} -I -l c -o ${.TARGET} ${.ALLSRC:N*.h}
+	-cd ${.CURDIR} && ${_TOOL_ETAGS} -I -l c -o ${.TARGET} ${.ALLSRC:N*.h}
 .endif
 .endif
 
