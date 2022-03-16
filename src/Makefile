@@ -2,13 +2,9 @@
 
 bmake_topdir = ..
 
-# this must be set first to avoid the top-level LDADD
-# (it should be the same as ${PACKAGE})
-LIB =	yajl
+LIB =	${PACKAGE:S/^lib//}
 
-# If these are set blank then no shared library is built, and so on OSX even
-# Pkgsrc bmake can then complete a successful build.
-#
+# If these are set blank then no shared library is built
 SHLIB_MAJOR ?=   ${LIB_MAJOR}
 SHLIB_MINOR ?=   ${LIB_MINOR}
 SHLIB_TEENY ?=   ${LIB_MICRO}
