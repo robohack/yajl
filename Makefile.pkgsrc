@@ -14,55 +14,23 @@ DISTFILES=	# empty
 #
 # else (and remove do-extract):
 #MASTER_SITES=	${MASTER_SITE_GITHUB:=robohack/}
-#GITHUB_TAG=	bsdmake-2.${PKGREVISION}
+#GITHUB_TAG=	bsdmake-2.${PKGREVISION}	# xxx also release-2.${PKGREVISION}
 
 OWNER=		woods@planix.ca
-HOMEPAGE=	http://robohack.github.com/yajl/
+HOMEPAGE=	http://robohack.github.com/${PKGBASE}/
 COMMENT=	Small JSON library written in ANSI C
 # "YAJL is released under the permissive ISC license."
 LICENSE=	modified-bsd
 
 BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 
-# N.B.:  It may be necessary to turn off use of CWrappers in some local
-# configurations of pkgsrc.
-#
-# This is because ${.CURDIR} will not appear, by straight string comparison, to
-# be within ${WRKOBJDIR} when there's a symlink involved in the path pointed to
-# by ${WRKOBJDIR}, e.g. with the following line in /etc/mk.conf:
-#
-#	WRKOBJDIR?=	/var/package-obj/${USER}
-#
-# $ ls -l /var/package-obj/
-# lrwxr-xr-x  1 root  wheel  18 Jun 30  2020 /var/package-obj/ -> /build/package-obj
-#
-# this is because when MAKEOBJDIRPREFIX is set then make(1) gets the canonical
-# pathname for ${.CURDIR} using getcwd(3), but everthing else, including
-# cwrappers, thinks it's in the path starting with the symlink.
-#
-# This can be fixed in pkgsrc by adding the canonical path to ${WRKOBJDIR} (or
-# actually ${WRKDIR}) to the list of "protected directories" for CWrappers
-# parameter transformations.
-#
-# This is done in "pkgsrc/mk/buildlink3/bsd.buildlink3.mk" with the addition of
-# the following two lines at about the same place where ${WRKDIR} is also added
-# to the list:
-#
-#	_CANONICAL_WRKDIR!=	cd ${WRKDIR} && ${PWD_CMD}
-#	_BLNK_PROTECT_DIRS+=	${_CANONICAL_WRKDIR}
-#
-# Otherwise if you have a problem then until the pkgsrc is fixed as above you
-# can ucomment the following line:
-#
-#USE_CWRAPPERS=		no
-
 USE_LANGUAGES=		c
+
 USE_BSD_MAKEFILE=	yes
 BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild
-BUILD_MAKE_FLAGS=	MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
-TEST_MAKE_FLAGS=	${BUILD_MAKE_FLAGS} # pkglint complains here, but it's not ":="!!!
-INSTALL_MAKE_FLAGS=	${BUILD_MAKE_FLAGS} # pkglint complains here, but it's not ":="!!!
-INSTALL_TARGET=		includes install
+MAKE_ENV+=		MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
+
+#USE_FEATURES+=		err warn snprintf asprintf
 
 # xxx this use of ${VAR:!cmd!} is quite ugly to have to do, but because it is
 # evaluated lazily it works to find the canonical form of ${WRKSRC} as a
@@ -78,7 +46,7 @@ INSTALL_TARGET=		includes install
 # overly pedantic.
 #
 CANONICAL_WRKSRC=		${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
-PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/yajl.pc
+PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/${PKGBASE}.pc
 PKGCONFIG_OVERRIDE_STAGE=	post-build
 
 AUTO_MKDIRS=		yes
@@ -89,7 +57,7 @@ AUTO_MKDIRS=		yes
 #		${FIND} * \( -type f -or -type l \) | ${SORT};
 #
 GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
-		${FIND} ${DOCDIR:S|^${PREFIX}||}/${PKGBASE}/html \( -type f -or -type l \) | ${SORT};
+		${FIND} share/doc/${PKGBASE}/html \( -type f -or -type l \) | ${SORT};
 
 .include "../../mk/bsd.prefs.mk"
 
@@ -135,6 +103,10 @@ do-extract:
 do-configure:
 	${MKDIR} ${BSD_MAKE_BUILD_DIR}
 
+# n.b.:  this package does not need this step -- it does it itself
+#pre-build:
+#	cd ${WRKSRC} && ${BUILD_MAKE_CMD} obj
+
 # how to get from there to here....
 #
 # Go to where you have cloned https://github.com/robohack/yajl to, copy this
@@ -144,9 +116,9 @@ do-configure:
 #	git status
 #	# commit anything outstanding...
 #	mkdir build
-#	bsdmake MAKEOBJDIRPREFIX=$(pwd)/build dependall regress
+#	make MAKEOBJDIRPREFIX=$(pwd)/build all regress
 #	mkdir dist
-#	bsdmake DESTDIR=$(pwd)/dist install
+#	make MAKEOBJDIRPREFIX=$(pwd)/build DESTDIR=$(pwd)/dist install
 #	# check dist/* is correct...
 #	rm -rf build dist
 #	make distclean
@@ -160,7 +132,7 @@ do-configure:
 REPODIR ?=	/work/woods/f-yajl
 setup-pkgsrc:
 	find ${FILESDIR} -type d \( -name CVS -or -name .git -or -name .svn \) -prune -or -type f ! -name '.*ignore' -print0 | xargs -0 rm
-	cd ${REPODIR} && find . \( -type d \( -name CVS -or -name .git -or -name .svn -or -name build -or -name 'build-*' -or -name dest -or -name 'dest-*' \) -prune \) -or -type f ! -name '.#*' ! -name '#*#' ! -name '*~' ! -name '.*ignore' ! -name '[Tt][Aa][Gg][Ss]' -print | pax -rw ${FILESDIR}
+	cd ${REPODIR} && find . \( -type d \( -name debian -or -name CVS -or -name .git -or -name .svn -or -name build -or -name 'build-*' -or -name 'd[ei]st' -or -name 'd[ei]st-*' \) -prune \) -or -type f ! -name '.#*' ! -name '#*#' ! -name '*~' ! -name '.*ignore' ! -name '[Tt][Aa][Gg][Ss]' -print | pax -rw ${FILESDIR}
 	mv ${FILESDIR}/DESCR.pkgsrc ${PKGDIR}/DESCR
 	mv ${FILESDIR}/Makefile.pkgsrc ${PKGDIR}/Makefile
 	mv ${FILESDIR}/PLIST.pkgsrc ${PKGDIR}/PLIST
