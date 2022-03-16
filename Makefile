@@ -343,10 +343,10 @@ doc/html/yajl.apdx.html: doc/html yajl.cxref
 	files=$$(find ./src -depth -type d \( -name CVS -or -name .git -or -name .svn -or -name build \) -prune -or -type f \( -name '*.[ch]' -o -name '*.cxref' \) -print); \
 	files="yajl.cxref $${files} reformatter/json_reformat.c example/parse_config.c"; \
 	for file in $${files}; do \
-		${CXREF} -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
+		${CXREF} -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -std=c99 -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
 	done;\
 	for file in $${files}; do \
-		${CXREF} -warn-all -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
+		${CXREF} -warn-all -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -std=c99 -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
 	done; \
 	${CXREF} -index-all -O${.OBJDIR}/doc/html -N${PACKAGE} -html
 	ln -fs yajl.cxref.html ${.OBJDIR}/doc/html/index.html

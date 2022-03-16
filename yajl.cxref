@@ -31,15 +31,15 @@ Features
 
 - Stream (incremental) parsing and generation of JSON
 
-- Plain Standard ANSI C (C89!)
+- written in Plain Standard ANSI C (C99!)
 
 - Human readable error messages, complete with context
 
 - tiny
 
-- event driven
+- fast
 
-- support for generating "beautified" JSON 
+- support for generating "beautified" (multi-line, indented) JSON 
 
 - includes a simplified tree parser and access API
 

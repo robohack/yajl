@@ -18,8 +18,8 @@ See, e.g.: https://nullprogram.com/blog/2017/03/30/
 Good question.  In a review of current C JSON parsing libraries I was
 unable to find one that satisfies my requirements.  Those are,
 
-0. written in C
-1. portable
+0. written in Plain Standard ANSI C (C99!)
+1. i.e. portable
 2. robust -- as close to "crash proof" as possible
 3. data representation independent
 4. fast
@@ -28,6 +28,7 @@ unable to find one that satisfies my requirements.  Those are,
 6. can parse JSON data off a stream, incrementally
 7. simple to use
 8. tiny
+9. can use a custom memory allocator
 
 Numbers 3, 5, 6, and 7 were particularly hard to find, and were what
 caused me to ultimately create YAJL.  This document is a tour of some

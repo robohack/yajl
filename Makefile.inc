@@ -146,8 +146,11 @@ WARNS = 10
 
 # Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly
 #
-CSTD = c89
+CSTD = c99
 
+# However since <bsd.sys.mk> hasn't been included yet, this will still add the
+# flag anyway...
+#
 .if empty(CFLAGS:M*-std=${CSTD}*)
 CFLAGS += -std=${CSTD}
 .endif
