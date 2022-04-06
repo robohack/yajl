@@ -16,6 +16,8 @@
 
 /**
  * Common declarations to allow the client to use a custom allocator.
+ *
+ * Serious users of YAJL should provide error checking and handling variants.
  **/
 
 #ifndef __YAJL_COMMON_H__
@@ -59,25 +61,35 @@ typedef void *(*yajl_malloc_func)(void *ctx, size_t sz);
 typedef void (*yajl_free_func)(void *ctx, void *ptr);
 
 /*+
- * A pointer to a realloc() function.
+ * A pointer to a realloc() function.  Should also invoke error handling action
+ * if sz==0.
  +*/
 typedef void *(*yajl_realloc_func)(void *ctx, void *ptr, size_t sz);
 
 /*+
  *  A structure which can be passed to yajl_*_alloc routines to allow the
  *  client to specify memory allocation functions to be used.
+ *
+ *  These functions should check for and handle any allocation errors, including
+ *  considering requests to (*.realloc)() for zero bytes (sz==0) as an error.
  +*/
 typedef struct
 {
     yajl_malloc_func malloc;	/*+ pointer to a function that can allocate
-                                 *  uninitialized memory +*/
+                                 *  uninitialized memory
+                                +*/
     yajl_realloc_func realloc;	/*+ pointer to a function that can resize memory
-                                 *  allocations +*/
+                                 *  allocations (should also treat sz==0 as an
+                                 *  error condition)
+                                +*/
     yajl_free_func free;		/*+ pointer to a function that can free memory
                                  *  allocated using the (*.realloc)() function
-                                 *  or the (*.malloc)() function +*/
+                                 *  or the (*.malloc)() function
+                                +*/
     void *ctx;					/*+ a context pointer that will be passed to
-                                 *  each of the above allocation routines +*/
+                                 *  each of the above allocation routines
+                                +*/
+    /* xxx consider adding an optional error() call too! */
 } yajl_alloc_funcs;
 
 #ifdef __cplusplus

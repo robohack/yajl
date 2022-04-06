@@ -51,8 +51,9 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
     need = buf->len;
 
     while (want >= (need - buf->used)) {
-        need <<= 1;                     /* XXX maybe this is a bit too aggressive? */
+        need <<= 1;                     /* XXX this is a bit too aggressive!  but "wraps" nicely to zero... */
     }
+    assert(need >= buf->len);
     if (need != buf->len) {
         buf->data = (unsigned char *) YA_REALLOC(buf->alloc, buf->data, need);
         buf->len = need;

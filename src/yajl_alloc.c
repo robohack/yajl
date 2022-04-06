@@ -17,6 +17,10 @@
 /**
  * default memory allocation routines for yajl which use malloc(3), realloc(3),
  * and free(3)
+ *
+ * Serious users of YAJL should replace these with error checking and handling
+ * variants.  Implementations of yaf->realloc should check for sz==0 and fault
+ * on that as well.
  **/
 
 #include "yajl_alloc.h"
