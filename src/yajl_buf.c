@@ -39,6 +39,7 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
     /* first call */
     if (buf->data == NULL) {
         assert(buf->used == 0);
+        assert(buf->len == 0);
         buf->len = YAJL_BUF_INIT_SIZE;
         buf->data = (unsigned char *) YA_MALLOC(buf->alloc, buf->len);
 #if 0
@@ -50,8 +51,9 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 
     need = buf->len;
 
-    while (want >= (need - buf->used)) {
-        need <<= 1;                     /* XXX this is a bit too aggressive!  but "wraps" nicely to zero... */
+    while (need > 0 && want >= (need - buf->used)) {
+        /* XXX <<=1 is too aggressive!  but it "wraps" nicely to zero... */
+        need <<= 1;
     }
     assert(need >= buf->len);
     if (need != buf->len) {
