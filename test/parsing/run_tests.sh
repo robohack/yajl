@@ -134,17 +134,28 @@ for file in cases/*.json ; do
   # parse with a read buffer size ranging from 1-31 to stress stream parsing
   while [ $iter -lt 32  ] && [ $success = "SUCCESS" ] ; do
     $testBin $allowPartials $allowComments $allowGarbage $allowMultiple -b $iter < $file > ${file}.test  2>&1
-    diff ${DIFF_FLAGS} ${file}.gold ${file}.test > ${file}.out
     if [ $? -eq 0 ] ; then
-      if [ $iter -eq 31 ] ; then testsSucceeded=$(( $testsSucceeded + 1 )) ; fi
+      diff ${DIFF_FLAGS} ${file}.gold ${file}.test > ${file}.out
+      if [ $? -eq 0 ] ; then
+        if [ $iter -eq 31 ] ; then
+	  testsSucceeded=$(( $testsSucceeded + 1 ))
+	fi
+      else
+        false;
+      fi
     else
+       false;
+    fi
+    if [ $? -ne 0 ] ; then
       success="FAILURE"
       iter=32
       ${echo} "${nl}"
-      cat ${file}.out
+      if [ -f ${file}.out ] ; then
+        cat ${file}.out
+      fi
     fi
     iter=$(( iter + 1 ))
-    rm ${file}.test ${file}.out
+    rm -f ${file}.test ${file}.out
   done
 
   ${echo} "${success}${nl}"
