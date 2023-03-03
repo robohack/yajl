@@ -49,6 +49,11 @@ jobs:
         - os: ubuntu-latest
           # see if there are still errors in header files
           docs: no
+        - os: netbsd-latest
+          # xxx or we could also install bmake and bootstrap-mk-files
+          make: bmake
+        - os: netbsd-latest
+          cc: clang
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -58,7 +63,8 @@ jobs:
         uname -a
         sudo apt-get update
         sudo apt-get install bmake cxref
-        bmake -V MAKE_VERSION
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (Ubuntu-18.04)
       if: matrix.os == 'ubuntu-18.04'
@@ -66,7 +72,8 @@ jobs:
         uname -a
         sudo apt-get update
         sudo apt-get install bmake cxref
-        bmake -V MAKE_VERSION
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macos-latest'
@@ -74,7 +81,8 @@ jobs:
         uname -a
         brew update
         brew install bmake
-        bmake -V MAKE_VERSION
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (MacOS-11)
       if: matrix.os == 'macos-11'
@@ -82,13 +90,16 @@ jobs:
         uname -a
         brew update
         brew install bmake
-        bmake -V MAKE_VERSION
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
       run: |
         uname -a
         pkgin install cxref clang
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: builddir
       run: rm -rf build && mkdir build
