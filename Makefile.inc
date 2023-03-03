@@ -405,9 +405,9 @@ showenv: .PHONY
 .if exists(${.OBJDIR}/${bmake_topdir}/src)
 	@echo "the directory shown above exists!"
 .endif
-	@echo "../${bmake_topdir}/src/${.OBJDIR:T}"
 	@echo ""
 	@echo "Vars:"
+	@echo "unix = ${unix:Q}"
 	@echo ".CURDIR = ${.CURDIR:Q}"
 	@echo ".OBJDIR = ${.OBJDIR:Q}"
 	@echo ".OBJDIR:T = ${.OBJDIR:T:Q}"
@@ -420,6 +420,8 @@ showenv: .PHONY
 	@echo "MKDEBUGLIB = ${MKDEBUGLIB:Q}"
 	@echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"
 	@echo "MKLINT = ${MKLINT:Q}"
+	@echo "LDADD = ${LDADD:Q}"
+	@echo "DPADD = ${DPADD:Q}"
 	@echo ""
 #	@echo "Environment:"
 #	env | sort
