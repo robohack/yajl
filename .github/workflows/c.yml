@@ -57,53 +57,41 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: whoami
+      run: uname -a
     - name: dependencies (Ubuntu-latest)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        uname -a
         sudo apt-get update
         sudo apt-get install bmake cxref
-        ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} showenv
-        cat /usr/share/mk/bsd.subdir.mk
-        ${{ matrix.cc }} --version
     - name: dependencies (Ubuntu-18.04)
       if: matrix.os == 'ubuntu-18.04'
       run: |
-        uname -a
         sudo apt-get update
         sudo apt-get install bmake cxref
-        ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} showenv
-        ${{ matrix.cc }} --version
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macos-latest'
       run: |
-        uname -a
         brew update
         brew install bmake
-        ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} showenv
-        ${{ matrix.cc }} --version
     - name: dependencies (MacOS-11)
       if: matrix.os == 'macos-11'
       run: |
-        uname -a
         brew update
         brew install bmake
-        ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} showenv
-        ${{ matrix.cc }} --version
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
       run: |
-        uname -a
         pkgin install cxref clang
+    - name: showversions
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: builddir
       run: rm -rf build && mkdir build
+    - name: showenv
+      run: |
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
+        env | sort
     - name: build
       run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
     - name: distribution
