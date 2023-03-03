@@ -3,4 +3,6 @@
 obj/
 obj.*/
 /build/
+/build-*/
 /dist/
+/dist-*/
