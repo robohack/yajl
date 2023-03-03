@@ -421,10 +421,7 @@ showenv: .PHONY
 	echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"; \
 	echo "MKLINT = ${MKLINT:Q}"; \
 	echo "LDADD = ${LDADD:Q}"; \
-	echo "DPADD = ${DPADD:Q}"; \
-	echo ""; \
-	echo "Environment:"; \
-	env | sort
+	echo "DPADD = ${DPADD:Q}"
 
 #
 # Local Variables:
