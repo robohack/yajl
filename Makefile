@@ -84,31 +84,38 @@
 #
 # Special Notes for Special Systems:
 #
+# MacOS vs. various BMakes:
+#
 # OSX, aka macOS, since use of Xcode 10(?) doesn't have a working bsdmake in the
 # base system, nor does the one installable from Homebrew work.  However the
 # version of Bmake that can be installed from Homebrew does mostly(*) work (and
 # presumably a manual install of Simon's Bmake will also work).  Unfortunately
-# the Bmake that comes with pkgsrc does not work properly on macOS.  Pkgsrc does
-# not include Simon's MK files, but rather the bootstrap-mk-files package, which
-# (as of 20180901) are not yet fully ported to OSX/Darwin (it is more or less
-# just an out-of-date copy of the non-portable NetBSD MK files).  So, if one can
-# do without the shared library then one can use the pkgsrc bmake on macOS, and
-# depending on the vintage of one's pkgsrc, it may also be necessary to pass
-# "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY=" on the command line or in
-# Makefile.inc.  In current pkgsrc not doing so will install the shared library
-# with the wrong name (i.e. using the ".so" naming convention instead of the
-# Mach-O ".dylib" convention, and so the linker will never find and use it.
+# the Bmake that comes with pkgsrc does not work properly on macOS.
+#
+# Pkgsrc does not include Simon's MK files, but rather the bootstrap-mk-files
+# package, which (as of 20180901) are not yet fully ported to OSX/Darwin (it is
+# more or less just an out-of-date copy of the non-portable NetBSD MK files).
+# So, if one can do without the shared library then one can use the pkgsrc bmake
+# on macOS, and depending on the vintage of one's pkgsrc, it may also be
+# necessary to pass "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY=" on the command line
+# or in Makefile.inc.
 #
 # The really old Apple bsdmake and mk-files do generate the correct shared
 # library names, but they don't support .WAIT in the ${SUBDIR} list.
 #
+# OpenBSD:
+#
 # So note OpenBSD's make since 5.5 (and before 2.1) does NOT support
 # $MAKEOBJDIRPREFIX at all.  For recent OpenBSD, just use ${MAKEOBJDIR} instead.
+#
+# FreeBSD:
 #
 # FreeBSD's make (or rather their mk-files) is too broken to do the right thing
 # with "obj" in the target list for "all".  Their saving grace (as of at least
 # 12.0) is they've implemented WITH_AUTO_OBJ, and it works, BUT ONLY IF YOU PUT
 # "WITH_AUTO_OBJ=yes" ON THE COMMAND LINE OR IN THE ENVIRONMENT!
+#
+# Other BMake ports:
 #
 # See the first use of .WAIT below for comments about really old BMakes and
 # mk-files that don't deal with it properly.
