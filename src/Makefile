@@ -166,6 +166,11 @@ install:	includes
 incinstall: .PHONY
 .endif
 
+.if !empty(unix:M*[Ll]inux*)
+# try using the short option, which might still be universal
+SHLIB_SHFLAGS=		-Wl,-h,lib${LIB}.so.${SHLIB_SOVERSION}
+.endif
+
 # note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
 #
 # Local Variables:
