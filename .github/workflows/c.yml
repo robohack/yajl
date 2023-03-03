@@ -64,6 +64,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install bmake cxref
+        cat /usr/share/mk/bsd.lib.mk
     - name: dependencies (Ubuntu-18.04)
       if: matrix.os == 'ubuntu-18.04'
       run: |
