@@ -399,7 +399,7 @@ docs:
 
 # Makefile debugging support
 #
-showenv: .PHONY
+myshowenv: .PHONY
 	@echo ""
 	@echo "${.OBJDIR}/${bmake_topdir}/src"
 .if exists(${.OBJDIR}/${bmake_topdir}/src)
