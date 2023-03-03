@@ -401,29 +401,29 @@ docs:
 #
 showenv: .PHONY
 	@echo "" ; \
-	@echo "${.OBJDIR}/${bmake_topdir}/src"; \
-.if exists(${.OBJDIR}/${bmake_topdir}/src)
-	@echo "the directory shown above exists!"; \
-.endif
-	@echo ""; \
-	@echo "Vars:"; \
-	@echo "unix = ${unix:Q}"; \
-	@echo ".CURDIR = ${.CURDIR:Q}"; \
-	@echo ".OBJDIR = ${.OBJDIR:Q}"; \
-	@echo ".OBJDIR:T = ${.OBJDIR:T:Q}"; \
-	@echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"; \
-	@echo "GENHDIR = ${GENHDIR:Q}"; \
-	@echo "DEBUGDIR = ${DEBUGDIR:Q}"; \
-	@echo "LINTLIBDIR = ${LINTLIBDIR:Q}"; \
-	@echo "MAKECONF = ${MAKECONF:Q}"; \
-	@echo "MKDEBUG = ${MKDEBUG:Q}"; \
-	@echo "MKDEBUGLIB = ${MKDEBUGLIB:Q}"; \
-	@echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"; \
-	@echo "MKLINT = ${MKLINT:Q}"; \
-	@echo "LDADD = ${LDADD:Q}"; \
-	@echo "DPADD = ${DPADD:Q}"; \
-	@echo ""; \
-	@echo "Environment:"; \
+	echo "${.OBJDIR}/${bmake_topdir}/src"; \
+	if [ -d "${.OBJDIR}/${bmake_topdir}/src" ]; then \
+		echo "the directory shown above exists!"; \
+	fi; \
+	echo ""; \
+	echo "Vars:"; \
+	echo "unix = ${unix:Q}"; \
+	echo ".CURDIR = ${.CURDIR:Q}"; \
+	echo ".OBJDIR = ${.OBJDIR:Q}"; \
+	echo ".OBJDIR:T = ${.OBJDIR:T:Q}"; \
+	echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"; \
+	echo "GENHDIR = ${GENHDIR:Q}"; \
+	echo "DEBUGDIR = ${DEBUGDIR:Q}"; \
+	echo "LINTLIBDIR = ${LINTLIBDIR:Q}"; \
+	echo "MAKECONF = ${MAKECONF:Q}"; \
+	echo "MKDEBUG = ${MKDEBUG:Q}"; \
+	echo "MKDEBUGLIB = ${MKDEBUGLIB:Q}"; \
+	echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"; \
+	echo "MKLINT = ${MKLINT:Q}"; \
+	echo "LDADD = ${LDADD:Q}"; \
+	echo "DPADD = ${DPADD:Q}"; \
+	echo ""; \
+	echo "Environment:"; \
 	env | sort
 
 #
