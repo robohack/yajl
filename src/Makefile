@@ -166,7 +166,7 @@ install:	includes
 incinstall: .PHONY
 .endif
 
-.if !empty(unix:M*[Ll]inux*)
+.if empty(unix:M*Darwin*)
 # try using the short option, which might still be universal
 SHLIB_SHFLAGS=		-Wl,-h,lib${LIB}.so.${SHLIB_SOVERSION}
 .endif
