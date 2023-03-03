@@ -64,7 +64,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install bmake cxref
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} myshowenv
+        ${{ matrix.make }} showenv
+        cat /usr/share/mk/bsd.subdir.mk
         ${{ matrix.cc }} --version
     - name: dependencies (Ubuntu-18.04)
       if: matrix.os == 'ubuntu-18.04'
@@ -73,7 +74,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install bmake cxref
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} myshowenv
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (MacOS-latest)
       if: matrix.os == 'macos-latest'
@@ -82,7 +83,7 @@ jobs:
         brew update
         brew install bmake
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} myshowenv
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (MacOS-11)
       if: matrix.os == 'macos-11'
@@ -91,7 +92,7 @@ jobs:
         brew update
         brew install bmake
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} myshowenv
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: dependencies (NetBSD-latest)
       if: matrix.os == 'netbsd-latest'
@@ -99,7 +100,7 @@ jobs:
         uname -a
         pkgin install cxref clang
         ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.make }} myshowenv
+        ${{ matrix.make }} showenv
         ${{ matrix.cc }} --version
     - name: builddir
       run: rm -rf build && mkdir build
