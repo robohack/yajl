@@ -166,9 +166,18 @@ install:	includes
 incinstall: .PHONY
 .endif
 
-.if empty(unix:M*Darwin*)
-# try using the short option, which might still be universal
-SHLIB_SHFLAGS=		-Wl,-h,lib${LIB}.so.${SHLIB_SOVERSION}
+.if ${TARGET_OSNAME} == "Linux"
+# XXX stupid GNU BinUtils LD changed its command line syntax recently,
+# apparently without concern for backward compatability.
+#
+# N.B.:  also apparently on Linux BMake currently (20200710) doesn't use
+# SHLIB_SHFLAGS for the final command, but instead LD_shared, and for non-BSD
+# platforms the value of LD_shared directly overridden without consulting
+# SHLIB_SHFLAGS.
+#
+# So, override LD_shared to use more portable '-h' instead of the apparently now
+# dead '-soname' (we could use '--soname', but '-h' is probably more canonical).
+LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 .endif
 
 # note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
