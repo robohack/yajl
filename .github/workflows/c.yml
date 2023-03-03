@@ -84,6 +84,7 @@ jobs:
       run: |
         pkgin install cxref clang
     - name: showversions
+      run: |
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
     - name: builddir
