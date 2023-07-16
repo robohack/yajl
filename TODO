@@ -6,5 +6,5 @@
   a. the permuter
   b. some performance comparison against json_checker.
 * investigate pull instead of push parsing
-* Handle memory allocation failures gracefully
-* cygwin/msys support on win32
+* Handle memory allocation failures gracefully?
+* Convert example/* (parse_config) to also run a whole a test suite
