@@ -63,7 +63,9 @@ __clang_patchlevel__ !=	echo __clang_patchlevel__ | $(CC) -E - | sed '/\#/d;s/__
 . endif
 .endif
 
-.if ((defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || (defined(OS) && (${OS} == "Darwin")) || (defined(.FreeBSD) && (${.FreeBSD} == "false")))
+.if ((defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || \
+	(defined(OS) && (${OS} == "Darwin")) || \
+	(defined(.FreeBSD) && (${.FreeBSD} == "false")))
 #
 # NOTE: Mac OS X does not use GNU ld, but....
 #
@@ -73,15 +75,21 @@ __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
 
+# Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly
+#
+CSTD ?= c99
+
+.if !empty(unix:M*NetBSD*)
+# prevent NetBSD's mk-files from adding -std=gnu99 to CFLAGS
+COVERITY_TOP_CONFIG =	1
+.endif
+
 #
 # Set ${CWARNFLAGS} based on the detected compiler and its version.
 #
 # Note we do depend on the mk-files (notably <bsd.sys.mk>) to add ${CWARNFLAGS}
 # to ${CFLAGS}, but so far this is universally portable.
 #
-
-# I do not usually use any system-supplied "WARNS" level.  Code using this
-# helper should be clean with of all the compiler-specific warnings set below!
 
 # -Winline
 #
@@ -113,6 +121,8 @@ CWARNFLAGS += -Wshadow
 #CWARNFLAGS += -Wwrite-strings
 # this isn't mentioned in 1.42's manual but causes no error
 CWARNFLAGS += -Wstrict-prototypes
+#XXX# -Wsystem-headers does not go well with -Wundef
+#XXX#CWARNFLAGS += -Wsystem-headers
 .endif # ${__GNUC__} >= 1
 
 # in addition to -Wall
@@ -153,6 +163,10 @@ CWARNFLAGS += -Wformat-extra-args
 #CWARNFLAGS += -Wundef
 # we may intentionally have large arrays
 #CWARNFLAGS += -Wlarger-than-65536
+# N.B.:  -Wbad-function-cast can be extremely annoying as it complains about
+# conversions by casts which even -Wconversion doesn't complain about.  In
+# theory it does warn about cases where UB(?)/IDB can happen because the return
+# value is out-of-bounds for the target type.
 CWARNFLAGS += -Wbad-function-cast
 .endif
 
@@ -164,10 +178,10 @@ CWARNFLAGS += -Wdeclaration-after-statement
 # -Wformat is included in -Wall, but not "-Wformat-nonliteral -Wformat-security"
 # but -Wformat-y2k is stupid
 CWARNFLAGS += -Wformat=2 -Wno-format-y2k
-# note: will only have effect if '-fstrict-aliasing' is enabled, but we never
-# enable that option!
+# note: will only have effect if '-fstrict-aliasing' is enabled, but normally we
+# do the opposite and disable that option
 # xxx maybe only in >= 3.3?
-#CWARNFLAGS += -Wstrict-aliasing=2
+CWARNFLAGS += -Wstrict-aliasing=2
 .endif
 
 .if (defined(__GNUC__) && \
@@ -180,6 +194,9 @@ CWARNFLAGS += -Wformat=2 -Wno-format-y2k
 CWARNFLAGS += -Wtraditional-conversion
 . endif
 CWARNFLAGS += -Wunreachable-code
+# note: this only works if we don't turn off -fstrict-overflow (which we
+# normally do) _and_ we have -O2 or greater (see below)
+CWARNFLAGS += -Wstrict-overflow=5
 .endif
 
 # maybe this is right? (it's always enabled in more recent GCC's)
@@ -241,13 +258,6 @@ CWARNFLAGS += -fsanitize=address
 LDFLAGS += ${CWARNFLAGS:M-fsanitize=*}
 .endif
 
-.if defined(__GNUC__) || defined(__clang__)
-# WARNING: C99 (and C11) allow compilers to perform optimizations based on the
-# "strict aliasing" rules which _will_ change the behaviour of previously
-# correct C90 and earlier code!
-CFLAGS += -fno-strict-aliasing
-.endif
-
 .if defined(__GNUC__) && !defined(__clang__)
 . if defined(USE_UBSAN)
 # xxx hmmmm which, exactly?
@@ -288,18 +298,13 @@ LDSTATIC := # empty -- leak sanitizer does not support static linking
 . endif
 .endif
 
+# N.B.:  -g3 is required if debugging is wanted while optimizing with -O2.
+DBG ?= -g3
+OPTIM ?= -O2
+
 .if (defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || defined(.FreeBSD)
 # for both FreeBSD and Mac OS X....
 NO_SHARED = YES
-. if !empty(DBG) && empty(CFLAGS:M*${DBG}*)
-CFLAGS += ${DBG}
-. endif
-. if !empty(OPTIM) && empty(CFLAGS:M*${OPTIM}*)
-CFLAGS += ${OPTIM}
-. endif
-. if !empty(CPPFLAGS) && empty(CFLAGS:M*${CPPFLAGS}*)
-CFLAGS += ${CPPFLAGS}
-. endif
 .else
 NOSHARED = YES
 .endif
@@ -318,11 +323,57 @@ LDFLAGS += -Wl,--warn-common
 . endif
 .endif
 
+.if !empty(DBG) && empty(CFLAGS:M*${DBG}*)
+CFLAGS += ${DBG}
+.endif
+.if !empty(OPTIM) && empty(CFLAGS:M*${OPTIM}*)
+CFLAGS += ${OPTIM}
+.endif
+.if empty(CFLAGS:M*-std=${CSTD}*)
+CFLAGS += -std=${CSTD}
+.endif
+.if !empty(CPPFLAGS) && empty(CFLAGS:M*${CPPFLAGS}*)
+CFLAGS += ${CPPFLAGS}
+.endif
+
 .if (defined(__GNUC__) && ${__GNUC__} >= 1) || \
 	(defined(__clang__) && ${__clang__} >= 1)
 . if empty(CFLAGS:M*-pipe*)
 CFLAGS +=	-pipe
 . endif
+.endif
+
+.if defined(__GNUC__) || defined(__clang__) && \
+	empty(CFLAGS:M*-fno-strict-aliasing*)
+# WARNING: C99 (and C11) allow compilers to perform optimizations based on the
+# "strict" aliasing, overflow, and enums rules which _will_ change the behaviour
+# of previously correct C90 and earlier code!
+CFLAGS += -fno-strict-aliasing
+.endif
+
+.if (defined(__GNUC__) && \
+	${__GNUC__} >= 4 && ${__GNUC_MINOR__} >= 2) && \
+	empty(CFLAGS:M*-fno-strict-overflow*)
+# WARNING:  Prevent the optimizer from assuming that the program
+# follows the strict signed overflow semantics permitted for the
+# language.
+#CFLAGS += -fno-strict-overflow
+.endif
+
+# XXX in GCC -fstrict-enums apparently only applies to C++
+.if defined(__GNUC__) && defined(__clang__) && \
+	empty(CFLAGS:M*-fno-strict-enums*)
+# WARNING:  Prevent the compiler from optimizing "using the assumption
+# that a value of enumerated type can only be one of the values of the
+# enumeration"
+#CFLAGS += -fno-strict-enums
+.endif
+
+.if (defined(__GNUC__) && !defined(__clang__) && \
+	${__GNUC__} >= 4 && ${__GNUC_MINOR__} >= 2) && \
+	empty(CFLAGS:M*-fno-strict-volatile-bitfields*)
+# WARNING:  Force the compiler to always read the whole underlying value!
+#CFLAGS += -fno-strict-volatile-bitfields
 .endif
 
 # Dunno for sure if this is right, but Apple's PowerPC GCC-4.0.1 does not have
