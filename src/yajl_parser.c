@@ -31,7 +31,7 @@
 
 #define MAX_VALUE_TO_MULTIPLY ((LLONG_MAX / 10) + (LLONG_MAX % 10))
 
- /* same semantics as strtol */
+ /* same semantics as strtol(3) for base=10 */
 long long
 yajl_parse_integer(const unsigned char *number, size_t length)
 {
@@ -108,7 +108,6 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
         size_t start, end, i;
         size_t spacesNeeded;
 
-        /* xxx this doesn't seem to be working right.... */
         spacesNeeded = (offset < 30 ? 40 - offset : 10);
         start = (offset >= 30 ? offset - 30 : 0);
         end = (offset + 30 > jsonTextLen ? jsonTextLen : offset + 30);
@@ -414,7 +413,7 @@ yajl_do_parse(yajl_handle hand, const unsigned char * jsonText,
                 default:
                     yajl_bs_set(hand->stateStack, yajl_state_parse_error);
                     hand->parseError =
-                        "invalid object key (must be a string)"; 
+                        "invalid object key (must be a string)";
                     goto around_again;
             }
         }
