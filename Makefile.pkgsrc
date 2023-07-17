@@ -6,7 +6,7 @@
 # "2.1.0"
 
 PKGNAME=	yajl-2.1.0
-PKGREVISION=	1
+PKGREVISION=	2
 CATEGORIES=	devel textproc
 
 # for use of ${FILESDIR} (as per "make setup-pkgsrc" below):
