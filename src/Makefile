@@ -166,7 +166,7 @@ install:	includes
 incinstall: .PHONY
 .endif
 
-.if ${TARGET_OSNAME} == "Linux"
+.if defined(TARGET_OSNAME) && ${TARGET_OSNAME} == "Linux"
 # XXX stupid GNU BinUtils LD changed its command line syntax recently,
 # apparently without concern for backward compatability.
 #

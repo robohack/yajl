@@ -15,11 +15,78 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include <assert.h>
 
 #include "yajl/yajl_tree.h"
 
-static unsigned char fileData[65536];
+/* context storage for memory debugging routines */
+typedef struct
+{
+    bool do_printfs;
+    unsigned int numFrees;
+    unsigned int numMallocs;
+    /* XXX: we really need a hash table here with per-allocation
+     *      information to find any missing free() calls */
+} yajlTestMemoryContext;
+
+/* cast void * into context */
+#define TEST_CTX(vptr) ((yajlTestMemoryContext *) (vptr))
+
+static void
+yajlTestFree(void *ctx,
+             void *ptr)
+{
+    assert(ptr != NULL);
+    TEST_CTX(ctx)->numFrees++;
+    if (TEST_CTX(ctx)->do_printfs) {
+        fprintf(stderr, "yfree:  %p\n", ptr);
+    }
+    free(ptr);
+}
+
+static void *
+yajlTestMalloc(void *ctx,
+               size_t sz)
+{
+    void *rv = NULL;
+
+    assert(sz != 0);
+    TEST_CTX(ctx)->numMallocs++;
+    rv = malloc(sz);
+    assert(rv != NULL);
+    if (TEST_CTX(ctx)->do_printfs) {
+        fprintf(stderr, "yalloc:  %p of %ju\n", rv, sz);
+    }
+    return rv;
+}
+
+static void *
+yajlTestRealloc(void *ctx,
+                void *ptr,
+                size_t sz)
+{
+    void *rv = NULL;
+
+    if (ptr == NULL) {
+        assert(sz != 0);
+        TEST_CTX(ctx)->numMallocs++;
+    } else if (sz == 0) {
+        TEST_CTX(ctx)->numFrees++;
+    }
+    rv = realloc(ptr, sz);
+    assert(rv != NULL);
+    if (TEST_CTX(ctx)->do_printfs) {
+        fprintf(stderr, "yrealloc:  %p -> %p of %ju\n", ptr, rv, sz);
+    }
+    return rv;
+}
+
+
+static unsigned char fileData[65536];   /* xxx: allocate to size of file, error if stdin can't be stat()ed? */
 
 int
 main(void)
@@ -28,35 +95,49 @@ main(void)
     yajl_val node;
     char errbuf[1024];
 
-    /* NUL plug the buffers */
-    fileData[0] = '\0';
-    errbuf[0] = '\0';
+    /* memory allocation debugging: allocate a structure which holds
+     * allocation routines */
+    yajl_alloc_funcs allocFuncs = {
+        yajlTestMalloc,
+        yajlTestRealloc,
+        yajlTestFree,
+        (void *) NULL
+    };
+
+    /* memory allocation debugging: allocate a structure which collects
+     * statistics */
+    yajlTestMemoryContext memCtx;
+
+    memCtx.do_printfs = false;          /* xxx set from a command option */
+    memCtx.numMallocs = 0;
+    memCtx.numFrees = 0;
+
+    allocFuncs.ctx = (void *) &memCtx;
+    yajl_tree_parse_afs = &allocFuncs;
 
     /* read the entire config file */
     rd = fread((void *) fileData, (size_t) 1, sizeof(fileData) - 1, stdin);
 
     /* file read error handling */
-    if (rd == 0 && !feof(stdin)) {
-        fprintf(stderr, "error encountered on file read\n");
-        return 1;
-    } else if (rd >= sizeof(fileData) - 1) {
+    if ((rd == 0 && !feof(stdin)) || ferror(stdin)) {
+        perror("error encountered on file read");
+        exit(1);
+    } else if (!feof(stdin)) {
         fprintf(stderr, "config file too big\n");
-        return 1;
+        exit(1);
     }
+    fileData[rd] = '\0';
 
     /* we have the whole config file in memory.  let's parse it ... */
     node = yajl_tree_parse((const char *) fileData, errbuf, sizeof(errbuf));
 
     /* parse error handling */
     if (node == NULL) {
-        fprintf(stderr, "parse_error: ");
-        if (strlen(errbuf)) {
-            fprintf(stderr, "%s", errbuf);
-        } else {
-            fprintf(stderr, "unknown error");
-        }
-        fprintf(stderr, "\n");
-        return 1;
+        assert(errbuf != NULL);
+        fprintf(stderr, "tree_parse_error: %s\n", errbuf);
+        fprintf(stderr, "memory leaks:\t%u\n", memCtx.numMallocs - memCtx.numFrees);
+
+        exit(1);
     }
 
     /* ... and extract a nested value from the config file */
@@ -74,5 +155,7 @@ main(void)
 
     yajl_tree_free(node);
 
-    return 0;
+    fprintf(stderr, "memory leaks:\t%u\n", memCtx.numMallocs - memCtx.numFrees);
+
+    exit(memCtx.numMallocs - memCtx.numFrees ? 1 : 0);
 }
