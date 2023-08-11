@@ -50,6 +50,18 @@ extern "C" {
 #  endif
 #endif
 
+/*+ error codes returned from this interface +*/
+typedef enum {
+    /*+ no error was encountered +*/
+    yajl_status_ok,
+    /*+ a client callback returned zero, stopping the parse +*/
+    yajl_status_client_canceled,
+    /*+ An error occurred during the parse.  Call yajl_get_error for
+     *  more information about the encountered error +*/
+    yajl_status_error
+} yajl_status;
+
+
 /*+
  * A pointer to a malloc() function.
  +*/

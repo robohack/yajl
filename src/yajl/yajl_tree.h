@@ -37,9 +37,6 @@
 extern "C" {
 #endif
 
-/*+ an optional hook to allow use of custom yajl_alloc_funcs with yajl_tree_parse() +*/
-extern yajl_alloc_funcs *yajl_tree_parse_afs;
-
 /*+ possible data types that a yajl_val_s can hold +*/
 typedef enum {
     yajl_t_string = 1,
@@ -106,6 +103,31 @@ struct yajl_val_s
     } u;
 };
 
+struct stack_elem_s;
+typedef struct stack_elem_s stack_elem_t;
+struct stack_elem_s
+{
+    char * key;
+    yajl_val value;
+    stack_elem_t *next;
+};
+
+struct context_s
+{
+    stack_elem_t *stack;
+    yajl_val root;
+    char *errbuf;
+    size_t errbuf_size;
+};
+typedef struct context_s context_t;
+
+
+typedef struct yajl_stream_context_t {
+	context_t ctx;
+	struct yajl_handle_t * handle;
+	yajl_status status;
+} yajl_stream_context_t;
+
 YAJL_API yajl_val yajl_tree_parse (const char *input,
                                    char *error_buffer, size_t error_buffer_size);
 YAJL_API void yajl_tree_free (yajl_val v);
@@ -143,6 +165,28 @@ YAJL_API yajl_val yajl_tree_get(yajl_val parent, const char ** path, yajl_type t
 
 /*+ Get a pointer to a yajl_val_array or NULL if the value is not an object. +*/
 #define YAJL_GET_ARRAY(v)  (YAJL_IS_ARRAY(v)  ? &(v)->u.array  : NULL)
+
+
+yajl_stream_context_t *yajl_tree_stream_parse_start (
+                          char *error_buffer, /*+ Pointer to a buffer in which
+                                               * an error message will be stored
+                                               * if yajl_tree_parse() fails, or
+                                               * NULL. The buffer will be
+                                               * initialized before parsing, so
+                                               * its content will be destroyed
+                                               * even if yajl_tree_parse()
+                                               * succeeds. +*/
+                          size_t error_buffer_size); /*+ Size of the memory area
+                                                     * pointed to by
+                                                     * error_buffer_size.  If
+                                                     * error_buffer_size is
+                                                     * NULL, this argument is
+                                                     * ignored. +*/
+yajl_status yajl_tree_stream_parse_feed(yajl_stream_context_t *stream_ctx,
+                                        const unsigned char* input,
+                                        size_t input_len);
+
+yajl_val yajl_tree_stream_parse_finish(yajl_stream_context_t *stream_ctx);
 
 #ifdef __cplusplus
 }

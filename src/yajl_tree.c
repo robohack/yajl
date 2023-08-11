@@ -49,24 +49,6 @@
 
 yajl_alloc_funcs *yajl_tree_parse_afs = NULL;
 
-struct stack_elem_s;
-typedef struct stack_elem_s stack_elem_t;
-struct stack_elem_s
-{
-    char * key;
-    yajl_val value;
-    stack_elem_t *next;
-};
-
-struct context_s
-{
-    stack_elem_t *stack;
-    yajl_val root;
-    char *errbuf;
-    size_t errbuf_size;
-};
-typedef struct context_s context_t;
-
 #define RETURN_ERROR(ctx,retval,...) {                                  \
         if ((ctx)->errbuf != NULL)                                      \
             snprintf ((ctx)->errbuf, (ctx)->errbuf_size, __VA_ARGS__);  \
@@ -536,6 +518,91 @@ yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
 
     return (ctx.root);
 }
+
+
+/*+
+ * Parse a string, piece by piece.
+ *
+ * Parses a null-terminated string containing JSON data.
+ *
+ * Returns a pointer to a yajl_val object which is the top-level value (root of
+ * the parse tree) or NULL on error.
+ *
+ * The memory pointed to must be freed using yajl_tree_free().  In case of an
+ * error, a null terminated message describing the error in more detail is
+ * stored in error_buffer if it is not NULL.
+ +*/
+yajl_stream_context_t *yajl_tree_stream_parse_start (
+                          char *error_buffer, /*+ Pointer to a buffer in which
+                                               * an error message will be stored
+                                               * if yajl_tree_parse() fails, or
+                                               * NULL. The buffer will be
+                                               * initialized before parsing, so
+                                               * its content will be destroyed
+                                               * even if yajl_tree_parse()
+                                               * succeeds. +*/
+                          size_t error_buffer_size) /*+ Size of the memory area
+                                                     * pointed to by
+                                                     * error_buffer_size.  If
+                                                     * error_buffer_size is
+                                                     * NULL, this argument is
+                                                     * ignored. +*/
+{
+    /* pointers to parsing callbacks */
+    static const yajl_callbacks callbacks =
+        {
+            /* null        = */ handle_null,
+            /* boolean     = */ handle_boolean,
+            /* integer     = */ NULL,
+            /* double      = */ NULL,
+            /* number      = */ handle_number,
+            /* string      = */ handle_string,
+            /* start map   = */ handle_start_map,
+            /* map key     = */ handle_string,
+            /* end map     = */ handle_end_map,
+            /* start array = */ handle_start_array,
+            /* end array   = */ handle_end_array
+        };
+
+
+    yajl_stream_context_t *stream_ctx = malloc(sizeof(*stream_ctx));
+
+    stream_ctx->ctx.stack = 0;
+    stream_ctx->ctx.root = 0;
+    stream_ctx->ctx.errbuf = error_buffer;
+    stream_ctx->ctx.errbuf_size = error_buffer_size;
+
+    if (error_buffer != NULL)
+        memset (error_buffer, 0, error_buffer_size);
+
+    static const yajl_alloc_funcs afs = {
+        .free = yajl_free,
+        .malloc = yajl_malloc,
+        .realloc = yajl_realloc
+    };
+
+    stream_ctx->handle = yajl_alloc (&callbacks, &afs, &stream_ctx->ctx);
+    yajl_config(stream_ctx->handle, yajl_allow_trailing_garbage, 1);
+
+    return stream_ctx;
+}
+
+
+yajl_status yajl_tree_stream_parse_feed(yajl_stream_context_t *stream_ctx,
+                                                                               const unsigned char* input,
+                                                                               size_t input_len) {
+
+       stream_ctx->status = yajl_parse(stream_ctx->handle,
+                                    input,
+                                    input_len);
+
+       if (yajl_status_ok != stream_ctx->status){
+               int i = 123;
+       }
+
+       return stream_ctx->status;
+}
+
 
 /*+
  * Access a nested value inside a tree.

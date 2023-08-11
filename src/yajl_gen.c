@@ -270,6 +270,7 @@ yajl_gen_free(yajl_gen g)
         case yajl_gen_map_val:                      \
             g->state[g->depth] = yajl_gen_map_key;  \
             break;                                  \
+        case yajl_gen_complete:                     \
         default:                                    \
             break;                                  \
     }
