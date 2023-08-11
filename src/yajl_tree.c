@@ -525,8 +525,8 @@ yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
  *
  * Parses a null-terminated string containing JSON data.
  *
- * Returns a pointer to a yajl_val object which is the top-level value (root of
- * the parse tree) or NULL on error.
+ * Returns a pointer to a yajl_stream_context_t object that shall be 
+ * passed to the function consuming the json data.
  *
  * The memory pointed to must be freed using yajl_tree_free().  In case of an
  * error, a null terminated message describing the error in more detail is
@@ -575,13 +575,7 @@ yajl_stream_context_t *yajl_tree_stream_parse_start (
     if (error_buffer != NULL)
         memset (error_buffer, 0, error_buffer_size);
 
-    static const yajl_alloc_funcs afs = {
-        .free = yajl_free,
-        .malloc = yajl_malloc,
-        .realloc = yajl_realloc
-    };
-
-    stream_ctx->handle = yajl_alloc (&callbacks, &afs, &stream_ctx->ctx);
+    stream_ctx->handle = yajl_alloc(&callbacks, yajl_tree_parse_afs, &stream_ctx);
     yajl_config(stream_ctx->handle, yajl_allow_trailing_garbage, 1);
 
     return stream_ctx;
@@ -589,17 +583,12 @@ yajl_stream_context_t *yajl_tree_stream_parse_start (
 
 
 yajl_status yajl_tree_stream_parse_feed(yajl_stream_context_t *stream_ctx,
-                                                                               const unsigned char* input,
-                                                                               size_t input_len) {
+                                        const unsigned char* input,
+                                        size_t input_len) {
 
        stream_ctx->status = yajl_parse(stream_ctx->handle,
-                                    input,
-                                    input_len);
-
-       if (yajl_status_ok != stream_ctx->status){
-               int i = 123;
-       }
-
+                                       input,
+                                       input_len);
        return stream_ctx->status;
 }
 
