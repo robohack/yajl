@@ -521,7 +521,7 @@ yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
 
 
 /*+
- * Parse a string, piece by piece.
+ * Begin to parse a string, piece by piece.
  *
  * Parses a null-terminated string containing JSON data.
  *
@@ -581,7 +581,9 @@ yajl_stream_context_t *yajl_tree_stream_parse_start (
     return stream_ctx;
 }
 
-
+/*+
+ * Input one or more bytes of json data
+ +*/
 yajl_status yajl_tree_stream_parse_feed(yajl_stream_context_t *stream_ctx,
                                         const unsigned char* input,
                                         size_t input_len) {
@@ -590,6 +592,39 @@ yajl_status yajl_tree_stream_parse_feed(yajl_stream_context_t *stream_ctx,
                                        input,
                                        input_len);
        return stream_ctx->status;
+}
+
+/*+
+ * Finish a stream of json data.
+ *
+ * Returns the tree corresponding to the json input.
++*/
+yajl_val yajl_tree_stream_parse_finish(yajl_stream_context_t *stream_ctx) {
+
+    char * internal_err_str;
+
+    if (stream_ctx->status != yajl_status_ok) {
+        if (stream_ctx->ctx.errbuf != NULL && stream_ctx->ctx.errbuf_size > 0) {
+               internal_err_str = (char *) yajl_get_error(stream_ctx->handle, 1,
+                     "unknown", strlen("unknown"));
+
+             snprintf(stream_ctx->ctx.errbuf, stream_ctx->ctx.errbuf_size, "%s", internal_err_str);
+             YA_FREE(&(stream_ctx->handle->alloc), internal_err_str);
+        }
+        while (stream_ctx->ctx.stack) {
+            yajl_tree_free(context_pop(&stream_ctx->ctx));
+        }
+        yajl_free (stream_ctx->handle);
+        return NULL;
+    }
+    yajl_complete_parse (stream_ctx->handle);
+
+    yajl_free (stream_ctx->handle);
+    yajl_val root = stream_ctx->ctx.root;
+
+    free(stream_ctx);
+
+    return root;
 }
 
 
