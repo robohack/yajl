@@ -575,7 +575,7 @@ yajl_stream_context_t *yajl_tree_stream_parse_start (
     if (error_buffer != NULL)
         memset (error_buffer, 0, error_buffer_size);
 
-    stream_ctx->handle = yajl_alloc(&callbacks, yajl_tree_parse_afs, &stream_ctx);
+    stream_ctx->handle = yajl_alloc(&callbacks, yajl_tree_parse_afs, &stream_ctx->ctx);
     yajl_config(stream_ctx->handle, yajl_allow_trailing_garbage, 1);
 
     return stream_ctx;
