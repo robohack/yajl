@@ -28,16 +28,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    /*+ error codes returned from this interface +*/
-    typedef enum {
-        /*+ no error was encountered +*/
-        yajl_status_ok,
-        /*+ a client callback returned zero, stopping the parse +*/
-        yajl_status_client_canceled,
-        /*+ An error occurred during the parse.  Call yajl_get_error for
-         *  more information about the encountered error +*/
-        yajl_status_error
-    } yajl_status;
+
 
     /*+ attain a human readable, english, string for an error +*/
     YAJL_API const char * yajl_status_to_string(yajl_status code);
