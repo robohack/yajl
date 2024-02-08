@@ -78,8 +78,7 @@ static yajl_val value_alloc (yajl_type type)
     yajl_val v;
 
     v = YA_MALLOC(yajl_tree_parse_afs, sizeof(*v));
-    if (v == NULL) return (NULL);
-    memset (v, 0, sizeof (*v));
+    memset(v, 0, sizeof (*v));
     v->type = type;
 
     return (v);
@@ -138,14 +137,13 @@ static int context_push(context_t *ctx, yajl_val v)
 {
     stack_elem_t *stack;
 
-    stack = YA_MALLOC(yajl_tree_parse_afs, sizeof(*stack));
-    if (stack == NULL)
-        RETURN_ERROR (ctx, ENOMEM, "Out of memory");
-    memset (stack, 0, sizeof (*stack));
+    assert(v);
 
-    assert ((ctx->stack == NULL)
-            || YAJL_IS_OBJECT (v)
-            || YAJL_IS_ARRAY (v));
+    stack = YA_MALLOC(yajl_tree_parse_afs, sizeof(*stack));
+    memset(stack, 0, sizeof (*stack));
+
+    assert(YAJL_IS_OBJECT (v) ||
+           YAJL_IS_ARRAY (v));
 
     stack->value = v;
     stack->next = ctx->stack;
@@ -194,15 +192,11 @@ static int object_add_keyval(context_t *ctx,
     tmpk = YA_REALLOC(yajl_tree_parse_afs,
                       (void *) obj->u.object.keys,
                       sizeof(*(obj->u.object.keys)) * (obj->u.object.len + 1));
-    if (tmpk == NULL)
-        RETURN_ERROR(ctx, ENOMEM, "Out of memory");
     obj->u.object.keys = tmpk;
 
     tmpv = YA_REALLOC(yajl_tree_parse_afs,
                       obj->u.object.values,
                       sizeof (*obj->u.object.values) * (obj->u.object.len + 1));
-    if (tmpv == NULL)
-        RETURN_ERROR(ctx, ENOMEM, "Out of memory");
     obj->u.object.values = tmpv;
 
     obj->u.object.keys[obj->u.object.len] = key;
@@ -229,8 +223,6 @@ static int array_add_value (context_t *ctx,
     tmp = YA_REALLOC(yajl_tree_parse_afs,
                      array->u.array.values,
                      sizeof(*(array->u.array.values)) * (array->u.array.len + 1));
-    if (tmp == NULL)
-        RETURN_ERROR(ctx, ENOMEM, "Out of memory");
     array->u.array.values = tmp;
     array->u.array.values[array->u.array.len] = value;
     array->u.array.len++;
@@ -306,15 +298,7 @@ static int handle_string (void *ctx,
     yajl_val v;
 
     v = value_alloc (yajl_t_string);
-    if (v == NULL)
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-
     v->u.string = YA_MALLOC(yajl_tree_parse_afs, string_length + 1);
-    if (v->u.string == NULL)
-    {
-        YA_FREE(yajl_tree_parse_afs, v);
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-    }
     memcpy(v->u.string, string, string_length);
     v->u.string[string_length] = 0;
 
@@ -327,14 +311,7 @@ static int handle_number (void *ctx, const char *string, size_t string_length)
     char *endptr;
 
     v = value_alloc(yajl_t_number);
-    if (v == NULL) {
-        RETURN_ERROR((context_t *) ctx, STATUS_ABORT, "Out of memory");
-    }
     v->u.number.r = YA_MALLOC(yajl_tree_parse_afs, string_length + 1);
-    if (v->u.number.r == NULL) {
-        YA_FREE(yajl_tree_parse_afs, v);
-        RETURN_ERROR((context_t *) ctx, STATUS_ABORT, "Out of memory");
-    }
     memcpy(v->u.number.r, string, string_length);
     v->u.number.r[string_length] = 0;
 
@@ -360,9 +337,6 @@ static int handle_start_map (void *ctx)
     yajl_val v;
 
     v = value_alloc(yajl_t_object);
-    if (v == NULL)
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-
     v->u.object.keys = NULL;
     v->u.object.values = NULL;
     v->u.object.len = 0;
@@ -386,9 +360,6 @@ static int handle_start_array (void *ctx)
     yajl_val v;
 
     v = value_alloc(yajl_t_array);
-    if (v == NULL)
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-
     v->u.array.values = NULL;
     v->u.array.len = 0;
 
@@ -411,9 +382,6 @@ static int handle_boolean (void *ctx, int boolean_value)
     yajl_val v;
 
     v = value_alloc (boolean_value ? yajl_t_true : yajl_t_false);
-    if (v == NULL)
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-
     return ((context_add_value (ctx, v) == 0) ? STATUS_CONTINUE : STATUS_ABORT);
 }
 
@@ -422,9 +390,6 @@ static int handle_null (void *ctx)
     yajl_val v;
 
     v = value_alloc (yajl_t_null);
-    if (v == NULL)
-        RETURN_ERROR ((context_t *) ctx, STATUS_ABORT, "Out of memory");
-
     return ((context_add_value (ctx, v) == 0) ? STATUS_CONTINUE : STATUS_ABORT);
 }
 

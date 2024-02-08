@@ -91,7 +91,6 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
             memneeded += strlen(errorText);
         }
         str = (unsigned char *) YA_MALLOC(&(hand->alloc), memneeded + 2);
-        if (!str) return NULL;
         str[0] = 0;
         strcat((char *) str, errorType);
         strcat((char *) str, " error");
@@ -131,12 +130,10 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
                 YA_MALLOC(&(hand->alloc), (size_t)(strlen((char *) str) +
                                                    strlen((char *) text) +
                                                    strlen(arrow) + 1));
-            if (newStr) {
-                newStr[0] = 0;
-                strcat((char *) newStr, (char *) str);
-                strcat((char *) newStr, (char *) text);
-                strcat((char *) newStr, arrow);
-            }
+            newStr[0] = 0;
+            strcat((char *) newStr, (char *) str);
+            strcat((char *) newStr, (char *) text);
+            strcat((char *) newStr, arrow);
             YA_FREE(&(hand->alloc), str);
             str = (unsigned char *) newStr;
         }
