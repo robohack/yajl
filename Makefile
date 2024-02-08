@@ -332,6 +332,8 @@ docs: doc/html/yajl.apdx.html
 #
 install-docs:: ${DESTDIR}${DOCDIR}/${PACKAGE}/html/
 	cd doc/html && cp -R ./ ${DESTDIR}${DOCDIR}/${PACKAGE}/html/
+	rm -f ${DESTDIR}${DOCDIR}/${PACKAGE}/html/index.html
+	ln -fs ./yajl.cxref.html ${DESTDIR}${DOCDIR}/${PACKAGE}/html/index.html
 
 # See the helper settings below the include of <bsd.obj.mk> for how ${.OBJDIR}
 # is properly reset even before it has been made.
