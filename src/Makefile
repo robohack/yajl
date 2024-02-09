@@ -206,13 +206,14 @@ lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
 
 realall all: lib${LIB}.dylib
 
-libinstall:: ${DESTDIR}${LIBDIR}/lib${LIB}.dylib
+afterinstall: ${DESTDIR}${LIBDIR}/lib${LIB}.dylib
 
 ${DESTDIR}${LIBDIR}/lib${LIB}.dylib:
 	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} \
 		${DESTDIR}${LIBDIR}/lib${LIB}.dylib.tmp
 	mv -f ${DESTDIR}${LIBDIR}/lib${LIB}.dylib.tmp \
 		${DESTDIR}${LIBDIR}/lib${LIB}.dylib
+
 .endif
 
 # note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
