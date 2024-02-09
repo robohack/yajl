@@ -138,12 +138,14 @@ static int context_push(context_t *ctx, yajl_val v)
     stack_elem_t *stack;
 
     assert(v);
+    assert(ctx);
 
     stack = YA_MALLOC(yajl_tree_parse_afs, sizeof(*stack));
     memset(stack, 0, sizeof (*stack));
 
-    assert(YAJL_IS_OBJECT (v) ||
-           YAJL_IS_ARRAY (v));
+    assert ((ctx->stack == NULL)
+            || YAJL_IS_OBJECT (v)
+            || YAJL_IS_ARRAY (v));
 
     stack->value = v;
     stack->next = ctx->stack;
