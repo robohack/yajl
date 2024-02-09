@@ -93,7 +93,7 @@
 # the Bmake that comes with pkgsrc does not work properly on macOS.
 #
 # Pkgsrc does not include Simon's MK files, but rather the bootstrap-mk-files
-# package, which (as of 20180901) are not yet fully ported to OSX/Darwin (it is
+# package, which (as of 20240210) are not yet fully ported to OSX/Darwin (it is
 # more or less just an out-of-date copy of the non-portable NetBSD MK files).
 # So, if one can do without the shared library then one can use the pkgsrc bmake
 # on macOS, and depending on the vintage of one's pkgsrc, it may also be
