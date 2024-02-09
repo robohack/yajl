@@ -2,6 +2,8 @@
 
 # XXX this should be a Makefile to facilitate parallel runs!
 
+# xxx there should probably be a trap set to remove the temp files....
+
 # note:  this script requires a modern POSIX shell with $(command substitution)
 # and $((arithmetic + expressions))
 #
@@ -133,9 +135,9 @@ for file in cases/*.json ; do
 
   # parse with a read buffer size ranging from 1-31 to stress stream parsing
   while [ $iter -lt 32  ] && [ $success = "SUCCESS" ] ; do
-    $testBin $allowPartials $allowComments $allowGarbage $allowMultiple -b $iter < $file > ${file}.test  2>&1
+    $testBin $allowPartials $allowComments $allowGarbage $allowMultiple -b $iter < $file > ${OBJDIR:-.}/${fileShort}.test  2>&1
     if [ $? -eq 0 ] ; then
-      diff ${DIFF_FLAGS} ${file}.gold ${file}.test > ${file}.out
+      diff ${DIFF_FLAGS} ${file}.gold ${OBJDIR:-.}/${fileShort}.test > ${OBJDIR:-.}/${fileShort}.out
       if [ $? -eq 0 ] ; then
         if [ $iter -eq 31 ] ; then
 	  testsSucceeded=$(( $testsSucceeded + 1 ))
@@ -150,12 +152,12 @@ for file in cases/*.json ; do
       success="FAILURE"
       iter=32
       ${echo} "${nl}"
-      if [ -f ${file}.out ] ; then
-        cat ${file}.out
+      if [ -f ${OBJDIR:-.}/${fileShort}.out ] ; then
+        cat ${OBJDIR:-.}/${fileShort}.out
       fi
     fi
     iter=$(( iter + 1 ))
-    rm -f ${file}.test ${file}.out
+    rm -f ${OBJDIR:-.}/${fileShort}.test ${OBJDIR:-.}/${fileShort}.out
   done
 
   ${echo} "${success}${nl}"

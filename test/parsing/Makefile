@@ -9,15 +9,12 @@ MAN =	# empty
 # don't install
 proginstall:
 
-# XXX N.B.:  this currently creates files in the source tree, but it does clean
-# them up properly if all goes well and it is not interrupted.
-#
 regress:
 .if defined(USE_ASAN)
 	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
-	ulimit -v unlimited && cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} sh ./run_tests.sh
+	ulimit -v unlimited && cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} OBJDIR=${.OBJDIR} sh ./run_tests.sh
 .else
-	cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} sh ./run_tests.sh
+	cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} OBJDIR=${.OBJDIR} sh ./run_tests.sh
 .endif
 
 .include <bsd.prog.mk>
