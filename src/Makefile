@@ -121,12 +121,13 @@ CFLAGS += -I${GENHDIR}
 # Note also this makes the link before the library may exist.
 #
 afterdepend: _bmake_static_lib_build_symlink
-afterinstall: _bmake_static_lib_install_symlink
 
 _bmake_static_lib_build_symlink:	.PHONY
 	ln -fs lib$(LIB).a lib$(LIB)_s.a
 
 CLEANFILES += lib$(LIB)_s.a
+
+afterinstall: _bmake_static_lib_install_symlink
 
 _bmake_static_lib_install_symlink: .PHONY
 	ln -fs lib$(LIB).a ${DESTDIR}${LIBDIR}/lib$(LIB)_s.a
