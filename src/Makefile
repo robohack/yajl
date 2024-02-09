@@ -181,6 +181,40 @@ incinstall: .PHONY
 LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 .endif
 
+# Some hacks to try to get a lib*.dylib file built and installed on macos....
+#
+# We'll still link our own programs and tests with the static library as that
+# makes testing during build possible, but providing a dylib might be useful for
+# other uses....
+#
+.if ((defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || \
+	(defined(OS) && (${OS} == "Darwin")) || \
+	(defined(.FreeBSD) && (${.FreeBSD} == "false")))
+OBJECT_FMT = Mach-O		# XXX not really of much use....
+SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR:U0}.${SHLIB_TEENY:U0}
+SHLIB_INSTALL_VERSION ?= ${SHLIB_MAJOR}
+# hmmm..... should compat be just SHLIB_MAJOR? (not according to Simon G.)
+SHLIB_COMPATABILITY_VERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR:U0}
+# XXX do we need "-install_name=${PREFIX}/lib/lib${LIB}.dylib" too?
+SHLIB_SHFLAGS=-dylib \
+	-dylib_current_version=${SHLIB_FULLVERSION} \
+	-dylib_compatibility_version=${SHLIB_COMPATABILITY_VERSION}
+
+lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
+	@echo fixing up shared library name for macos: ${.TARGET}
+	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} ${.TARGET}
+
+realall all: lib${LIB}.dylib
+
+libinstall:: ${DESTDIR}${LIBDIR}/lib${LIB}.dylib
+
+${DESTDIR}${LIBDIR}/lib${LIB}.dylib:
+	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} \
+		${DESTDIR}${LIBDIR}/lib${LIB}.dylib.tmp
+	mv -f ${DESTDIR}${LIBDIR}/lib${LIB}.dylib.tmp \
+		${DESTDIR}${LIBDIR}/lib${LIB}.dylib
+.endif
+
 # note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
 #
 # Local Variables:
