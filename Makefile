@@ -267,8 +267,14 @@ dependall: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 
 .ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR} bmake-do-docs
 
+# XXX Why isn't this working on FreeBSD!?!?!?!?  (make ${targ:S/bmake-do-//} works!)
+# (something about ${targ}_subdir_${SUBDIR} not being depended on?)
+#
 .for targ in ${BUILDTARGETS}
+. if ${targ} != ".WAIT"
 ${targ}: .PHONY ${targ:S/bmake-do-//}
+	@echo "Done ${.TARGET} ..."
+. endif
 .endfor
 
 # XXX this is just a very crude check...  not as complete as the FreeBSD check
