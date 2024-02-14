@@ -254,6 +254,27 @@ CWARNFLAGS += -fsanitize=address
 .   endif
 .  endif
 . endif
+# XXX unknown when this started.... just turn them off globally for now
+. if ${__clang_major__} >= 16 && defined(.FreeBSD) && ${.FreeBSD} == "true"
+#
+# $ cc -Werror -Wimplicit-int-conversion stdio.h
+# /usr/include/stdio.h:465:23: error: implicit conversion loses integer precision: 'int' to 'unsigned char' [-Werror,-Wimplicit-int-conversion]
+#                 return (*_p->_p++ = _c);
+#                                   ~ ^~
+#
+CWARNFLAGS += -Wno-implicit-int-conversion
+# /usr/include/_ctype.h:102:39: error: implicit conversion loses integer precision: 'unsigned long' to 'int' [-Werror,-Wshorten-64-to-32]
+#                 _CurrentRuneLocale->__runetype[_c]) & _f;
+#                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~
+CWARNFLAGS += -Wno-shorten-64-to-32
+# /usr/include/sys/types.h:333:36: error: implicit conversion changes signedness: 'dev_t' (aka 'unsigned long') to 'int' [-Werror,-Wsign-conversion]
+#         return (((_d >> 32) & 0xffffff00) | ((_d >> 8) & 0xff));
+#         ~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+# /usr/include/sys/time.h:147:38: error: implicit conversion changes signedness: 'uint64_t' (aka 'unsigned long') to 'sbintime_t' (aka 'long') [-Werror,-Wsign-conversion]
+#         return (((sbintime_t)_bt.sec << 32) + (_bt.frac >> 32));
+#         ~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+CWARNFLAGS += -Wno-sign-conversion
+. endif # clang >= 16 && FreeBSD
 # -fsanitize must also be provided to the linker (for hidden runtime libraries)
 LDFLAGS += ${CWARNFLAGS:M-fsanitize=*}
 .endif
