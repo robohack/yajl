@@ -88,8 +88,10 @@ COVERITY_TOP_CONFIG =	1
 # Set ${CWARNFLAGS} based on the detected compiler and its version.
 #
 # Note we do depend on the mk-files (notably <bsd.sys.mk>) to add ${CWARNFLAGS}
-# to ${CFLAGS}, but so far this is universally portable.
+# to ${CFLAGS}, and so far only Crufty's Mk-files don't do this...
 #
+# xxx consider ${CWARNFLAGS.${COMPILER_TYPE}} ala FreeBSD to hopefully simplify
+# the .if logic somewhat....
 
 # -Winline
 #
@@ -417,6 +419,11 @@ CFLAGS +=	-fstack-protector-all
 	empty(CWARNFLAGS:M*-Wstack-protector*)
 CWARNFLAGS +=	-Wstack-protector
 .endif
+
+# XXX override newer Crufty Mk-files <warnings.mk>....  We have more!
+#
+WARNINGS_SET =	HIGH
+WARNINGS =	${CWARNFLAGS}
 
 # This is a hack for my own NetBSD releases where older versions don't include
 # CPPFLAGS in the LINK macro, so the ".c:" rule won't get CPPFLAGS..
