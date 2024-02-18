@@ -218,6 +218,7 @@ SUBDIR =	src
 #
 SUBDIR +=	.WAIT
 
+SUBDIR +=	doc
 SUBDIR +=	reformatter
 SUBDIR +=	verify
 SUBDIR +=	example
@@ -310,147 +311,15 @@ _bmake_install_dirs: .PHONY
 	${INSTALL} -d ${DESTDIR}${instdir}
 .endfor
 
-# XXX This, along with the dependency of install-docs on the HTML directory,
-# seems necessary for Bmake (in pkgsrc and on Linux) to avoid parallel jobs
-# during install from running ahead of the install directories being made....
+# XXX This seems necessary for BMake (in pkgsrc and on Linux) to avoid parallel
+# jobs during install from running ahead of the install directories being
+# made....
 #
 ${bmake_install_dirs:S|^|${DESTDIR}|}: _bmake_install_dirs
 
-#####################
-#
-# Now some special hooks for building YAJL's API documentation.
-#
-# n.b.:  Use of ${MKDOC} must come after an include of <bsd.own.mk>, which was
-# done via the include of "Makefile.inc" just above.
-#
-.if !defined(MKDOC) || empty(MKDOC:M[Nn][Oo])
-#
-# Note that here we're using MKDOC only to control HTML docs -- not to control
-# the install of the basic README and COPYING files, etc.  This may not be
-# standard use, but we're really only using it to avoid needing Cxref to build.
-#
-# Alternatively one can set CXREF=true on the command line or in the environ.
-#
-
-docs: doc/html/yajl.apdx.html
-
-# See below for additional, non-optional, rules for other docs
-#
-install-docs:: ${DESTDIR}${DOCDIR}/${PACKAGE}/html/
-	cd doc/html && cp -R ./ ${DESTDIR}${DOCDIR}/${PACKAGE}/html/
-	rm -f ${DESTDIR}${DOCDIR}/${PACKAGE}/html/index.html
-	ln -fs ./yajl.cxref.html ${DESTDIR}${DOCDIR}/${PACKAGE}/html/index.html
-
-# See the helper settings below the include of <bsd.obj.mk> for how ${.OBJDIR}
-# is properly reset even before it has been made.
-#
-# Note on first run before ${.OBJDIR} exists, make obviously has not yet been
-# able to chdir there, so we have to do so explicitly in this rule after
-# depending on bmake-do-obj to do the making of the directory.
-#
-doc/html: bmake-do-obj
-	cd ${.OBJDIR} && mkdir -p doc/html
-
-# XXX this really SHOULD also depend on all the $${files} found herein....
-#
-doc/html/yajl.apdx.html: doc/html yajl.cxref
-	cd ${.CURDIR} && \
-	files=$$(find ./src -depth -type d \( -name CVS -or -name .git -or -name .svn -or -name build \) -prune -or -type f \( -name '*.[ch]' -o -name '*.cxref' \) -print); \
-	files="yajl.cxref $${files} reformatter/json_reformat.c example/parse_config.c"; \
-	for file in $${files}; do \
-		${CXREF} -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -std=c99 -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
-	done;\
-	for file in $${files}; do \
-		${CXREF} -warn-all -xref-all -block-comments -O${.OBJDIR}/doc/html -N${PACKAGE} -html -html-src -I${.CURDIR}/src -I${GENHDIR} -CPP 'cc -E -std=c99 -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
-	done; \
-	${CXREF} -index-all -O${.OBJDIR}/doc/html -N${PACKAGE} -html
-	ln -fs yajl.cxref.html ${.OBJDIR}/doc/html/index.html
-
-.endif	# ${MKDOC} != "no"
-
-# n.b.:  we always install these documentation files -- they do not have to be
-# built or transformed from their original source form
-#
-DOCFILES =		\
-	README		\
-	COPYING		\
-	TODO
-
-install-docs:: .PHONY beforeinstall docs .WAIT # maninstall
-.for docfile in ${DOCFILES}
-	cp ${.CURDIR:Q}/${docfile} ${DESTDIR}${DOCDIR}/${PACKAGE}/
-.endfor
-
-# this is how we hook in the "docs" install...
-#
-afterinstall: .PHONY install-docs
-
-# n.b. this may be needed for making docs/html from this top-level directory
-#
-# XXX We include it first because it might include <bsd.subdir.mk>!
-#
-.include <bsd.obj.mk>
-
 # include the "standard" mk-file for building in sub-directories
 #
-# XXX unfortunately BMake's (and older FreeBSD's) mk-files will again include
-# <bsd.subdir.mk> from within <bsd.obj.mk>.  Worse there's no common macro
-# defined in all common versions of <bsd.subdir.mk>.
-#
-# XXX However it currently seems as if every <bsd.obj.mk> that includes
-# <bsd.subdir.mk> on its own also defines ${CANONICALOBJDIR}, so we protect this
-# include with that knowledge:
-#
-.if !defined(CANONICALOBJDIR)
 .include <bsd.subdir.mk>
-.endif
-
-# This block must come after <bsd.obj.mk> in order to use ${__objdir} or
-# ${CANONICALOBJDIR}:
-#
-# XXX This futzing with .OBJDIR could be avoided if we didn't do it from here
-# (i.e. in the top-level directory) -- I.e.:  Consider moving the main header
-# file, i.e. yajl.cxref, to a "docs" subdir and do it all there.
-#
-# This reset is needed IFF ${.OBJDIR} didn't exist on startup and, because this
-# is the top-level Makefile, make won't have been able to chdir there yet on
-# first invocation (i.e. before it does the bmake-do-obj target).  Perhaps all
-# <bsd.obj.mk> files should have been/be resetting ${.OBJDIR} internally!
-#
-# XXX this (obviously) makes "make -V .OBJDIR" show the expected value, but it
-# doesn't immediately go there, i.e. without the cd in the doc/html rule above.
-#
-# (Note that IFF ${.OBJDIR} doesn't exist then this also leaves ${.OBJDIR} as a
-# relative directory, not an absolute path, but that's ok as doc/html depends on
-# bmake-do-obj and so will create the missing ${.OBJDIR} before using it.)
-#
-.if !defined(MKDOC) || empty(MKDOC:M[Nn][Oo])
-#
-# first for NetBSD's native mk-files:
-#
-. if defined(__objdir)
-#
-# reset .OBJDIR so it expands correctly herein on first go when it doesn't exist
-#
-.OBJDIR = ${__objdir}
-#
-# If ${.OBJDIR} does now exist then (re)canonicalize .OBJDIR, and reset internal
-# stuff (chdir(), set $PWD, etc.)
-#
-.OBJDIR: ${.OBJDIR}
-#
-# now do the same for BMake's (including FreeBSD') (and Apple's old bsdmake)
-# mk-files...
-#
-# XXX this should also work for modern bmake-using FreeBSD and for Simon's
-# mk-files, but then again with WITH_AUTO_OBJ it may not be necessary.
-#
-. elif defined(CANONICALOBJDIR)
-.OBJDIR = ${CANONICALOBJDIR}
-.OBJDIR: ${.OBJDIR}
-. endif
-#
-.endif	# ${MKDOC} != "no"
 
 #
 # Local Variables:
