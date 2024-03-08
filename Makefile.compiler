@@ -63,9 +63,13 @@ __clang_patchlevel__ !=	echo __clang_patchlevel__ | $(CC) -E - | sed '/\#/d;s/__
 . endif
 .endif
 
-.if ((defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || \
+# Note:  TARGET_OSNAME is from Crufty's Mk files (host-target.mk, own.mk), and
+# OS is from pkgsrc bootstrap-mk.  .FreeBSD is a trick shared by FreeBSD and old
+# MacOS bsdmake.
+#
+.if ((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || \
 	(defined(OS) && (${OS} == "Darwin")) || \
-	(defined(.FreeBSD) && (${.FreeBSD} == "false")))
+	(defined(.FreeBSD) && (empty(.FreeBSD) || (${.FreeBSD} == "false"))))
 #
 # NOTE: Mac OS X does not use GNU ld, but....
 #
@@ -325,7 +329,7 @@ LDSTATIC := # empty -- leak sanitizer does not support static linking
 DBG ?= -g3
 OPTIM ?= -O2
 
-.if (defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || defined(.FreeBSD)
+.if (defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || defined(.FreeBSD)
 # for both FreeBSD and Mac OS X....
 NO_SHARED = YES
 .else
