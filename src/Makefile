@@ -187,22 +187,44 @@ LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 # makes testing during build possible, but providing a dylib might be useful for
 # other uses....
 #
-.if ((defined(_HOST_OSNAME) && (${_HOST_OSNAME} == "Darwin")) || \
-	(defined(OS) && (${OS} == "Darwin")) || \
-	(defined(.FreeBSD) && (${.FreeBSD} == "false")))
+.if ${MAKE} != "bsdmake" && \
+	((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || \
+	 (defined(OS) && (${OS} == "Darwin")) || \
+	 (defined(.FreeBSD) && (${.FreeBSD} == "false")))
+#
+# but we only need to do this for non-sjg (or really old sgj) Mk-files!
+#
+. if !defined(LD_solink) || (${LD_solink} != "dylib")
 OBJECT_FMT = Mach-O		# XXX not really of much use....
-SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR:U0}.${SHLIB_TEENY:U0}
+# we should avoid :U for older bmakes, but this breaks something
+.  if !defined(SHLIB_MINOR)
+SHLIB_MINOR = 0
+.  endif
+.  if !defined(SHLIB_TEENY)
+SHLIB_TEENY = 0
+.  endif
+.  if ${MAKE} == "bsdmake"
+SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}
+.  else
+SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR}.${SHLIB_TEENY}
+.  endif
 SHLIB_INSTALL_VERSION ?= ${SHLIB_MAJOR}
 # hmmm..... should compat be just SHLIB_MAJOR? (not according to Simon G.)
-SHLIB_COMPATABILITY_VERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR:U0}
+SHLIB_COMPATABILITY_VERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR}
 # XXX do we need "-install_name=${PREFIX}/lib/lib${LIB}.dylib" too?
+# xxx -dylib_*_version might be too new for macos-10.x
 SHLIB_SHFLAGS=-dylib \
 	-dylib_current_version=${SHLIB_FULLVERSION} \
 	-dylib_compatibility_version=${SHLIB_COMPATABILITY_VERSION}
 
+# xxx maybe this link should point at just lib${LIB}.so ???
 lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
 	@echo fixing up shared library name for macos: ${.TARGET}
 	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} ${.TARGET}
+
+#lib${LIB}.${SHLIB_INSTALL_VERSION}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
+#	@echo fixing up shared library name for macos: ${.TARGET}
+#	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} ${.TARGET}
 
 realall all: lib${LIB}.dylib
 
@@ -214,6 +236,7 @@ ${DESTDIR}${LIBDIR}/lib${LIB}.dylib:
 	mv -f ${DESTDIR}${LIBDIR}/lib${LIB}.dylib.tmp \
 		${DESTDIR}${LIBDIR}/lib${LIB}.dylib
 
+. endif # !sjg
 .endif
 
 # note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
