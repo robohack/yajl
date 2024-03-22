@@ -214,24 +214,46 @@ bmake_topdir =	.
 
 SUBDIR =	src
 
-# If you're staring at the line below becaouse your build blew up with something
-# resembling "warning: Extra target ignored" and/or "warning: Special and
-# mundane targets don't mix. Mundane ones ignored" and/or "cd:  .../.WAIT:  No
-# such file or directory", then please read the following:
-#
-# Many older mk-files support having a .WAIT in a SUBDIR list, but it is vital
-# and necessary for parallel builds (i.e. use of 'make -j') (.ORDER doesn't
+# Some variants of Mk-files (e.g. NetBSD's) build subdirs in parallel (when
+# "make -j N" with N>1 is used) and they support having a .WAIT in a SUBDIR
+# list, and for them it is vital and necessary to have the .WAIT (.ORDER doesn't
 # quite make up for it because of the fact these directories always exist prior
 # to starting make).
 #
-# The best fix by far is to upgrade to a current version of Bmake.
+# BMake with pkgsrc's bootstrap-mk-files is equivalent to NetBSD's native
+# mk-files, so work fine with '-h' so long as this .WAIT is present.
 #
-# If you can't easily do that, or you're just in a hurry to build yajl this one
-# time, you can comment out the .WAIT settings here and, if necessary, below.
+# BMake with sjg's Mk-files doesn't build subdirs in parallel at all yet, and
+# until 20240212 it does not support .WAIT in the SUBDIR list, but older
+# versions will work fine with '-j' so long as this .WAIT is not there (things
+# within each directory will be built in parallel if possible).
 #
-# WARNING!!!  But if you eliminate .WAIT then DO NOT invoke parallel builds!
+# BMake (i.e. native make if recent) on FreeBSD with FreeBSD's mk-files also
+# does build subdirs in parallel IFF SUBDIR_PARALELL is defined, and it does
+# allow/require .WAIT in the SUBDIR list.  Note if SUBDIR_PARALLEL is not
+# defined it will still work fine with '-j' and with or without this .WAIT.
 #
+# The really old bsdmake on OSX/macOS has a wonky huge MAKE_VERSION....
+#
+# WARNING!!!  If .WAIT is not included in SUBDIR for any reason then DO NOT
+# invoke parallel builds (no -j)!
+#
+.if !defined(MAKE_VERSION) || \
+	(defined(MAKE_VERSION) && (${MAKE_VERSION} >= 20240212 && ${MAKE_VERSION} < 5200408120)) || \
+	(defined(.FreeBSD) && (${.FreeBSD} == "true")) || \
+	(defined(_BSD_OWN_MK_) && (${_BSD_OWN_MK_} == 1))
 SUBDIR +=	.WAIT
+SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
+.elif (defined(.MAKE.JOBS) && (${.MAKE.JOBS} > 1))
+#
+# XXX for older (pre-20240212) sjg Mk-files, assuming bmake is same version,
+# this can be commented out as SUBDIRs are never built in parallel.
+#
+# xxx n.b.:  only more recent bmake's define .MAKE.JOBS.  Maybe to support
+# ancient OSx bsdmake maybe the .WAIT should be left in so the user has to
+# manually remove it and thus see that parallel builds are unsupported?
+. error "Parallel builds not supported without .WAIT in SUBDIR list."
+.endif
 
 SUBDIR +=	doc
 SUBDIR +=	reformatter
