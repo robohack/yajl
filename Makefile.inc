@@ -296,6 +296,10 @@ CFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src
 #
 .include <bsd.own.mk>
 
+# In NetBSD all TARGETS are candiates for making in the SUBDIR list
+#
+# (but avoid creating TARGETS if it doesn't exist)
+#
 .if !empty(TARGETS)
 . if empty(TARGETS:Mdocs)
 TARGETS +=	docs
@@ -313,13 +317,27 @@ TARGETS +=	TAGS
 TARGETS +=	showenv
 . endif
 .else
-# In FreeBSD the list of SUBDIR_TARGETS cannot be appended to after including
-# <bsd.subdir.mk>, but most of the interesting targets, such as some of these
-# below, are not added to the default value of SUBDIR_TARGETS until it is
-# included, so it's pointless to check here if they're already in the list.
+#
+# In FreeBSD and sjg's Mk-files the list of SUBDIR_TARGETS cannot be appended to
+# after including <bsd.subdir.mk>, but most of the interesting targets, such as
+# some of these below, are not added to the default value of SUBDIR_TARGETS
+# until it is included, so it's pointless to check here if they're already in
+# the list.
+#
+# Note:  In FreeBSD SUBDIR_TARGETS was once reserved for adding custom targets
+# that should recurse into subdirs, and the main meat was in ALL_SUBDIR_TARGETS,
+# but again that couldn't be seen until after <bsd.subdir.mk> was included.
+#
+# "regress" was once a default for FreeBSD, but not for some time now.
+#
+# XXX Dunno why I added obj, depend, and tags.  They've been there in FreeBSD
+# for a long time.
+#
+#SUBDIR_TARGETS +=	obj
+#SUBDIR_TARGETS +=	depend
 SUBDIR_TARGETS +=	docs
 SUBDIR_TARGETS +=	regress
-SUBDIR_TARGETS +=	tags
+#SUBDIR_TARGETS +=	tags
 SUBDIR_TARGETS +=	TAGS
 SUBDIR_TARGETS +=	showenv
 .endif
