@@ -124,11 +124,12 @@ CWARNFLAGS += -Wcast-qual
 CWARNFLAGS += -Wpointer-arith
 CWARNFLAGS += -Wshadow
 # code may not be quite ready for full const-ification yet...
-#CWARNFLAGS += -Wwrite-strings
+CWARNFLAGS += -Wwrite-strings
 # this isn't mentioned in 1.42's manual but causes no error
 CWARNFLAGS += -Wstrict-prototypes
-#XXX# -Wsystem-headers does not go well with -Wundef
+#XXX# -Wsystem-headers does not go well on many systems!
 #XXX#CWARNFLAGS += -Wsystem-headers
+CWARNFLAGS += -Wno-system-headers
 .endif # ${__GNUC__} >= 1
 
 # in addition to -Wall
