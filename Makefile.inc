@@ -125,39 +125,18 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 
 # For testing and debugging -- at least on sane systems, or with 'bmake'
 #
-# (note these can also be overridden on the command line)
+# (note:  these can also be overridden on the command line)
 #
 # (note:  bmake puts optimizer flags in DBG)
+#
+# (note:  defaults are set in Makefile.compiler)
 #
 #DBG ?= -g
 #OPTIM ?= -O0
 
-# Contrary to what Makefile.compiler claims, do enable system-specific warnings
-# -- this will likely double up on many of the flags added by Makefile.compiler,
-# but it may also add some target-specific flags that might be useful.
+# If you are making changes and want to be sure to clean up all warnings....
 #
-# Of course this is just for developers -- it could be commented out for users.
-#
-WARNS = 10
-
-# However do not enable -Werror, by default.
-#
-#NOGCCERROR = 1
-
-# Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly
-#
-CSTD = c99
-
-# However since <bsd.sys.mk> hasn't been included yet, this will still add the
-# flag anyway...
-#
-.if empty(CFLAGS:M*-std=${CSTD}*)
-CFLAGS += -std=${CSTD}
-.endif
-.if !empty(unix:M*NetBSD*)
-# prevent NetBSD's mk-files from adding -std=gnu99 to CFLAGS
-COVERITY_TOP_CONFIG =	1
-.endif
+#CWARNFLAGS += -Werror
 
 # N.B.:  testing in the build or 'install' (distribution) directories, or making
 # a distribution that can be un-packed on a target system in any arbitrary

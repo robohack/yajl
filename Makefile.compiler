@@ -79,13 +79,27 @@ __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
 
-# Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly
+# Enable system-specific warnings -- this will likely double up on many of the
+# flags added by Makefile.compiler, but on rare occasions it may also add some
+# host-specific flags that might be useful.
 #
-CSTD ?= c99
+# Of course this is just for developers, and beware it often includes
+# -Wsystem-headers leading to miles of useless warnings!
+#
+# XXX so far no system has required this be explicitly set to "0"
+#
+#WARNS = 10
 
-.if !empty(unix:M*NetBSD*)
-# prevent NetBSD's mk-files from adding -std=gnu99 to CFLAGS
-COVERITY_TOP_CONFIG =	1
+# Do not enable/allow -Werror
+#
+NOGCCERROR = 1
+NOCLANGERROR = 1
+# more recent FreeBSDs deprecate NO_WERROR
+# (Note the really old bsdmake on OSX/macOS has a wonky huge MAKE_VERSION.)
+.if defined(MAKE_VERSION) && (${MAKE_VERSION} >= 20210106 && ${MAKE_VERSION} < 5200408120)
+MK_WERROR = no
+.else
+NO_WERROR = 1
 .endif
 
 #
@@ -315,6 +329,17 @@ LDSTATIC := # empty -- leak sanitizer does not support static linking
 # N.B.:  -g3 is required if debugging is wanted while optimizing with -O2.
 DBG ?= -g3
 OPTIM ?= -O2
+
+# Note:  FreeBSD's mk-files (<bsd.sys.mk>) use this directly, and correctly
+#
+CSTD ?= c99
+
+# prevent NetBSD's mk-files from adding -std=gnu99 to CFLAGS
+#
+.if !empty(unix:M*NetBSD*)
+# XXX this is very ad-hoc, obviously, but until something better is done...
+COVERITY_TOP_CONFIG =	1
+.endif
 
 .if (defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || defined(.FreeBSD)
 # for both FreeBSD and Mac OS X....
