@@ -167,7 +167,11 @@ install:	includes
 incinstall: .PHONY
 .endif
 
-.if defined(TARGET_OSNAME) && ${TARGET_OSNAME} == "Linux"
+# Note:  TARGET_OSNAME is from sjg's Mk-files (host-target.mk, own.mk), and
+# OS is from pkgsrc bootstrap-mk.
+#
+.if ((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Linux")) || \
+	(defined(OS) && (${OS} == "Linux")))
 # XXX stupid GNU BinUtils LD changed its command line syntax recently,
 # apparently without concern for backward compatability.
 #
