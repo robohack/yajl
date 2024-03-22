@@ -14,13 +14,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, macos-11 ] # ubuntu-18.04, netbsd!!!, freebsd!!!, openbsd!!!
+        # latest runners:  ubuntu-latest, ubuntu-22.04, ubuntu-20.04, macos-latest, macos-12, macos-11
+        os: [ ubuntu-latest, ubuntu-20.04, macos-latest, macos-11 ] # ubuntu-22.04, netbsd!!!, freebsd!!!, openbsd!!!
         cc: [ gcc, clang ]
         make: [ bmake, make ]
         sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
         # XXX this isn't the ideal way to handle a binary option?
         docs: [ yes, no ]
         exclude:
+        # N.B.:  here we _EXCLUDE_ the matrix options we don't want!
+        # MacOS-11.x
         - os: macos-11
           # it's clang anyway
           cc: gcc
@@ -29,6 +32,16 @@ jobs:
           make: make
         - os: macos-11
           docs: yes
+        # MacOS-12.x
+        - os: macos-12
+          # it's clang anyway
+          cc: gcc
+        - os: macos-12
+          # make is gmake
+          make: make
+        - os: macos-12
+          docs: yes
+        # MacOS-latest
         - os: macos-latest
           # it's clang anyway
           cc: gcc
@@ -37,20 +50,27 @@ jobs:
           make: make
         - os: macos-latest
           docs: yes
-        - os: ubuntu-18.04
+        # Ubuntu 22.04
+        - os: ubuntu-22.04
           # it's gmake
           make: make
-        - os: ubuntu-18.04
-          # errors in header files
-          docs: yes
-        - os: ubuntu-latest
-          # it's gmake
-          make: make
-        - os: ubuntu-latest
-          # see if there are still errors in header files
+        - os: ubuntu-22.04
           docs: no
+        # Ubuntu 20.04
+        - os: ubuntu-20.04
+          # it's gmake
+          make: make
+        - os: ubuntu-20.04
+          docs: no
+        # Ubuntu Latest
+        - os: ubuntu-latest
+          # it's gmake
+          make: make
+        - os: ubuntu-latest
+          docs: no
+        # NetBSD
         - os: netbsd-latest
-          # xxx or we could also install bmake and bootstrap-mk-files
+          # xxx or we could also install bmake
           make: bmake
         - os: netbsd-latest
           cc: clang
@@ -58,35 +78,30 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: whoami
-      run: uname -a
-    - name: dependencies (Ubuntu-latest)
-      if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get update
-        sudo apt-get install bmake cxref
-    - name: dependencies (Ubuntu-18.04)
-      if: matrix.os == 'ubuntu-18.04'
-      run: |
-        sudo apt-get update
-        sudo apt-get install bmake cxref
-    - name: dependencies (MacOS-latest)
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew update
-        brew install bmake
-    - name: dependencies (MacOS-11)
-      if: matrix.os == 'macos-11'
-      run: |
-        brew update
-        brew install bmake
-    - name: dependencies (NetBSD-latest)
-      if: matrix.os == 'netbsd-latest'
-      run: |
-        pkgin install cxref clang
-    - name: showversions
-      run: |
+        uname -a
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
+      if: startsWith(matrix.os, "macos")
+      run: |
+        sw_vers
+    - name: dependencies (Ubuntu)
+      if: startsWith(matrix.os, "ubuntu")
+      run: |
+        sudo apt-get update
+        sudo apt-get install bmake cxref
+    - name: dependencies (MacOS)
+      if: startsWith(matrix.os, "macos")
+      run: |
+        # n.b.:  cxref is in macports.... which apparently can be installed like this:
+	# wget https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
+	# sudo installer -pkg ./MacPorts-2.9.1-14-Sonoma.pkg -target /
+        brew update
+        brew install bmake
+    - name: dependencies (NetBSD)
+      if: startsWith(matrix.os, "netbsd")
+      run: |
+        pkgin install cxref
     - name: builddir
       run: rm -rf build && mkdir build
     - name: showenv
