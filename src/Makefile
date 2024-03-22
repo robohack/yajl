@@ -145,23 +145,16 @@ _bmake_static_lib_install_symlink: .PHONY
 SUBDIR += yajl
 
 .include <bsd.lib.mk>
-.if !defined(DISTRIBUTION)	# avoid a duplicate include on some systems
-.include <bsd.subdir.mk>
-.endif
-.sinclude <inc.mk>			# hack for crufty.net mk-files
-
-# this has to come after to avoid upsetting the check in any system mk-file
-#
-.if target(install)
-# get includes to install at install time
-install:	includes
+# avoid a duplicate include on some systems
+.if !defined(DISTRIBUTION)
+. include <bsd.subdir.mk>
 .endif
 
-# xxx hmmmm.... weird!  Avoid a "don't know how to make incinstall" error on
-# macOS with Homebrew bmake-20181221:
+# xxx hmmmm.... weird!  Avoid a "don't know how to make incinstall" error with
+# Bmake-20181221 and newer (and maybe some older?  was ok in mk-20160401):
 #
-# (this target is defined in <bsd.inc.mk> (on at least NetBSD and DragonflyBSD)
-# which is included in <bsd.lib.mk> and others)
+# (this target is defined in <bsd.inc.mk> (on at least NetBSD and DragonflyBSD,
+# and in sjg's Mk-files) which is included in <bsd.lib.mk> and others)
 #
 .if !target(incinstall)
 incinstall: .PHONY
