@@ -431,17 +431,17 @@ yajl_val yajl_tree_parse (const char *input, /*+ Pointer to a null-terminated
     /* pointers to parsing callbacks */
     static const yajl_callbacks callbacks =
         {
-            /* null        = */ handle_null,
-            /* boolean     = */ handle_boolean,
-            /* integer     = */ NULL,
-            /* double      = */ NULL,
-            /* number      = */ handle_number,
-            /* string      = */ handle_string,
-            /* start map   = */ handle_start_map,
-            /* map key     = */ handle_string,
-            /* end map     = */ handle_end_map,
-            /* start array = */ handle_start_array,
-            /* end array   = */ handle_end_array
+            /* .yajl_null        = */ handle_null,
+            /* .yajl_boolean     = */ handle_boolean,
+            /* .yajl_integer     = */ NULL,
+            /* .yajl_double      = */ NULL,
+            /* .yajl_number      = */ handle_number,
+            /* .yajl_string      = */ handle_string,
+            /* .yajl_start_map   = */ handle_start_map,
+            /* .yajl_map_key     = */ handle_string,
+            /* .yajl_end_map     = */ handle_end_map,
+            /* .yajl_start_array = */ handle_start_array,
+            /* .yajl_end_array   = */ handle_end_array
         };
 
     yajl_handle handle;
