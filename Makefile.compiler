@@ -207,7 +207,10 @@ CWARNFLAGS += -Wtraditional-conversion
 CWARNFLAGS += -Wunreachable-code
 # note: this only works if we don't turn off -fstrict-overflow (which we
 # normally do) _and_ we have -O2 or greater (see below)
+. if(${__GNUC_MINOR__} >= 1)
+# xxx not in 4.0.1, and in 4.2.1, but when first?
 CWARNFLAGS += -Wstrict-overflow=5
+. endif
 .endif
 
 # maybe this is right? (it's always enabled in more recent GCC's)
