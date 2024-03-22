@@ -47,7 +47,7 @@
 #define STATUS_CONTINUE 1
 #define STATUS_ABORT    0
 
-yajl_alloc_funcs *yajl_tree_parse_afs = NULL;
+YAJL_API yajl_alloc_funcs *yajl_tree_parse_afs = NULL;
 
 struct stack_elem_s;
 typedef struct stack_elem_s stack_elem_t;
