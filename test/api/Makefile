@@ -7,6 +7,8 @@ PROG = 	gen-extra-close
 MAN =	# empty
 
 # don't install
+INTERNALPROG =	# defined
+realinstall:
 proginstall:
 
 # this test seems to fail, the old run_tests script was bogus and

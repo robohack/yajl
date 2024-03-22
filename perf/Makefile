@@ -10,6 +10,8 @@ PROG = 	perftest
 MAN =	# empty
 
 # don't install
+INTERNALPROG =	# defined
+realinstall:
 proginstall:
 
 regress:

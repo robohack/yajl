@@ -7,6 +7,8 @@ PROG = 	parse_config
 MAN =	# empty
 
 # don't install
+INTERNALPROG =	# defined
+realinstall:
 proginstall:
 
 # xxx hmmm....  stdout and stderr are reversed

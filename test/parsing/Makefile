@@ -7,6 +7,8 @@ PROG = 	yajl_test
 MAN =	# empty
 
 # don't install
+INTERNALPROG =	# defined
+realinstall:
 proginstall:
 
 regress:
