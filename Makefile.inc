@@ -70,6 +70,7 @@
 #	# include done by <bsd.prog.mk> in the subdir's Makefile
 #	.include "../Makefile.inc"
 
+.if !target(yajl-showenv)
 
 # The common name of the package.
 #
@@ -396,15 +397,19 @@ docs: .PHONY
 
 # Makefile debugging support
 #
-showenv: .PHONY
+showenv: yajl-showenv .PHONY
+
+yajl-showenv: .PHONY
 	@echo "" ; \
 	echo "${.OBJDIR}/${bmake_topdir}/src"; \
 	if [ -d "${.OBJDIR}/${bmake_topdir}/src" ]; then \
 		echo "the directory shown above exists!"; \
 	fi; \
 	echo ""; \
-	echo "Vars:"; \
+	echo "Some Interesting Vars:"; \
 	echo "unix = ${unix:Q}"; \
+	echo "MAKE_VERSION = ${MAKE_VERSION:Q}"; \
+	echo ".FreeBSD = ${.FreeBSD:Q}"; \
 	echo ".CURDIR = ${.CURDIR:Q}"; \
 	echo ".OBJDIR = ${.OBJDIR:Q}"; \
 	echo ".OBJDIR:T = ${.OBJDIR:T:Q}"; \
@@ -418,7 +423,10 @@ showenv: .PHONY
 	echo "MKDYNAMICROOT = ${MKDYNAMICROOT:Q}"; \
 	echo "MKLINT = ${MKLINT:Q}"; \
 	echo "LDADD = ${LDADD:Q}"; \
-	echo "DPADD = ${DPADD:Q}"
+	echo "DPADD = ${DPADD:Q}"; \
+	echo ""
+
+.endif # !target(yajl-showenv)
 
 #
 # Local Variables:
