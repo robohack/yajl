@@ -387,7 +387,7 @@ TAGS: ${SRCS}
 .endif
 
 .if !target(docs)
-docs:
+docs: .PHONY
 .endif
 
 # finally we include Makefile.compiler
