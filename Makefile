@@ -1,14 +1,14 @@
 # -*- makefile-bsdmake -*-
 
 # This Makefile (and its associated include files) works with NetBSD Make and
-# Simon Gerraty's Bmake & Mk-files from http://www.crufty.net/FreeWare/, and
-# with FreeBSD make with caveats.  For many systems the bmake included in pkgsrc
-# will also work (see https://pkgsrc.org/).
+# Simon Gerraty's (sjg's) BMake & Mk-files from http://www.crufty.net/FreeWare/,
+# and with FreeBSD make with caveats.  For many systems the BMake included in
+# pkgsrc will also work (see https://pkgsrc.org/).
 #
 # See:  http://www.crufty.net/ftp/pub/sjg/help/bmake.htm
 #
 # Pkgsrc will install on a vast number of systems, including MS-Windows with
-# Cygwin.  Similarly Simon's Bmake works on most any Unix or Unix-like system.
+# Cygwin.  Similarly Simon's BMake works on most any Unix or Unix-like system.
 #
 # You should use $MAKEOBJDIRPREFIX so as to build everything elsewhere outside
 # of, or within a single sub-directory, of the source tree (i.e. instead of
@@ -26,11 +26,13 @@
 # just use $MAKEOBJDIRPREFIX, set in the environment (except on OpenBSD since
 # 5.5, where $MAKEOBJDIR is necessary).
 #
-# Optionally you may change the final installation heriarchy from the default of
-# "/usr" to any path prefix of your choice by setting PREFIX on the make command
-# lines, like this (or optionally in the environment):
+# You may change the final installation heriarchy from the default of "/usr" to
+# any path prefix of your choice by setting PREFIX on the make command lines,
+# like this (or optionally on the command line, but remember it for the install
+# step too!):
 #
-#	b(sd)make PREFIX=/opt/pkg
+#	export PREFIX=/opt/pkg
+#	b(sd)make
 #
 # Then if the build succeeds (and assuming you're not cross-compiling) you can
 # run the regression tests to see if the results are correct.
@@ -71,14 +73,16 @@
 # providing a comprehensive hyperlinked cross-reference of all the types and
 # functions in all of the source files.
 #
-# If your Bmake system defined MKDOC, but you do not have Cxref, you can disable
+# If your BMake system defined MKDOC, but you do not have Cxref, you can disable
 # the building and installation of the HTML documentation by setting "MKDOC=no"
-# on the Bmake command line or in the environment, or by uncommenting the
-# following line:
+# on the BMake command line or in the environment, or by uncommenting the
+# following line, or by setting CXREF=true on the BMake command line:
 #
 #MKDOC = no
 #
 # Cxref can be found at:  https://www.gedanken.org.uk/software/cxref/
+#
+# It is included in Homebrew and a package is available for Ubuntu Linux.
 #
 #####################
 #
@@ -86,22 +90,31 @@
 #
 # MacOS vs. various BMakes:
 #
-# OSX, aka macOS, since use of Xcode 10(?) doesn't have a working bsdmake in the
-# base system, nor does the one installable from Homebrew work.  However the
-# version of Bmake that can be installed from Homebrew does mostly(*) work (and
-# presumably a manual install of Simon's Bmake will also work).  Unfortunately
-# the Bmake that comes with pkgsrc does not work properly on macOS.
+# OSX, aka macOS, since the release of Xcode 10(?) doesn't have a working
+# bsdmake in the base system any longer, nor does the one installable from
+# Homebrew work.
 #
-# Pkgsrc does not include Simon's MK files, but rather the bootstrap-mk-files
-# package, which (as of 20240210) are not yet fully ported to OSX/Darwin (it is
-# more or less just an out-of-date copy of the non-portable NetBSD MK files).
-# So, if one can do without the shared library then one can use the pkgsrc bmake
-# on macOS, and depending on the vintage of one's pkgsrc, it may also be
-# necessary to pass "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY=" on the command line
-# or in Makefile.inc.
+# However the version of BMake that can be installed from Homebrew does mostly
+# work.
 #
-# The really old Apple bsdmake and mk-files do generate the correct shared
-# library names, but they don't support .WAIT in the ${SUBDIR} list.
+# Manually installing sjg's BMake will also work, obviously.
+#
+# Unfortunately the BMake that comes with pkgsrc does not produce ideal results
+# on macOS as it does not (yet?) use sjg's Mk-files but rather it uses the
+# bootstrap-mk-files package, which (as of 20240210) has not yet been fully
+# ported to OSX/Darwin (it is more or less just an out-of-date copy of the
+# non-portable NetBSD Mk files).  There are some hacks in src/Makefile to try to
+# detect the bootstrap-mk-files and to produce a shared library, but they're not
+# guaranteed!
+#
+# Alernatively if one can do without the shared library then the pkgsrc bmake
+# will work as-is on macOS, and depending on the vintage of one's pkgsrc, it may
+# also be necessary to pass "SHLIB_MAJOR= SHLIB_MINOR= SHLIB_TEENY=" on the
+# command line or in Makefile.inc to completely disable generation of the shlib.
+#
+# The really old Apple bsdmake does generate the correct shared library name,
+# more or less, but it doesn't support .WAIT in the ${SUBDIR} list, so parallel
+# builds are impossible with it.
 #
 # OpenBSD:
 #
@@ -110,10 +123,12 @@
 #
 # FreeBSD:
 #
-# FreeBSD's make (or rather their mk-files) is too broken to do the right thing
-# with "obj" in the target list for "all".  Their saving grace (as of at least
-# 12.0) is they've implemented WITH_AUTO_OBJ, and it works, BUT ONLY IF YOU PUT
-# "WITH_AUTO_OBJ=yes" ON THE COMMAND LINE OR IN THE ENVIRONMENT!
+# FreeBSD's mk-files don't work reliably with "obj" in the dependency list for
+# "all".  There are workarounds below, but they rely on internal implementation
+# details that may change at any time.  Their saving grace (as of at least 12.0)
+# is they've implemented WITH_AUTO_OBJ, and it works, BUT ONLY IF YOU PUT
+# "WITH_AUTO_OBJ=yes" ON THE COMMAND LINE OR IN THE ENVIRONMENT!  (Having it set
+# in /etc/src-env.conf DOES NOT WORK for an out-of-/usr/src project.)
 #
 # Other BMake ports:
 #
@@ -178,7 +193,7 @@
 # However the initial implementation in FreeBSD's original make since 2.2.1 when
 # they first gain support, and up to about May 2014, or in 9.0; and as merged in
 # NetBSD's make since (effectively) 1.5 (literally since 1.3) and prior to 7.0
-# (and so in Simon's Bmake since its inception, and up to bmake-20140214); and
+# (and so in Simon's BMake since its inception, and up to bmake-20140214); and
 # in OpenBSD's make since 2.1 when they first gained support up until 5.5 (after
 # which they removed all support for MAKEOBJDIRPREFIX, a change not documented
 # until 6.7!!!) were all extremely beligerent about having $MAKEOBJDIRPREFIX set
@@ -187,8 +202,8 @@
 #
 # However in all but OpenBSD this has been fixed so that MAKEOBJDIRPREFIX can
 # also be set on the command line.  I think.  I have had bad experiences with
-# some versions (e.g. claiming to support setting it on the command line, but in fact
-# not supporting that at all.
+# some versions (e.g. claiming to support setting it on the command line, but in
+# fact not supporting that at all.
 
 #####################
 #

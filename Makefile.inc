@@ -27,11 +27,11 @@
 # BSDMake versions have the ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL} was first
 # found in NetBSD-current after 2009/09/08 but it is not found in any release
 # until 6.0.  Unfortunately there is no easy way to know definitively what
-# version of BSDMake is being used.  Simon Gerraty's bmake has MAKE_VERSION, as
-# does FreeBSD's make though they are entirely and totally different and
-# unrelated.  In NetBSD MAKE_VERSION was only briefly present since it
-# represented the build date, not the release date, and it was removed in order
-# to make it possible to do reproducible builds.
+# version of BSDMake is being used.  Simon Gerraty's (sjg's) BMake has
+# MAKE_VERSION, as does FreeBSD's make though they are entirely and totally
+# different and unrelated.  In NetBSD MAKE_VERSION was only briefly present
+# since it represented the build date, not the release date, and it was removed
+# in order to make it possible to do reproducible builds.
 #
 # For example this file can be used to define the version number(s) for the
 # project, and thus sources which use these numbers (header file templates, or
@@ -95,7 +95,7 @@ LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
 # The rest is default boilerplate common to most projects....
 #
 # XXX it should probably be in another file, and indeed it should probably be
-# part of the pkgsrc infrastructure, especially if using crufty.net mk-files.
+# part of the pkgsrc infrastructure, especially if using sjg's Mk-files.
 #
 
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
@@ -151,10 +151,10 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 #LDSTATIC =	-static
 #
 # However, sadly, OS X does not support a command-line way of forcing static
-# linking.  As a result on OS X if you want to test programs without first
-# installing the library in its final destination directory then it is necessary
-# to set the variable DYLD_LIBRARY_PATH in the environment to include the
-# location of the library to be tested against.
+# linking (nor does Solaris?).  As a result on OS X if you want to test programs
+# without first installing the library in its final destination directory then
+# it is necessary to set the variable DYLD_LIBRARY_PATH in the environment to
+# include the location of the library to be tested against.
 #
 # So, instead of making testing onerous for OS X we use a common trick of giving
 # the static library a unique name, such as by appending "_s" or similar to it,
@@ -232,7 +232,7 @@ CXREF ?= cxref
 # NOTICE:  Nothing at all below here should be project dependent
 #
 # XXX it should probably be in another file, and indeed it should probably be
-# part of the pkgsrc infrastructure, especially if using crufty.net mk-files.
+# part of the pkgsrc infrastructure, especially if using sjg's Mk-files.
 #
 
 # yes, always -- we use this because it's safer when using a shared network
