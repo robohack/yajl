@@ -63,7 +63,7 @@ __clang_patchlevel__ !=	echo __clang_patchlevel__ | $(CC) -E - | sed '/\#/d;s/__
 . endif
 .endif
 
-# Note:  TARGET_OSNAME is from Crufty's Mk files (host-target.mk, own.mk), and
+# Note:  TARGET_OSNAME is from sjg's Mk-files (host-target.mk, own.mk), and
 # OS is from pkgsrc bootstrap-mk.  .FreeBSD is a trick shared by FreeBSD and old
 # MacOS bsdmake.
 #
@@ -92,10 +92,12 @@ COVERITY_TOP_CONFIG =	1
 # Set ${CWARNFLAGS} based on the detected compiler and its version.
 #
 # Note we do depend on the mk-files (notably <bsd.sys.mk>) to add ${CWARNFLAGS}
-# to ${CFLAGS}, and so far only Crufty's Mk-files don't do this...
+# to ${CFLAGS}, and so far only sjg's Mk-files don't do this...
 #
 # xxx consider ${CWARNFLAGS.${COMPILER_TYPE}} ala FreeBSD to hopefully simplify
 # the .if logic somewhat....
+#
+# xxx there's also the ${EXPR:? flim : flam} form used by NetBSD....
 
 # -Winline
 #
@@ -140,10 +142,12 @@ CWARNFLAGS += -Wno-system-headers
 # (but is still in 3.0.4)
 CWARNFLAGS += -Wid-clash-30
 . endif
+
 .if ${__GNUC__} > 3 || \
 	(${__GNUC__} == 3 && ${__GNUC_MINOR__} == 4 && ${__GNUC_PATCHLEVEL__} >=6) || \
 	(${__GNUC__} == 3 && ${__GNUC_MINOR__} >= 5)
 # "-W" was replaced by "-Wextra" since at least 3.4.6
+# and in clang, which presents as GCC 4.2.1, this is also true
 CWARNFLAGS += -Wextra
 . else
 CWARNFLAGS += -W
@@ -330,6 +334,9 @@ LDFLAGS += -Wl,--warn-common
 . endif
 .endif
 
+# However since <bsd.sys.mk> hasn't been included yet, these will still add the
+# flags anyway...
+#
 .if !empty(DBG) && empty(CFLAGS:M*${DBG}*)
 CFLAGS += ${DBG}
 .endif
@@ -404,7 +411,7 @@ CFLAGS +=	-fstack-protector-all
 CWARNFLAGS +=	-Wstack-protector
 .endif
 
-# XXX override newer Crufty Mk-files <warnings.mk>....  We have more!
+# XXX override newer sjg's Mk-files <warnings.mk>....  We have more!
 #
 WARNINGS_SET =	HIGH
 WARNINGS =	${CWARNFLAGS}
