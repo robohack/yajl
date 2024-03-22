@@ -277,18 +277,40 @@ SUBDIR +=	test
 #
 
 MKOBJ = yes
-# XXX "auto" is actually not yet very widely supported and may not work.
-MKOBJDIRS = auto
 
 # Comment the .WAIT's out (and avoid -j) if your build blows up
 #
+# N.B.:  These .WAIT's should normally be OK as they are in a dependency list.
+#
 BUILDTARGETS +=	bmake-do-obj
+#
+# XXX extra hoops to jump through for (newer?) FreeBSD -- see below for more!
+#
+# Despite being included in the SUBDIR_TARGETS, obj, depend, and docs don't
+# actually recurse into subdirs without all this extra goop!
+#
+.if (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+. for __dir in ${SUBDIR:N.WAIT}
+BUILDTARGETS +=	obj_subdir_${__dir}
+. endfor
+.endif
 BUILDTARGETS +=	.WAIT
 # (forcing "make depend" is also both good, and necessary (see the beforedepend
 # target in src/Makefile, though otherwise it is a bit of a waste for pkgsrc).
 BUILDTARGETS +=	bmake-do-depend
+.if (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+. for __dir in ${SUBDIR:N.WAIT}
+BUILDTARGETS +=	depend_subdir_${__dir}
+. endfor
+.endif
 BUILDTARGETS +=	.WAIT
+# ("docs" should probably come after "all", but....)
 BUILDTARGETS +=	bmake-do-docs
+.if (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+. for __dir in ${SUBDIR:N.WAIT}
+BUILDTARGETS +=	docs_subdir_${__dir}
+. endfor
+.endif
 
 # this ("all") must be the VERY first target
 # (there shouldn't be any .includes above, including Makefile.inc!)
@@ -303,15 +325,19 @@ dependall: .PHONY all
 
 .ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR} bmake-do-docs
 
-# XXX Why isn't this working on FreeBSD!?!?!?!?  (make ${targ:S/bmake-do-//} works!)
-# (something about ${targ}_subdir_${SUBDIR} not being depended on?)
-#
-.for targ in ${BUILDTARGETS}
-. if ${targ} != ".WAIT"
-${targ}: .PHONY ${targ:S/bmake-do-//}
-	@echo "Done ${.TARGET} ..."
-. endif
+.for targ in ${BUILDTARGETS:N.WAIT:N*_subdir_*}
+${targ}: .PHONY .MAKE ${targ:S/bmake-do-//}
 .endfor
+
+# XXX extra hoops to jump through for (newer?) FreeBSD
+#
+.if (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+. for __targ in obj depend docs
+.  for __dir in ${SUBDIR:N.WAIT}
+${__dir}: ${__targ}_subdir_${__dir} .PHONY .MAKE
+.  endfor
+. endfor
+.endif
 
 # XXX this is just a very crude check...  not as complete as the FreeBSD check
 #
