@@ -90,17 +90,18 @@ __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 #
 #WARNS = 10
 
-# Do not enable/allow -Werror
+# Do not enable/allow -Werror -- oh, soooo very many ways to do it!
 #
-NOGCCERROR = 1
-NOCLANGERROR = 1
+NOGCCERROR = 1			# NetBSD
+NOCLANGERROR = 1		# NetBSD
 # more recent FreeBSDs deprecate NO_WERROR
 # (Note the really old bsdmake on OSX/macOS has a wonky huge MAKE_VERSION.)
-.if defined(MAKE_VERSION) && (${MAKE_VERSION} >= 20210106 && ${MAKE_VERSION} < 5200408120)
+.if defined(MAKE_VERSION) && (${MAKE_VERSION} >= 20210106 && ${MAKE} != "bsdmake")
 MK_WERROR = no
 .else
 NO_WERROR = 1
 .endif
+NO_CFLAGS_WARNINGS = 1		# sjg's Mk-files
 
 #
 # Set ${CWARNFLAGS} based on the detected compiler and its version.
