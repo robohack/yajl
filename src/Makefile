@@ -55,9 +55,9 @@ CLEANFILES += yajl.pc
 # (yajl.pc is here too because some versions of pkgsrc bootstrap-mk-files don't
 # build all ${FILES} with the default "all" target)
 #
-beforedepend: ${.OBJDIR}/yajl yajl/yajl_version.h yajl.pc
+beforedepend: yajl/yajl_version.h yajl.pc
 
-yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in ${.OBJDIR}/yajl
+yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	sed -e 's/$${LIB_MAJOR}/${LIB_MAJOR}/' \
 	    -e 's/$${LIB_MINOR}/${LIB_MINOR}/' \
 	    -e 's/$${LIB_MICRO}/${LIB_MICRO}/' \
@@ -70,11 +70,6 @@ yajl/yajl_version.h: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 # "make" after an install will fail!
 #
 yajl_version.o: yajl/yajl_version.h
-
-# XXX this is unfortunate... as it makes removing .OBJDIR harder.  See above.
-#
-${.OBJDIR}/yajl:
-	mkdir ${.TARGET}
 
 # Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
@@ -92,6 +87,8 @@ CLEANFILES += yajl/yajl_version.h
 
 # This .if is annoying, but some older systems don't support CPPFLAGS.
 #
+# XXX does this work if done before the .include <bsd.lib.mk> below?
+#
 # Note:  this needed in the build directory to find "yajl/yajl_version.h"
 #
 # XXX ideally this should just be for yajl_version.o, but support for
@@ -99,6 +96,8 @@ CLEANFILES += yajl/yajl_version.h
 # if we moved all include files to be products copied to ${.OBJDIR}/include (for
 # example) then this would be needed for everything but would already be
 # supplied in the right form by ../Makefile.inc.
+#
+# See ../Makefile.inc for GENHDIR
 #
 .if defined(CPPFLAGS)
 CPPFLAGS += -I${GENHDIR}

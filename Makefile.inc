@@ -194,9 +194,11 @@ OBJMACHINE ?=	yes
 # then .OBJDIR is from MAKEOBJDIRPREFIX
 LDADD += -L${.OBJDIR}/${bmake_topdir}/src
 DPADD += ${.OBJDIR}/${bmake_topdir}/src/lib${PACKAGE:S/^lib//}.a
+. elif defined(MAKEOBJDIR)
+LDADD += -L${MAKEOBJDIR}/${bmake_topdir}/src
+DPADD += ${MAKEOBJDIR}/${bmake_topdir}/src/lib${PACKAGE:S/^lib//}.a
 . else
 # assume .OBJDIR is a local directory, so look for bmake_topdir from the parent
-# XXX this probably breaks for ${MAKEOBJDIR}
 LDADD += -L../${bmake_topdir}/src/${.OBJDIR:T}
 DPADD += ../${bmake_topdir}/src/${.OBJDIR:T}/lib${PACKAGE:S/^lib//}.a
 . endif
@@ -207,9 +209,10 @@ LDADD += -l${PACKAGE:S/^lib//}_s
 .if defined(MAKEOBJDIRPREFIX)
 # .OBJDIR is from MAKEOBJDIRPREFIX
 GENHDIR = ${.OBJDIR}/${bmake_topdir}/src
+.elif defined(MAKEOBJDIR)
+GENHDIR = ${MAKEOBJDIR}/${bmake_topdir}/src
 .else
 # assume .OBJDIR is a local directory, so look in the parent
-# XXX this probably breaks for ${MAKEOBJDIR}
 GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
 .endif
 

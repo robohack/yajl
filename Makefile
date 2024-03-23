@@ -187,6 +187,11 @@
 # be created for each directory with products.  EXCEPT ON FreeBSD!!!  (where the
 # default is always just "obj", BUT IT IS BROKEN! (as of 12.0)).
 #
+# This can be avoided by using the environment variable MAKEOBJDIR as follows
+# (which more or less exactly simulates how MAKEOBJDIRPREFIX is used):
+#
+#	MAKEOBJDIR='${.CURDIR:S,^,'$(pwd -P)'/build,}' make
+#
 # If you end up with "obj.*" sub-directories and you want to go back to using a
 # 'build' directory (as would be sane to do) then you can remove all the obj.*
 # detritus with this command (the trailing, escaped, semicolon is important!):
