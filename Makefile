@@ -274,7 +274,7 @@ SUBDIR =	src
 SUBDIR +=	.WAIT
 SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
 .elif defined(.MAKE.JOBS) && (${.MAKE.JOBS} > 1) && \
-	(!defined(MAKE_VERSION) || (${MAKE_VERSION} < 20240212 && ${MAKE} != "bsdmake"))
+	(!defined(MAKE_VERSION) || (${MAKE_VERSION} < 20200710 && ${MAKE} != "bsdmake"))
 #
 # xxx:  only more recent bmake's define .MAKE.JOBS.
 #
