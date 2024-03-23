@@ -92,6 +92,7 @@ jobs:
     - name: macOS dependencies
       if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
+        ls -l /Developer/usr/bin/bsdmake || true
         # n.b.:  cxref is in macports.... which apparently can be installed like this:
         # wget https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
         # sudo installer -pkg ./MacPorts-2.9.1-14-Sonoma.pkg -target /
