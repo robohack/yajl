@@ -11,11 +11,11 @@ yajl_INCS +=	yajl_tree.h
 #
 # XXX Not needed after some point, but when????  Definitely not for macos
 # bsdmake!  Probably not needed after there was a <bsd.inc.mk> symlink to
-# <inc.mk>!  Does no harm though.
+# <inc.mk>!  Try 20181221 as that's where this fails on Ubuntu-20.04.
 #
 # but must be avoided with pkgsrc bootstrap-mk-files...
 #
-.if defined(MAKE_VERSION) && (${MAKE_VERSION} < 5200408120) && \
+.if defined(MAKE_VERSION) && (${MAKE_VERSION} > 20181221 && ${MAKE} != "bsdmake") && \
 	(defined(unix) && ${unix} != "We run Unix")
 INCS += ${yajl_INCS:S|^|${.CURDIR}/|}
 .else
