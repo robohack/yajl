@@ -61,7 +61,9 @@ jobs:
           # it's gmake
           make: make
         - os: ubuntu-20.04
-          docs: no
+          # cxref trips an error in a system header
+          # /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:21: cxref: syntax error, unexpected IDENTIFIER, expecting ')'
+          docs: yes
         # Ubuntu Latest
         - os: ubuntu-latest
           # it's gmake
