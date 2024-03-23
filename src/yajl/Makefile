@@ -13,7 +13,10 @@ yajl_INCS +=	yajl_tree.h
 # bsdmake!  Probably not needed after there was a <bsd.inc.mk> symlink to
 # <inc.mk>!  Does no harm though.
 #
-.if defined(MAKE_VERSION) && (${MAKE_VERSION} < 5200408120)
+# but must be avoided with pkgsrc bootstrap-mk-files...
+#
+.if defined(MAKE_VERSION) && (${MAKE_VERSION} < 5200408120) && \
+	(defined(unix) && ${unix} != "We run Unix")
 INCS += ${yajl_INCS:S|^|${.CURDIR}/|}
 .else
 INCS += ${yajl_INCS}

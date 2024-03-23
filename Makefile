@@ -116,10 +116,16 @@
 # more or less, but it doesn't support .WAIT in the ${SUBDIR} list, so parallel
 # builds are impossible with it.
 #
+# Old macOS systems with "bsdmake" may not have "mkdep" in the installed SDK
+# even though the wrapper in /usr/bin/mkdep exists (and "xcrun -find mkdep"
+# fails).  This can be worked around with:  MKDEPCMD=/Developer/usr/bin/mkdep
+#
+#
 # OpenBSD:
 #
 # So note OpenBSD's make since 5.5 (and before 2.1) does NOT support
 # $MAKEOBJDIRPREFIX at all.  For recent OpenBSD, just use ${MAKEOBJDIR} instead.
+#
 #
 # FreeBSD:
 #
@@ -130,10 +136,11 @@
 # "WITH_AUTO_OBJ=yes" ON THE COMMAND LINE OR IN THE ENVIRONMENT!  (Having it set
 # in /etc/src-env.conf DOES NOT WORK for an out-of-/usr/src project.)
 #
+#
 # Other BMake ports:
 #
 # See the first use of .WAIT below for comments about really old BMakes and
-# mk-files that don't deal with it properly.
+# Mk-files that don't deal with it properly.
 #
 #####################
 #
@@ -212,6 +219,14 @@
 
 bmake_topdir =	.
 
+#####################
+#
+# Sub-directories of the project
+#
+# xxx this must come after <bsd.own.mk> and thus after Makefile.inc because of
+# the ugly hacks here to try to sort out wether or not a .WAIT is needed and can
+# be included in the list.
+
 SUBDIR =	src
 
 # Some variants of Mk-files (e.g. NetBSD's) build subdirs in parallel (when
@@ -220,8 +235,9 @@ SUBDIR =	src
 # quite make up for it because of the fact these directories always exist prior
 # to starting make).
 #
-# BMake with pkgsrc's bootstrap-mk-files is equivalent to NetBSD's native
-# mk-files, so work fine with '-j' so long as this .WAIT is present.
+# BMake with pkgsrc's bootstrap-mk-files are equivalent to NetBSD's native
+# Mk-files, so work fine with '-j' so long as this .WAIT is present.  These set
+# "unix" to "We Run Unix" in <sys.mk>.
 #
 # BMake with sjg's Mk-files doesn't build subdirs in parallel at all yet, and
 # until 20240212 it does not support .WAIT in the SUBDIR list, but older
@@ -240,17 +256,15 @@ SUBDIR =	src
 # invoke parallel builds (no -j)!
 #
 .if !defined(MAKE_VERSION) || \
-	(defined(MAKE_VERSION) && defined(_BSD_OWN_MK_) && ${_BSD_OWN_MK_} == 1) || \
-	(defined(MAKE_VERSION) && ${MAKE_VERSION} >= 20240212 && ${MAKE} != "bsdmake") || \
+	(defined(unix) && ${unix} == "We run Unix"&& ${MAKE} != "bsdmake") || \
+	(${MAKE_VERSION} >= 20240212 && ${MAKE} != "bsdmake") || \
 	(defined(.FreeBSD) && ${.FreeBSD} == "true")
 SUBDIR +=	.WAIT
 SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
 .elif defined(.MAKE.JOBS) && (${.MAKE.JOBS} > 1) && \
 	!defined(MAKE_VERSION)
 #
-# xxx:  only more recent bmake's define .MAKE.JOBS.  Maybe to support ancient
-# OSx bsdmake maybe the .WAIT should be left in so the user has to manually
-# remove it and thus see that parallel builds are unsupported?
+# xxx:  only more recent bmake's define .MAKE.JOBS.
 #
 . error "Parallel builds not supported without .WAIT in SUBDIR list."
 .endif
@@ -266,7 +280,7 @@ SUBDIR +=	test
 #
 # The next section is mostly just default boilerplate for stand-alone project
 # builds.  It could/should be in a separate included file.  (Except for some of
-# the ${bmake_install_dirs}.)
+# the setting of ${SUBDIR} and ${bmake_install_dirs}.)
 #
 # Yes, "make obj" is forced -- it is stupid to build in the source directory)
 #
@@ -307,19 +321,6 @@ BUILDTARGETS +=	docs_subdir_${__dir}
 . endfor
 .endif
 
-# this ("all") must be the VERY first target
-# (there shouldn't be any .includes above, including Makefile.inc!)
-#
-# (Remove the .WAIT if your build blows up.)
-#
-all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
-
-# just in case old habits prevail
-#
-dependall: .PHONY all
-
-.ORDER: bmake-test-obj bmake-do-obj bmake-do-depend ${SUBDIR} bmake-do-docs
-
 .for targ in ${BUILDTARGETS:N.WAIT:N*_subdir_*}
 ${targ}: .PHONY .MAKE ${targ:S/bmake-do-//}
 .endfor
@@ -333,6 +334,18 @@ ${__dir}: ${__targ}_subdir_${__dir} .PHONY .MAKE
 .  endfor
 . endfor
 .endif
+
+# this ("all") must be the VERY first target
+# (there shouldn't be any .includes above, including Makefile.inc!)
+#
+all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
+
+# just in case old habits prevail
+#
+dependall: .PHONY all
+
+# xxx the .WAIT's in here are probably not necessary???
+.ORDER: bmake-test-obj .WAIT ${BUILDTARGETS}
 
 # XXX this is just a very crude check...  not as complete as the FreeBSD check
 #

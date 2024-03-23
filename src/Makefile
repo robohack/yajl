@@ -165,16 +165,18 @@ incinstall: .PHONY
 #
 .if ((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Linux")) || \
 	(defined(OS) && (${OS} == "Linux")))
+#
 # XXX stupid GNU BinUtils LD changed its command line syntax recently,
 # apparently without concern for backward compatability.
 #
-# N.B.:  also apparently on Linux BMake currently (20200710) doesn't use
-# SHLIB_SHFLAGS for the final command, but instead LD_shared, and for non-BSD
-# platforms the value of LD_shared directly overridden without consulting
-# SHLIB_SHFLAGS.
+# N.B.:  also apparently on Linux BMake currently (20200710 on ubuntu-latest,
+# 20181221 on ubuntu-20.04) doesn't use SHLIB_SHFLAGS for the final command, but
+# instead LD_shared, and for non-BSD platforms the value of LD_shared directly
+# overridden without consulting SHLIB_SHFLAGS.
 #
 # So, override LD_shared to use more portable '-h' instead of the apparently now
 # dead '-soname' (we could use '--soname', but '-h' is probably more canonical).
+#
 LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 .endif
 
@@ -182,7 +184,7 @@ LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 #
 # We'll still link our own programs and tests with the static library as that
 # makes testing during build possible, but providing a dylib might be useful for
-# other uses....
+# other uses and may make packager's jobs easier....
 #
 .if ${MAKE} != "bsdmake" && \
 	((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || \
@@ -206,7 +208,7 @@ SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}
 SHLIB_FULLVERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR}.${SHLIB_TEENY}
 .  endif
 SHLIB_INSTALL_VERSION ?= ${SHLIB_MAJOR}
-# hmmm..... should compat be just SHLIB_MAJOR? (not according to Simon G.)
+# hmmm..... should compat be just SHLIB_MAJOR? (not according to sjg)
 SHLIB_COMPATABILITY_VERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR}
 # XXX do we need "-install_name=${PREFIX}/lib/lib${LIB}.dylib" too?
 # xxx -dylib_*_version might be too new for macos-10.x
@@ -223,8 +225,10 @@ lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
 #	@echo fixing up shared library name for macos: ${.TARGET}
 #	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} ${.TARGET}
 
+# xxx why does this have realall too?
 realall all: lib${LIB}.dylib
 
+# xxx this 
 afterinstall: ${DESTDIR}${LIBDIR}/lib${LIB}.dylib
 
 ${DESTDIR}${LIBDIR}/lib${LIB}.dylib:
