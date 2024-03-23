@@ -154,4 +154,4 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
     - name: regression
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress MKDOC=${{ matrix.docs }}
