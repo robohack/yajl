@@ -82,6 +82,7 @@ jobs:
         uname -a
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
+    - name: macos-id (MacOS)
       if: startsWith(matrix.os, "macos")
       run: |
         sw_vers
