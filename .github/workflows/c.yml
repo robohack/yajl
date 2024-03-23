@@ -82,16 +82,16 @@ jobs:
         uname -a
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
-    - name: macos-id (MacOS)
+    - name: macos_id
       if: startsWith(matrix.os, "macos")
       run: |
         sw_vers
-    - name: dependencies (Ubuntu)
+    - name: ubuntu_dependencies
       if: startsWith(matrix.os, "ubuntu")
       run: |
         sudo apt-get update
         sudo apt-get install bmake cxref
-    - name: dependencies (MacOS)
+    - name: macos_dependencies
       if: startsWith(matrix.os, "macos")
       run: |
         # n.b.:  cxref is in macports.... which apparently can be installed like this:
@@ -99,7 +99,7 @@ jobs:
         # sudo installer -pkg ./MacPorts-2.9.1-14-Sonoma.pkg -target /
         brew update
         brew install bmake
-    - name: dependencies (NetBSD)
+    - name: netbsd_dependencies
       if: startsWith(matrix.os, "netbsd")
       run: |
         pkgin install cxref
