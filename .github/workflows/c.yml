@@ -76,23 +76,23 @@ jobs:
           cc: clang
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: whoami
       run: |
         uname -a
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
     - name: macos_id
-      if: startsWith(matrix.os, 'macos')
+      if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
         sw_vers
     - name: ubuntu_dependencies
-      if: startsWith(matrix.os, 'ubuntu')
+      if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         sudo apt-get update
         sudo apt-get install bmake cxref
     - name: macos_dependencies
-      if: startsWith(matrix.os, 'macos')
+      if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
         # n.b.:  cxref is in macports.... which apparently can be installed like this:
         # wget https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
@@ -100,7 +100,7 @@ jobs:
         brew update
         brew install bmake
     - name: netbsd_dependencies
-      if: startsWith(matrix.os, 'netbsd')
+      if: ${{ startsWith(matrix.os, 'netbsd') }}
       run: |
         pkgin install cxref
     - name: builddir
