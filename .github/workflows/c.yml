@@ -79,19 +79,15 @@ jobs:
       uses: actions/checkout@v4
     - name: whoami
       run: uname -a
-    - name: versions
-      run: |
-        ${{ matrix.make }} -V MAKE_VERSION
-        ${{ matrix.cc }} --version
-    - name: macos_id
+    - name: macos id
       if: ${{ startsWith(matrix.os, 'macos') }}
       run: sw_vers
-    - name: ubuntu_dependencies
+    - name: ubuntu dependencies
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         sudo apt-get update
         sudo apt-get install bmake cxref
-    - name: macos_dependencies
+    - name: macOS dependencies
       if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
         # n.b.:  cxref is in macports.... which apparently can be installed like this:
@@ -104,6 +100,10 @@ jobs:
       run: |
         # pkg_add pkgin
         pkgin install cxref
+    - name: toolchain versions
+      run: |
+        ${{ matrix.make }} -V MAKE_VERSION
+        ${{ matrix.cc }} --version
     - name: builddir
       run: rm -rf build && mkdir build
     - name: showenv
