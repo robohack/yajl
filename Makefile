@@ -345,7 +345,7 @@ all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 dependall: .PHONY all
 
 # xxx the .WAIT's in here are probably not necessary???
-.ORDER: bmake-test-obj .WAIT ${BUILDTARGETS}
+.ORDER: bmake-test-obj bmake-do-obj bmake-do-depend bmake-do-docs
 
 # XXX this is just a very crude check...  not as complete as the FreeBSD check
 #
