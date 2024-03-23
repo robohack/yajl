@@ -252,9 +252,9 @@ SUBDIR =	src
 # "unix" to "We Run Unix" in <sys.mk>.
 #
 # BMake with sjg's Mk-files doesn't build subdirs in parallel at all yet, and
-# until 20240212 it does not support .WAIT in the SUBDIR list, but older
-# versions will work fine with '-j' so long as this .WAIT is not there (things
-# within each directory will be built in parallel if possible).
+# until 20240212 it does not support .WAIT in the SUBDIR list.  It seems like
+# some older versions, notably 20181221, will try to run SUBDIRs in parallel,
+# but don't support .WAIT, so we try to not allow it.
 #
 # BMake (i.e. native make if recent) on FreeBSD with FreeBSD's mk-files also
 # does build subdirs in parallel IFF SUBDIR_PARALELL is defined, and it does
@@ -269,12 +269,12 @@ SUBDIR =	src
 #
 .if !defined(MAKE_VERSION) || \
 	(defined(unix) && ${unix} == "We run Unix"&& ${MAKE} != "bsdmake") || \
-	(${MAKE_VERSION} >= 20181221 && ${MAKE} != "bsdmake") || \
+	(${MAKE_VERSION} >= 20240212 && ${MAKE} != "bsdmake") || \
 	(defined(.FreeBSD) && ${.FreeBSD} == "true")
 SUBDIR +=	.WAIT
 SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
 .elif defined(.MAKE.JOBS) && (${.MAKE.JOBS} > 1) && \
-	!defined(MAKE_VERSION)
+	(!defined(MAKE_VERSION) || (${MAKE_VERSION} < 20240212 && ${MAKE} != "bsdmake"))
 #
 # xxx:  only more recent bmake's define .MAKE.JOBS.
 #
