@@ -77,16 +77,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      run: git status
     - name: whoami
+      run: uname -a
+    - name: versions
       run: |
-        uname -a
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
     - name: macos_id
       if: ${{ startsWith(matrix.os, 'macos') }}
-      run: |
-        sw_vers
+      run: sw_vers
     - name: ubuntu_dependencies
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
@@ -103,6 +102,7 @@ jobs:
     - name: netbsd_dependencies
       if: ${{ startsWith(matrix.os, 'netbsd') }}
       run: |
+        # pkg_add pkgin
         pkgin install cxref
     - name: builddir
       run: rm -rf build && mkdir build
