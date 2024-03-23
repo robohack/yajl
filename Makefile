@@ -257,7 +257,7 @@ SUBDIR =	src
 #
 .if !defined(MAKE_VERSION) || \
 	(defined(unix) && ${unix} == "We run Unix"&& ${MAKE} != "bsdmake") || \
-	(${MAKE_VERSION} >= 20240212 && ${MAKE} != "bsdmake") || \
+	(${MAKE_VERSION} >= 20181221 && ${MAKE} != "bsdmake") || \
 	(defined(.FreeBSD) && ${.FreeBSD} == "true")
 SUBDIR +=	.WAIT
 SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
@@ -384,7 +384,7 @@ _bmake_install_dirs: .PHONY
 # jobs during install from running ahead of the install directories being
 # made....
 #
-${bmake_install_dirs:S|^|${DESTDIR}|}: _bmake_install_dirs
+${bmake_install_dirs:S|^|${DESTDIR}/|}: _bmake_install_dirs
 
 # include the "standard" mk-file for building in sub-directories
 #

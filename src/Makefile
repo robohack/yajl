@@ -225,10 +225,8 @@ lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
 #	@echo fixing up shared library name for macos: ${.TARGET}
 #	ln -sf lib${LIB}.so.${SHLIB_FULLVERSION} ${.TARGET}
 
-# xxx why does this have realall too?
-realall all: lib${LIB}.dylib
+all: lib${LIB}.dylib
 
-# xxx this 
 afterinstall: ${DESTDIR}${LIBDIR}/lib${LIB}.dylib
 
 ${DESTDIR}${LIBDIR}/lib${LIB}.dylib:
