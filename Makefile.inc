@@ -181,6 +181,14 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 # Note:  In order to avoid problems with parallel builds LDADD and DPADD should
 # not be set in src/Makefile, thus this .if:
 #
+MKOBJ = yes
+
+# yes, always -- we use this because it's safer when using a shared network
+# directory for building/testing/etc.  (though it is sometimes somewhat
+# annoying)
+#
+OBJMACHINE ?=	yes
+
 .if !defined(LIB)
 . if defined(MAKEOBJDIRPREFIX)
 # then .OBJDIR is from MAKEOBJDIRPREFIX
@@ -234,13 +242,6 @@ CXREF ?= cxref
 # XXX it should probably be in another file, and indeed it should probably be
 # part of the pkgsrc infrastructure, especially if using sjg's Mk-files.
 #
-
-# yes, always -- we use this because it's safer when using a shared network
-# directory for building/testing/etc.  (though it is sometimes somewhat
-# annoying)
-#
-OBJMACHINE ?=	yes
-
 # Unfortunately most MK files don't provide a "beforecleandir" or
 # "beforedistclean".
 #

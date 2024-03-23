@@ -275,12 +275,7 @@ SUBDIR +=	test
 # Note with some versions of Simon's "mk-files" this will cause obj* directories
 # to be created in the existing obj* directories the second time around...
 #
-
-MKOBJ = yes
-
-# Comment the .WAIT's out (and avoid -j) if your build blows up
-#
-# N.B.:  These .WAIT's should normally be OK as they are in a dependency list.
+# N.B.:  These .WAIT's should be OK as they end up in a dependency list.
 #
 BUILDTARGETS +=	bmake-do-obj
 #
