@@ -30,10 +30,12 @@ CLEANFILES +=	yajl_version.h
 . sinclude <inc.mk>	# hack for sjg's Mk-files, esp. pre <bsd.inc.mk> link
 .endif
 
-# this has to come after <bsd.prog.mk> to avoid upsetting the check in any
-# system mk-file
+# For NetBSD
 #
-.if target(install)
+# this has to come after <bsd.prog.mk> to avoid upsetting the check in any
+# system Mk-file
+#
+.if target(install) && target(includes)
 # get includes to install at install time
 install:	includes
 .endif
