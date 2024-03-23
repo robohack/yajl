@@ -141,15 +141,17 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
         env | sort
     - name: build
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
+      run: |
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
     - name: distribution without parallel
       # XXX no BMake seems to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
       run: |
-        run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
     - name: distribution in parallel
       if: ${{ ! startsWith(matrix.make, 'bmake') }}
       run: |
-        run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
     - name: regression
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress
+      run: |
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress
