@@ -19,10 +19,13 @@ jobs:
         cc: [ gcc, clang ]
         make: [ bmake, make ]
         sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
-        # XXX this isn't the ideal way to handle a binary option?
         docs: [ yes, no ]
+        # XXX this isn't the ideal way to handle a binary option?
+        parallel: [ '-j 3', '' ]
         exclude:
+        #
         # N.B.:  here we _EXCLUDE_ the matrix options we don't want!
+        #
         # MacOS-11.x
         - os: macos-11
           # it's clang anyway
@@ -32,6 +35,9 @@ jobs:
           make: make
         - os: macos-11
           docs: yes
+        - os: macos-11
+          parallel: ''
+        #
         # MacOS-12.x
         - os: macos-12
           # it's clang anyway
@@ -41,6 +47,9 @@ jobs:
           make: make
         - os: macos-12
           docs: yes
+        - os: macos-12
+          parallel: ''
+        #
         # MacOS-latest
         - os: macos-latest
           # it's clang anyway
@@ -50,12 +59,18 @@ jobs:
           make: make
         - os: macos-latest
           docs: yes
+        - os: macos-latest
+          parallel: ''
+        #
         # Ubuntu 22.04
         - os: ubuntu-22.04
           # it's gmake
           make: make
         - os: ubuntu-22.04
           docs: no
+        - os: ubuntu-22.04
+          parallel: ''
+        #
         # Ubuntu 20.04
         - os: ubuntu-20.04
           # it's gmake
@@ -64,18 +79,30 @@ jobs:
           # cxref trips an error in a system header
           # /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:21: cxref: syntax error, unexpected IDENTIFIER, expecting ')'
           docs: yes
+        - os: ubuntu-20.04
+          # BMake 20181221 seems to run SUBDIR in parallel, but doesn't
+          # support .WAIT in the list!
+          parallel: '-j 3'
+        #
         # Ubuntu Latest
         - os: ubuntu-latest
           # it's gmake
           make: make
         - os: ubuntu-latest
           docs: no
+        - os: ubuntu-latest
+          parallel: ''
+        #
         # NetBSD
         - os: netbsd-latest
           # xxx or we could also install bmake
           make: bmake
         - os: netbsd-latest
           cc: clang
+        - os: netbsd-latest
+          docs: no
+        - os: netbsd-latest
+          parallel: ''
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -114,8 +141,15 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
         env | sort
     - name: build
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -j 3 CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
-    - name: distribution
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist ${{ matrix.make }} -j 3 install MKDOC=${{ matrix.docs }}
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
+    - name: distribution without parallel
+      # XXX no BMake seems to handle parallel installs well yet....
+      if: ${{ startsWith(matrix.make, 'bmake') }}
+      run: |
+        run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
+    - name: distribution in parallel
+      if: ${{ ! startsWith(matrix.make, 'bmake') }}
+      run: |
+        run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
     - name: regression
-      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -j 3 regress ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
+      run: MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress
