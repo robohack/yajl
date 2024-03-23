@@ -145,8 +145,9 @@ _bmake_static_lib_install_symlink: .PHONY
 SUBDIR += yajl
 
 .include <bsd.lib.mk>
-# avoid a duplicate include on some systems
-.if !defined(DISTRIBUTION)
+# avoid a duplicate include on some systems, probably only NetBSD and pkgsrc
+# bootstrap-mk-files need this....
+.if defined(_BSD_OWN_MK_) && ${_BSD_OWN_MK_} == 1
 . include <bsd.subdir.mk>
 .endif
 

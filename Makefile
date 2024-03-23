@@ -88,6 +88,13 @@
 #
 # Special Notes for Special Systems:
 #
+# NetBSD:
+#
+# N.B.:  It is assumed that only NetBSD's Mk-files define _BSD_OWN_MK_ (and in
+# particular it is only defined in <bsd.own.mk>, which is in general included by
+# all the other Mk-files).
+#
+#
 # MacOS vs. various BMakes:
 #
 # OSX, aka macOS, since the release of Xcode 10(?) doesn't have a working
