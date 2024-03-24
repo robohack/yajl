@@ -14,8 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # latest runners:  ubuntu-latest, ubuntu-22.04, ubuntu-20.04, macos-latest, macos-12, macos-11
-        os: [ ubuntu-latest, ubuntu-20.04, macos-latest, macos-11 ] # ubuntu-22.04, netbsd!!!, freebsd!!!, openbsd!!!
+        # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories
+        # latest runners:  ubuntu-latest, ubuntu-22.04, ubuntu-20.04, macos-latest, macos-12, macos-11, macos-13?, macos-14?
+        # N.B.:  We want netbsd!!!, freebsd!!!, openbsd!!!
+        os: [ ubuntu-latest, ubuntu-20.04, macos-14, macos-13, macos-latest, macos-11 ]
         cc: [ gcc, clang ]
         make: [ bmake, make ]
         sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
@@ -48,6 +50,30 @@ jobs:
         - os: macos-12
           docs: yes
         - os: macos-12
+          parallel: ''
+        #
+        # MacOS-13.x
+        - os: macos-13
+          # it's clang anyway
+          cc: gcc
+        - os: macos-13
+          # make is gmake
+          make: make
+        - os: macos-13
+          docs: yes
+        - os: macos-13
+          parallel: ''
+        #
+        # MacOS-14.x
+        - os: macos-14
+          # it's clang anyway
+          cc: gcc
+        - os: macos-14
+          # make is gmake
+          make: make
+        - os: macos-14
+          docs: yes
+        - os: macos-14
           parallel: ''
         #
         # MacOS-latest
