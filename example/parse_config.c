@@ -152,6 +152,7 @@ main(void)
             printf("no such node: %s/%s\n", path[0], path[1]);
         }
     }
+    fflush(stdout);				/* make sure stdout flushed before stderr! */
 
     yajl_tree_free(node);
 

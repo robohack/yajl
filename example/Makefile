@@ -11,9 +11,7 @@ INTERNALPROG =	# defined
 realinstall:
 proginstall:
 
-# xxx hmmm....  stdout and stderr are reversed
-#
-T1 = [ $$(expr "$$(${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config 2>&1)" : "memory leaks:.0.Logging/timeFormat: utc") -eq 39 ]
+T1 = [ $$(expr "$$(${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config 2>&1)" : "Logging/timeFormat: utc.memory leaks:.0") -eq 39 ]
 T2 = [ $$(expr "$$(echo '{broken:' | ${.OBJDIR}/${PROG} 2>&1)" : "tree_parse_error: lexical error: invalid char in json text.*memory leaks:.0") -eq 165 ]
 
 regress:
