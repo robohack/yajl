@@ -108,6 +108,21 @@ main(void)
      * statistics */
     yajlTestMemoryContext memCtx;
 
+    /*
+     * stdout and stderr are sometimes reversed!  (maybe only on Linux?)
+     *
+     * attempt line buffering to get them in a consistent order.  see also the
+     * fflush() below.
+     */
+    if (setvbuf(stdout, (char *)NULL, _IOLBF, 0) != 0) {
+        perror("setvbuf(stdout)");
+        exit(1);
+    }
+    if (setvbuf(stderr, (char *)NULL, _IOLBF, 0) != 0) {
+        perror("setvbuf(stderr)");
+        exit(1);
+    }
+
     memCtx.do_printfs = false;          /* xxx set from a command option */
     memCtx.numMallocs = 0;
     memCtx.numFrees = 0;
@@ -152,7 +167,14 @@ main(void)
             printf("no such node: %s/%s\n", path[0], path[1]);
         }
     }
-    fflush(stdout);				/* make sure stdout flushed before stderr! */
+    /*
+     * try to make sure stdout flushed before stderr!
+     *
+     * this alone does not seem to work sometimes (maybe only on some Linux?)
+     */
+    if (fflush(stdout) != 0) {
+        perror("fflush");
+    }
 
     yajl_tree_free(node);
 
