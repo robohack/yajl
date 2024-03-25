@@ -319,8 +319,18 @@ LDFLAGS += -fsanitize=address
 LDSTATIC := # empty -- address sanitizer does not support static linking
 .  endif
 . endif
-# N.B.:  LeakSanitizer is incompatible with -fsanitize=address and -fsanitize=thread
-# (may also require setting LSAN_OPTIONS in the runtime environment)
+# N.B.:  LeakSanitizer is incompatible with -fsanitize=thread.
+#
+# LeakSanitizer is enabled by default in ASan builds of x86_64 Linux, and can be
+# enabled with ASAN_OPTIONS=detect_leaks=1 on x86_64 OS X.
+#
+# You can fine-tune LeakSanitizer's behavior through the LSAN_OPTIONS
+# environment variable.  See:
+#
+# <https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer>
+#
+# Here USE_LEAKSAN is provided for stand-alone leak detection.
+#
 . if defined(USE_LEAKSAN)
 LDFLAGS += -fsanitize=leak
 LDSTATIC := # empty -- leak sanitizer does not support static linking
