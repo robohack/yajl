@@ -13,7 +13,7 @@ proginstall:
 
 E1 = ${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config
 T1 = [ $$(expr "$$(${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config 2>&1)" : "Logging/timeFormat: utc.memory leaks:.0") -eq 39 ]
-E2 = echo '{broken:' | ${.OBJDIR}/${PROG}
+E2 = echo '{broken:' | ${.OBJDIR}/${PROG} || true
 T2 = [ $$(expr "$$(echo '{broken:' | ${.OBJDIR}/${PROG} 2>&1)" : "tree_parse_error: lexical error: invalid char in json text.*memory leaks:.0") -eq 165 ]
 
 regress:
