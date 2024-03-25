@@ -109,6 +109,11 @@ jobs:
           # BMake 20181221 seems to run SUBDIR in parallel, but doesn't
           # support .WAIT in the list!
           parallel: '-j 3'
+        - os: ubuntu-20.04
+          # gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0 with
+          # -fsanitize=leak is broken (at least for example/parse_config):
+          # https://bugs.launchpad.net/ubuntu/+source/gcc-defaults/+bug/2038386
+          sanitizer: USE_LEAKSAN
         #
         # Ubuntu Latest
         - os: ubuntu-latest
@@ -170,7 +175,7 @@ jobs:
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes MKDOC=${{ matrix.docs }}
     - name: distribution without parallel
-      # XXX no BMake seems to handle parallel installs well yet....
+      # XXX BMake does not seem to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install MKDOC=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
