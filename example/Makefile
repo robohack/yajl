@@ -17,9 +17,11 @@ T2 = [ $$(expr "$$(echo '{broken:' | ${.OBJDIR}/${PROG} 2>&1)" : "tree_parse_err
 regress:
 .if defined(USE_ASAN)
 	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
+	ulimit -v unlimited && ${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config
 	ulimit -v unlimited && ${T1}
 	ulimit -v unlimited && ${T2}
 .else
+	${.OBJDIR}/${PROG} < ${.CURDIR}/sample.config
 	${T1}
 	${T2}
 .endif
