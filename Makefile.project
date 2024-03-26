@@ -1,0 +1,22 @@
+# -*- makefile-bsdmake -*-
+
+#	Common/shared setup for this project.
+#
+# This file contains general project-specific settings.
+#
+
+# The common name of the package.
+#
+# For a library package this is either the library's simple name, else it is the
+# library's simple name prefixed by "lib".  Ideally it is the same as the base
+# of PKGNAME in the pkgsrc module.
+#
+PACKAGE =	yajl
+
+# The API says: "#include <yajl/yajl.h>"
+#
+INCSUBDIR =	/yajl
+
+LIB_MAJOR =	2
+LIB_MINOR =	1
+LIB_MICRO =	0

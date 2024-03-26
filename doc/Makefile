@@ -17,6 +17,29 @@ bmake_topdir =	..
 #
 # Alternatively one can set CXREF=true on the command line or in the environ.
 #
+# N.B.:  Cxref requires two passes of each file, the first to build up the cross
+#        referencing files and the second to use them.  Headers have to be done
+#        first to avoid warnings about missing prototypes, and warnings should
+#        be generated on the second pass.  A final index can be generated after
+#        the first two passes over all the files.  Note we put the Cxref
+#        database in the HTML output directory because there isn't any way to
+#        tell cxref to read it from anywhere but where except where it also
+#        writes it HTML output files in the second pass.  Sadly this means one
+#        cannot easily share the results of the first pass with any additional
+#        "2nd" passes to generate other forms of output (e.g. RTF or LaTeX).
+#
+# XXX because we process two example programs, each with definitions for main(),
+# only the first found main() is included in the Appendix section.
+#
+# Note RoboDoc (textproc/robodoc, https://www.xs4all.nl/~rfsber/Robo/,
+# https://github.com/gumpu/ROBODoc/) might be a viable alternative for cxref,
+# and the most recent releases have the advantage of being able to produce troff
+# output.  However it is even more ugly and much more difficult to use, and
+# doesn't actually cross-reference C code so well.
+#
+# xxx this probably shouldn't be in here?
+#
+CXREF ?= cxref
 
 # triggered by bmake-do-docs as a subdir target
 docs: .PHONY html/yajl.apdx.html

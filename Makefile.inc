@@ -72,32 +72,20 @@
 
 .if !target(yajl-showenv)
 
-# The common name of the package.
+# include any project-specific settings
 #
-# For a library package this is either the library's simple name, else it is the
-# library's simple name prefixed by "lib".  Ideally it is the same as the base
-# of PKGNAME in the pkgsrc module.
+# normally this includes the package name (${PACKAGE}), and include
+# sub-directory name (${INCSUBDIR} with a leading slash), project and/or library
+# version information (${LIB_MAJOR}, ${LIB_MINOR}, ${LIB_MICRO}), etc.
 #
-PACKAGE =	yajl
+.include "Makefile.project"
 
-# The API says: "#include <yajl/yajl.h>"
+# The full version ID for the library
 #
-INCSUBDIR =	/yajl
-
-LIB_MAJOR =	2
-LIB_MINOR =	1
-LIB_MICRO =	0
-
 LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
 
-#####################
+# Installation directories
 #
-# The rest is default boilerplate common to most projects....
-#
-# XXX it should probably be in another file, and indeed it should probably be
-# part of the pkgsrc infrastructure, especially if using sjg's Mk-files.
-#
-
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended
 # to each of these target directories for actual installation targets.
 #
@@ -216,36 +204,7 @@ GENHDIR = ${MAKEOBJDIR}/${bmake_topdir}/src
 GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
 .endif
 
-# N.B.:  Cxref requires two passes of each file, the first to build up the cross
-#        referencing files and the second to use them.  Headers have to be done
-#        first to avoid warnings about missing prototypes, and warnings should
-#        be generated on the second pass.  A final index can be generated after
-#        the first two passes over all the files.  Note we put the Cxref
-#        database in the HTML output directory because there isn't any way to
-#        tell cxref to read it from anywhere but where except where it also
-#        writes it HTML output files in the second pass.  Sadly this means one
-#        cannot easily share the results of the first pass with any additional
-#        "2nd" passes to generate other forms of output (e.g. RTF or LaTeX).
-#
-# XXX because we process two example programs, each with definitions for main(),
-# only the first found main() is included in the Appendix section.
-#
-# Note RoboDoc (textproc/robodoc, https://www.xs4all.nl/~rfsber/Robo/,
-# https://github.com/gumpu/ROBODoc/) might be a viable alternative for cxref,
-# and the most recent releases have the advantage of being able to produce troff
-# output.  However it is even more ugly and much more difficult to use, and
-# doesn't actually cross-reference C code so well.
-#
-CXREF ?= cxref
-
-#####################
-#
-# NOTICE:  Nothing at all below here should be project dependent
-#
-# XXX it should probably be in another file, and indeed it should probably be
-# part of the pkgsrc infrastructure, especially if using sjg's Mk-files.
-#
-# Unfortunately most MK files don't provide a "beforecleandir" or
+# xxx Unfortunately most MK files don't provide a "beforecleandir" or
 # "beforedistclean".
 #
 #beforecleandir: cleandir
