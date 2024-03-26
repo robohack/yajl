@@ -79,14 +79,17 @@ __GNULD__ !=		$(LD) -v | awk '{print int($$4);}' | tr -d ' \012'
 . endif
 .endif
 
-# Enable system-specific warnings -- this will likely double up on many of the
-# flags added by Makefile.compiler, but on rare occasions it may also add some
-# host-specific flags that might be useful.
+# Enable system-specific warnings -- this would likely double up on many of the
+# flags added by here, but on rare occasions it may also add some host-specific
+# flags that might be useful.
 #
 # Of course this is just for developers, and beware it often includes
-# -Wsystem-headers leading to miles of useless warnings!
+# -Wsystem-headers leading to miles of useless warnings and sometimes
+# unavoidable errors!
 #
-# XXX so far no system has required this be explicitly set to "0"
+# XXX so far no system has required this be explicitly set to "0", though for at
+# least recent NetBSD when using Clang there may be some advantage as just being
+# defined adds "-Wno-sign-compare -Wno-pointer-sign".
 #
 #WARNS = 10
 
@@ -101,7 +104,9 @@ MK_WERROR = no
 .else
 NO_WERROR = 1
 .endif
-NO_CFLAGS_WARNINGS = 1		# sjg's Mk-files
+# Just turn off all sjg's Mk-files warnings -- those herein are better tuned to
+# the supported compilers....
+NO_CFLAGS_WARNINGS = 1
 
 #
 # Set ${CWARNFLAGS} based on the detected compiler and its version.
@@ -449,11 +454,6 @@ CFLAGS +=	-fstack-protector-all
 	empty(CWARNFLAGS:M*-Wstack-protector*)
 CWARNFLAGS +=	-Wstack-protector
 .endif
-
-# XXX override newer sjg's Mk-files <warnings.mk>....  We have more!
-#
-WARNINGS_SET =	HIGH
-WARNINGS =	${CWARNFLAGS}
 
 # This is a hack for my own NetBSD releases where older versions don't include
 # CPPFLAGS in the LINK macro, so the ".c:" rule won't get CPPFLAGS..
