@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ..
-
 SRCS = perftest.c
 SRCS += documents.c
 

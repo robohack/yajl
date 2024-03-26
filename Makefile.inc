@@ -6,32 +6,24 @@
 #
 # (Some settings can be overridden on the command-line or from environment
 # variables though...)
-#
-# Note also that this file does have some unique per-project settings.
 
-# XXX see SJG's SSLrsh release for simple portability hacks via Make
-# e.g. in particular the use of .-include "$Makefile.${MACHINE}.inc" etc.
+# XXX see SJG's SSLrsh release for simple portability hacks via Make e.g. in
+# particular the use of .-include "$Makefile.${MACHINE}.inc" etc.
 
-# N.B.:  all sub-directory Makefiles must set ${bmake_topdir} to be a relative
-# path to the top of the source tree.
+# For subdirectories Makefiles this ${bmake_topdir} is provided to help find the
+# project's root directory.
 #
-# This is used to allow values in LDADD, DPADD, and CPPFLAGS (or CFLAGS) to
-# directly reference both products and sources in other parts of the tree,
-# especially if they are set in this file (though use directly in subdir
+# N.B.:  the top-level Makefile is not expected to ever have to use it though!
+#
+bmake_topdir = ..
+#
+# ${bmake_topdir} is used to allow values in LDADD, DPADD, and CPPFLAGS (or
+# CFLAGS) to directly reference both products and sources in other parts of the
+# tree, especially if they are set in this file (though use directly in subdir
 # makefiles can help them be more readable).  This is particularly useful for a
 # project that builds a library used by other programs in the same project,
 # and/or which may also build header files shared by several sources in
 # different directories in the same project.
-#
-# The setting of ${bmake_topdir} would not be necessary if/when all supported
-# BSDMake versions have the ${.MAKE.LEVEL} feature.  ${.MAKE.LEVEL} was first
-# found in NetBSD-current after 2009/09/08 but it is not found in any release
-# until 6.0.  Unfortunately there is no easy way to know definitively what
-# version of BSDMake is being used.  Simon Gerraty's (sjg's) BMake has
-# MAKE_VERSION, as does FreeBSD's make though they are entirely and totally
-# different and unrelated.  In NetBSD MAKE_VERSION was only briefly present
-# since it represented the build date, not the release date, and it was removed
-# in order to make it possible to do reproducible builds.
 #
 # For example this file can be used to define the version number(s) for the
 # project, and thus sources which use these numbers (header file templates, or
@@ -45,19 +37,20 @@
 # very early on, just before <bsd.own.mk> is included, and it is done by
 # sub-directory makes.  For most implementations certain system variables must
 # be defined before <bsd.own.mk> is included, and so they can be defined here.
-# See below though for why this also includes <bsd.own.mk> itself
-# half-way-through.  As such we depend on the standard <bsd.*.mk> files
-# protecting themselves from multiple inclusions, and though this was not true
-# on the original CSRG BSD releases it has been done now in all modern releases.
+# See below though for why this also includes <bsd.own.mk> itself half-way
+# through.  As such we depend on the standard <bsd.*.mk> files protecting
+# themselves from multiple inclusions, and though this was not true on the
+# original CSRG BSD releases it has been done now in all modern releases.
 #
-# Note also that this is only included by default by makefiles using standard
+# Note also that this is only included by default by Makefiles using standard
 # <bsd.*.mk> files in an immediate subdirectory -- i.e. it is done as follows:
 #
 #	.include "${.CURDIR}/../Makefile.inc"
 #
-# Thus the top level makefile may need to directly include this file, but it
-# must only do so after it has defined any default target (i.e. the .MAIN
-# target).
+# Thus the top level Makefile may need to directly include this file, but it
+# must only do so after it has defined the default target (i.e. the .MAIN
+# target, normally "all").  The top level Makefile should not (need to) use
+# ${bmake_topdir}.
 #
 # This also means that in any project with deeper source trees it may be
 # necessary to create a "Makefile.inc" in intermediate sub-directories in order
@@ -69,6 +62,7 @@
 #	# N.B.:  ${.CURDIR} here is not needed -- it's already implied because of the
 #	# include done by <bsd.prog.mk> in the subdir's Makefile
 #	.include "../Makefile.inc"
+#	bmake_topdir := ${bmake_topdir}/..
 
 .if !target(yajl-showenv)
 
@@ -366,6 +360,7 @@ showenv: yajl-showenv .PHONY
 
 yajl-showenv: .PHONY
 	@echo "" ; \
+	echo "bmake_topdir = '${bmake_topdir}'"; \
 	echo "${.OBJDIR}/${bmake_topdir}/src"; \
 	if [ -d "${.OBJDIR}/${bmake_topdir}/src" ]; then \
 		echo "the directory shown above exists!"; \

@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ..
-
 LIB =	${PACKAGE:S/^lib//}
 
 # If these are set blank then no shared library is built

@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ../..
-
 PROG = 	gen-extra-close
 
 MAN =	# empty

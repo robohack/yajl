@@ -226,12 +226,7 @@
 
 #####################
 #
-# Now, on with the show....
-#
-
-bmake_topdir =	.
-
-#####################
+#	Now, on with the show....
 #
 # Sub-directories of the project
 #

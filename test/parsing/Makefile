@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ../..
-
 PROG = 	yajl_test
 
 MAN =	# empty

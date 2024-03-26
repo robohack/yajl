@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ..
-
 PROG = 	parse_config
 
 MAN =	# empty

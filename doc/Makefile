@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir =	..
-
 .include <bsd.own.mk>
 
 #

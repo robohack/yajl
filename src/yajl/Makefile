@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ../..
-
 yajl_INCS +=	yajl_parse.h
 yajl_INCS +=	yajl_gen.h
 yajl_INCS +=	yajl_common.h

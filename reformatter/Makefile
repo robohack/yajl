@@ -1,7 +1,5 @@
 # -*- makefile-bsdmake -*-
 
-bmake_topdir = ..
-
 PROG = 	json_reformat
 
 MAN =	# empty
