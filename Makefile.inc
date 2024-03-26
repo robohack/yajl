@@ -116,7 +116,7 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 #
 # (note:  these can also be overridden on the command line)
 #
-# (note:  bmake puts optimizer flags in DBG)
+# (note:  sjg's BMake puts optimizer flags in DBG)
 #
 # (note:  defaults are set in Makefile.compiler)
 #
@@ -256,11 +256,13 @@ CPPFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src
 CFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src
 .endif
 
-# XXX N.B.:  we cannot include <bsd.own.mk> before the default "all" target!!!
+# N.B.:  we cannot include <bsd.own.mk> before the default "all" target!!!
+#
+# I.e. The top-level Makefile must inlcude this file _after_ defining it.
 #
 .include <bsd.own.mk>
 
-# In NetBSD all TARGETS are candiates for making in the SUBDIR list
+# In NetBSD all TARGETS are candidates for making in the SUBDIR list
 #
 # (but avoid creating TARGETS if it doesn't exist)
 #
