@@ -267,17 +267,18 @@ static int context_add_value (context_t *ctx, yajl_val v)
     {
         if (ctx->stack->key == NULL)
         {
-            if (!YAJL_IS_STRING (v))
+            if (!YAJL_IS_STRING (v)) {
+                /* XXX does 'v' leak here?  Is this error even possible? */
                 RETURN_ERROR (ctx, EINVAL, "context_add_value: "
-                              "Object key is not a string (%#04x)",
+                              "Object key is not a string (is %#04x)",
                               v->type);
-
+            }
             ctx->stack->key = v->u.string;
             v->u.string = NULL;
             YA_FREE(yajl_tree_parse_afs, v);
             return (0);
         }
-        else /* if (ctx->key != NULL) */
+        else /* if (ctx->stack->key != NULL) */
         {
             char * key;
 
@@ -297,10 +298,13 @@ static int context_add_value (context_t *ctx, yajl_val v)
         /*
          * XXX in theory this is impossible....  context_push() is only used
          * (and allowed) for maps (objects) and arrays
+         *
+         * XXX 'v' would likely leak here too....
          */
         RETURN_ERROR (ctx, EINVAL, "context_add_value: internal error: Cannot "
-                      "add a value to a value of type %#04x "
+                      "add a %#04x value to a value of type %#04x "
                       "(not a composite type)",
+                      v->type,
                       ctx->stack->value->type);
     }
 }
