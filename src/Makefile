@@ -72,6 +72,16 @@ yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	    -e 's/$${LIB_MICRO}/${LIB_MICRO}/' \
 	< ${.CURDIR}/yajl/yajl_version.h.in > ${.TARGET}
 
+# XXX Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
+# tedious.
+#
+.if ! defined(MAKEOBJDIRPREFIX)
+yajl/yajl_version.h: ${.OBJDIR}/yajl
+
+${.OBJDIR}/yajl:
+	mkdir yajl
+.endif
+
 # n.b.:  some variants of "make install" may (re)move ${FILES}, so a second
 # "make" after an install will fail!
 #
