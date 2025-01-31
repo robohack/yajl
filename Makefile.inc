@@ -272,7 +272,8 @@ SHLIB_LDENDFILE =	# empty
 # program products to be built with reference to the original source header
 # files.
 #
-# The .if here is annoying, but some older systems don't support CPPFLAGS.
+# The .if here is annoying, but some older systems, and modern FreeBSD, don't
+# support CPPFLAGS.
 #
 .if defined(CPPFLAGS)
 CPPFLAGS +=	-I${.CURDIR}/${bmake_topdir}/src

@@ -81,7 +81,8 @@ CLEANFILES += yajl/yajl_version.h
 # note:  cleandir doesn't remove local ${.OBJDIR} so we also won't worry about
 # removing the "yajl" sub-directory either.
 
-# This .if is annoying, but some older systems don't support CPPFLAGS.
+# This .if is annoying, but some older systems (and modern FreeBSD) don't
+# support CPPFLAGS.
 #
 # XXX does this work if done before the .include <bsd.lib.mk> below?
 #
