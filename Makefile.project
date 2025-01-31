@@ -28,7 +28,7 @@ INCSUBDIR =	/yajl
 #
 LIB_MAJOR =	2
 LIB_MINOR =	2
-LIB_MICRO =	90
+LIB_MICRO =	91
 
 bmake_install_dirs += ${BINDIR}
 bmake_install_dirs += ${INCSDIR}
