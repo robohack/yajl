@@ -225,7 +225,9 @@
 # 'build' directory (as would be sane to do) then you can remove all the obj.*
 # detritus with this command (the trailing, escaped, semicolon is important!):
 #
-#	find . -type d -name .git -prune -o -type d ! -name .git ! -name 'obj*' -exec rm -rf {}obj {}/obj.$(uname -m) \;
+#	find . -type d -name .git -prune -o -type d ! -name .git ! -name 'obj*' -exec rm -rf {}/obj.$(uname -m)-$(uname -p) \;
+#
+# XXX there really should be a way to remove all ${.OBJDIR} in <bsd.*.mk>!
 #
 #####################
 #

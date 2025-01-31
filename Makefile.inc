@@ -130,6 +130,14 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 #
 #CWARNFLAGS += -Werror
 
+# yes, always -- we use this because it's safer when using a shared network
+# directory for building/testing/etc.  (though it is sometimes somewhat
+# annoying)
+#
+MKOBJ =			yes
+OBJMACHINE ?=		yes
+OBJMACHINE_ARCH ?=	yes
+
 # N.B.:  testing in the build or 'install' (distribution) directories, or making
 # a distribution that can be un-packed on a target system in any arbitrary
 # hierarchy (/usr/local, /opt, /usr/pkg, etc.)  is "hard" (i.e. annoyingly more
@@ -170,22 +178,14 @@ PKGCONFIGDIR ?= ${LIBDIR}/pkgconfig
 # installed, so we use "-l${PACKAGE:S/^lib//}_s" to do the linking.  (Note some
 # packages include "lib" as the prefix in their package name!)
 #
+# Note:  In order to avoid problems with parallel builds LDADD and DPADD should
+# not be set in src/Makefile, thus this .if:
+#
 # see src/Makefile for where LIB is set
 #
 # XXX Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
-# Note:  In order to avoid problems with parallel builds LDADD and DPADD should
-# not be set in src/Makefile, thus this .if:
-#
-MKOBJ = yes
-
-# yes, always -- we use this because it's safer when using a shared network
-# directory for building/testing/etc.  (though it is sometimes somewhat
-# annoying)
-#
-OBJMACHINE ?=	yes
-
 .if !defined(LIB)
 . if defined(MAKEOBJDIRPREFIX)
 # then .OBJDIR is from MAKEOBJDIRPREFIX
