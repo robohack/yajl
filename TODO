@@ -1,4 +1,7 @@
 * Fix up all the copyright notices!
+* Pull up #130+#251 (together!) and double-check LLONG_MIN & LLONG_MAX
+* Make sure real values (doubles) are always printed with a fractional
+  part ("3.0" not "3")
 * add a test for 0x1F bug
 * testing:
   - see http://seriot.ch/parsing_json.php (and https://github.com/nst/JSONTestSuite)
