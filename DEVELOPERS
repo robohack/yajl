@@ -1,0 +1,172 @@
+# Documentation for Developers
+
+## Library Versioning
+
+Attempts will/should be made to conform to Semantic Versioning rules:
+
+	https://semver.org/
+
+This will apply to both the release numbers, as well as the library version
+numbers, which should ideally be kept in sync.
+
+### General Library Versioning Guidelines
+
+If any existing ABI aspect is changed such that binaries linked against an old
+shlib will no longer work correctly with the newer one then you must bump the
+major number.
+
+If no existing ABI aspect is changed but there are other changes, such as an API
+addition, which could make binaries built against the new shlib fail to work
+correctly on a system with just an older shlib then you must bump the minor
+number.
+
+New releases should also bump the minor number, just to keep the library version
+number in sync with the release number which is managed as per semver.org.
+
+
+### Other Issues
+
+With ELF the addition of new functions (not just changing old ones) may require
+a major version bump.
+
+With ELF if you bump one library's major version you have to recursively bump
+every library that uses it.
+
+
+## Making a New Release
+
+For this example the previous release was 2.2.  The pre-release will be 2.2.90,
+and the final new release will be 2.3.
+
+First make sure everything is up-to-date and tested!  Push all commits to GitHub
+to trigger Continuous Integration (CI) actions (with results visible under the
+"Actions" tab).
+
+	git status
+	# commit anything outstanding....
+	mkdir build
+	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build all regress
+	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist install
+	# check dist/* is correct...
+	rm -rf build dist
+	make distclean
+
+
+### Now, first, create a pre-release
+
+Update the version info in both Makefile.project and Makefile.pkgsrc to set the
+patch number (LIB_MICRO) to .90, update the DISTNAME by appending .90, and set
+PKGREVISION to zero (and comment it out).  (Alpha releases might start at .80,
+and multiple pre-releases will of course simply increment from .90.)
+
+	# edit version in Makefile.project and Makefile.pkgsrc
+	git add Makefile.project Makefile.pkgsrc
+	git commit -m 'Makefile.project, Makefile.pkgsrc: ready for release: 2.2.90'
+
+Write up notes about the release to prepare in `doc/release-2.3.md`, i.e. using
+the "next" full semantic version number(s).  Include a link to the compare with
+the previous release at the end, formatted as follows
+
+	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.90
+
+Note this `doc/release-2.3.md` file need not be committed for pre-releases, only
+for the full release.
+
+
+### Create the annotated release tag for the pre-release
+
+To create a release from an annotated/signed git tag, first create a signed tag
+locally with git, push the tag to GitHub.
+
+First write a "release" message in doc/release-2.3.md
+
+Then create the signed tag (here we are of course tagging the pre-release):
+
+	git tag -s -F doc/release-2.3.md release-2.2.90
+
+or in Magit:
+
+	t -s r
+
+and then set/adjust the tag name, press return, and then paste the "release"
+message file contents into the minibuffer and press return again.
+
+
+### Create the GitHub "release" for the pre-release:
+
+Finally use `gh` to create the release on GitHub.
+
+Use `--notes-from-tag` to automatically generate the release notes
+from the annotated git tag.  Additional release notes can be prepended
+to automatically generated notes by using the `--notes` flag.
+
+n.b.:  --verify-tag and --notes-from-tag require a recent release of `gh`
+
+Note the text for `-t` is just the main heading from doc/release-2.3.md.
+
+	gh release create release-2.2.90 -p \
+		-t "Version 2.2.90 (beta)" \
+		--verify-tag \
+		--notes-from-tag
+
+For older versions of `gh` just re-use the release notes file again directly:
+
+	gh release create release-2.2.90 -p \
+		-t "Version 2.2.90 (beta)" \
+		-F doc/release-2.3.md
+
+(*xxx* alternatively this can be done via the web interface)
+
+
+## Testing!
+
+Make sure you test everything again with `make regress`!
+
+### Testing releases with pkgsrc
+
+Copy *.pkgsrc over into /usr/pkgsrc/devel/yajl, then fetch the release archive,
+update the distinfo, and build:
+
+	pax -rw -v -s '|.pkgsrc$||' *.pkgsrc /usr/pkgsrc/devel/yajl
+	cd /usr/pkgsrc/devel/yajl
+	make fetch
+	make makesum
+	make test		# optional (no, not really -- do it!)
+	make package	# optional
+
+or just do the following:
+
+	make -f Makefile.pkgsrc setup-pkgsrc
+
+
+## Creating a full Release
+
+Fully test the pre-release if you haven't already!
+
+Replace the *(beta)* text in the main notes heading with the current date (in
+parenthesis:  *(2014/04/07)*).
+
+	# edit doc/release.2.3.md
+
+Commit the release notes:
+
+	git add doc/release.2.3.md
+	git commit -m 'Release 2.3'
+
+Do all the steps above (i.e. those for a pre-release) over again, using the
+"next" full release semantic version number(s), but drop the '-p' from the `gh`
+command and replace *(beta)* in the title (`-t`) option with the current date
+(in parenthesis:  *(2014/04/07)*) .
+
+
+## Documentation
+
+Documentation for the API is kept in comments in the source code and extracted
+and formatted with Cxref.
+
+note: https://developers.google.com/style
+
+
+## Footnotes
+
+(1) `gh` is the GitHub command-line API tool, in pkgsrc/net/gh
