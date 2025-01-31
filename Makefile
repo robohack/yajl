@@ -191,11 +191,12 @@
 # "make obj") then you can do so provided you carefully set $MAKEOBJDIRPREFIX to
 # the the pathname of the initial build directory you created.
 #
-# Remember BSD Make tries to change to ${MAKEOBJDIRPREFIX}${.CURDIR} to any
-# rules, so if you use a fully qualified pathname then you can use the exact
-# same $MAKEOBJDIRPREFIX no matter where you are in the project hierarchy.  If
-# the build directory is also a sub-directory of the project's source hierarchy
-# then you can also use a relative path to it from within a sub-directory.
+# Remember BSD Make tries to change to ${MAKEOBJDIRPREFIX}${.CURDIR} before
+# executing any rules, so if you use a fully qualified pathname then you can use
+# the exact same $MAKEOBJDIRPREFIX no matter where you are in the project
+# hierarchy.  If the build directory is also a sub-directory of the project's
+# source hierarchy then you can also use a relative path to it from within a
+# sub-directory.
 #
 # Note that setting $MAKEOBJDIRPREFIX in your shell's environment may risk
 # mixing things up for different projects, though if your BSD Make does
@@ -214,7 +215,8 @@
 #
 # If you don't use $MAKEOBJDIRPREFIX then "obj.${MACHINE}" sub-directories will
 # be created for each directory with products.  EXCEPT ON FreeBSD!!!  (where the
-# default is always just "obj", BUT IT IS BROKEN! (as of 12.0)).
+# default is always just "obj", BUT IT IS BROKEN! (as of 12.0) without
+# WITH_AUTO_OBJ=yes on the command line).
 #
 # This can be avoided by using the environment variable MAKEOBJDIR as follows
 # (which more or less exactly simulates how MAKEOBJDIRPREFIX is used):
@@ -241,14 +243,14 @@
 # think.
 #
 # However the initial implementation in FreeBSD's original make since 2.2.1 when
-# they first gain support, and up to about May 2014, or in 9.0; and as merged in
+# it first gains support, and up to about May 2014, or in 9.0; and as merged in
 # NetBSD's make since (effectively) 1.5 (literally since 1.3) and prior to 7.0
 # (and so in Simon's BMake since its inception, and up to bmake-20140214); and
 # in OpenBSD's make since 2.1 when they first gained support up until 5.5 (after
-# which they removed all support for MAKEOBJDIRPREFIX, a change not documented
-# until 6.7!!!) were all extremely beligerent about having $MAKEOBJDIRPREFIX set
-# in the environment and only in the environment -- they refused to even peek at
-# it if it is only set on the command line, using only getenv(3) to access it.
+# which they removed all support for MAKEOBJDIRPREFIX!) were all extremely
+# belligerent about having $MAKEOBJDIRPREFIX set in the environment and only in
+# the environment -- they refused to even peek at it if it is only set on the
+# command line, using only getenv(3) to access it.
 #
 # However in all but OpenBSD this has been fixed so that MAKEOBJDIRPREFIX can
 # also be set on the command line.  I think.  I have had bad experiences with
@@ -325,6 +327,7 @@ SUBDIR +=	test
 # the setting of ${SUBDIR} and ${bmake_install_dirs}.)
 #
 # Yes, "make obj" is forced -- it is stupid to build in the source directory)
+# (and no, use of MKOBJDIRS to control this is not supported)
 #
 # This does mean nothing else can be made in the top directory though.
 #
