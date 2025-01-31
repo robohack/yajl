@@ -184,14 +184,12 @@ static yajl_val context_pop(context_t *ctx)
     return (v);
 }
 
-static void object_add_keyval(context_t *ctx,
-                              yajl_val obj, char *key, yajl_val value)
+static void object_add_keyval(yajl_val obj, char *key, yajl_val value)
 {
     const char **tmpk;
     yajl_val *tmpv;
 
     /* We're checking for NULL in "context_add_value" or its callers. */
-    assert (ctx != NULL);
     assert (obj != NULL);
     assert (key != NULL);
     assert (value != NULL);
@@ -216,14 +214,12 @@ static void object_add_keyval(context_t *ctx,
     return;
 }
 
-static void array_add_value(context_t *ctx,
-                            yajl_val array, yajl_val value)
+static void array_add_value(yajl_val array, yajl_val value)
 {
     yajl_val *tmp;
 
     /* We're checking for NULL pointers in "context_add_value" or its
      * callers. */
-    assert (ctx != NULL);
     assert (array != NULL);
     assert (value != NULL);
 
@@ -287,13 +283,13 @@ static int context_add_value (context_t *ctx, yajl_val v)
 
             key = ctx->stack->key;
             ctx->stack->key = NULL;
-            object_add_keyval (ctx, ctx->stack->value, key, v);
+            object_add_keyval(ctx->stack->value, key, v);
             return (0);
         }
     }
     else if (YAJL_IS_ARRAY (ctx->stack->value))
     {
-        array_add_value (ctx, ctx->stack->value, v);
+        array_add_value(ctx->stack->value, v);
         return (0);
     }
     else
