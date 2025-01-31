@@ -59,7 +59,8 @@ yajl_status_to_string(yajl_status stat)
  *
  * void *ctx
  * a user-specified context pointer that will be passed to the callback
- * functions.
+ * functions.  E.g. used by yajl_tree_parse() to keep track of nested objects
+ * and possible error messages.
  *
  * Note:  The yajl parser assumes the locale is "C", and in particular that
  * LC_NUMERIC is set to "C", as otherwise (e.g. if the current locale does not
