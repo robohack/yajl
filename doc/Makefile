@@ -47,7 +47,7 @@ install-docs:: .PHONY docs .WAIT
 html/yajl.apdx.html: yajl.cxref # html
 	mkdir -p html
 	( cd ${.CURDIR} && \
-	  files=$$(find ../src -type d \( -name CVS -or -name .git\* -or -name .svn -or -name build -or -name 'build-*' -or -name dist -or -name 'dist-*' -or -name obj -or -name 'obj.*' \) -prune \) -or -type f \( -name '*.[ch]' -or -name '*.cxref' \) -print); \
+	  files=$$(find ../src \( -type d \( -name CVS -or -name .git\* -or -name .svn -or -name build -or -name 'build-*' -or -name dist -or -name 'dist-*' -or -name obj -or -name 'obj.*' \) -prune \) -or -type f \( -name '*.[ch]' -or -name '*.cxref' \) -print); \
 	  files="yajl.cxref $${files} ../reformatter/json_reformat.c ../example/parse_config.c"; \
 	  for file in $${files}; do \
 		${CXREF} -R.. -xref-all -block-comments -O${.OBJDIR}/html -N${PACKAGE} -I${.CURDIR}/../src -I${GENHDIR} -CPP 'cc -std=c99 -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
