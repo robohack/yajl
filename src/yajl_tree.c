@@ -317,7 +317,7 @@ static int handle_string (void *ctx,
     v = value_alloc (yajl_t_string);
     v->u.string = YA_MALLOC(yajl_tree_parse_afs, string_length + 1);
     memcpy(v->u.string, string, string_length);
-    v->u.string[string_length] = 0;
+    v->u.string[string_length] = '\0';
 
     return ((context_add_value (ctx, v) == 0) ? STATUS_CONTINUE : STATUS_ABORT);
 }
@@ -330,7 +330,7 @@ static int handle_number (void *ctx, const char *string, size_t string_length)
     v = value_alloc(yajl_t_number);
     v->u.number.r = YA_MALLOC(yajl_tree_parse_afs, string_length + 1);
     memcpy(v->u.number.r, string, string_length);
-    v->u.number.r[string_length] = 0;
+    v->u.number.r[string_length] = '\0';
 
     v->u.number.flags = 0;
 

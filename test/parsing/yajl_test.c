@@ -141,7 +141,7 @@ test_yajl_map_key(void *ctx,
 {
     if (TEST_CTX(ctx)->do_printfs) {
         char * str = (char *) malloc(stringLen + 1);
-        str[stringLen] = 0;
+        str[stringLen] = '\0';
         memcpy(str, stringVal, stringLen);
         printf("key: '%s'\n", str);
         free(str);

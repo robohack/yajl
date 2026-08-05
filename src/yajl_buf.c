@@ -45,7 +45,7 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 #if 0
         memset((void *) buf->data, 0, buf->len);
 #else  /* it's really just a string, albiet UTF-8.... */
-        buf->data[0] = 0;
+        buf->data[0] = '\0';
 #endif
     }
 
@@ -89,7 +89,7 @@ void yajl_buf_append(yajl_buf buf, const void * data, size_t len)
         assert(data != NULL);
         memcpy(buf->data + buf->used, data, len);
         buf->used += len;
-        buf->data[buf->used] = 0;
+        buf->data[buf->used] = '\0';
     }
 }
 
@@ -98,7 +98,7 @@ void yajl_buf_clear(yajl_buf buf)
 {
     buf->used = 0;
     if (buf->data) {
-        buf->data[buf->used] = 0;
+        buf->data[buf->used] = '\0';
     }
 }
 
