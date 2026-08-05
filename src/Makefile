@@ -222,9 +222,15 @@ SHLIB_INSTALL_VERSION ?= ${SHLIB_MAJOR}
 SHLIB_COMPATABILITY_VERSION ?= ${SHLIB_MAJOR}.${SHLIB_MINOR}
 # XXX do we need "-install_name=${PREFIX}/lib/lib${LIB}.dylib" too?
 # xxx -dylib_*_version might be too new for macos-10.x
-SHLIB_SHFLAGS=-dylib \
+SHLIB_SHFLAGS = -dylib \
 	-dylib_current_version=${SHLIB_FULLVERSION} \
 	-dylib_compatibility_version=${SHLIB_COMPATABILITY_VERSION}
+.if defined(USE_UBSAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "undefined")
+SHLIB_SHFLAGS += -fsanitize=undefined
+.endif
+.if defined(USE_ABSAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
+SHLIB_SHFLAGS += -fsanitize=address
+.endif
 
 # xxx maybe this link should point at just lib${LIB}.so ???
 lib${LIB}.dylib: lib${LIB}.so.${SHLIB_FULLVERSION}
