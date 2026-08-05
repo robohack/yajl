@@ -10,8 +10,8 @@ realinstall:
 proginstall:
 
 regress:
-.if defined(USE_ASAN)
-	@if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
+.if defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
+	@if [  -x ${PAXCTL} ]; then ${PAXCTL} +a ${.OBJDIR}/${PROG}; fi
 .endif
 	ulimit -v unlimited && ${.OBJDIR}/${PROG}; rc=$$?; if [ $$rc != 0 ]; then echo "rc=$$rc"; false; fi
 

@@ -87,6 +87,11 @@ LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}
 . error "Parallel installs are not supported with older BMakes"
 .endif
 
+# xxx on NetBSD <bsd.sys.mk> sets this just to "paxctl", so if /usr/sbin isn't
+# in the caller's PATH it fails
+#
+PAXCTL ?=		/usr/sbin/paxctl
+
 # Installation directories
 #
 # N.B.:  ${DESTDIR} if set on the 'install' command line, it is also prepended

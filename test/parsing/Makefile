@@ -10,12 +10,10 @@ realinstall:
 proginstall:
 
 regress:
-.if defined(USE_ASAN)
-	if [  -x /usr/sbin/paxctl ]; then /usr/sbin/paxctl +a ${.OBJDIR}/${PROG}; fi
-	ulimit -v unlimited && cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} OBJDIR=${.OBJDIR} sh ./run_tests.sh
-.else
-	cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} OBJDIR=${.OBJDIR} sh ./run_tests.sh
+.if defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
+	if [  -x ${PAXCTL} ]; then ${PAXCTL} +a ${.OBJDIR}/${PROG}; fi
 .endif
+	ulimit -v unlimited && cd ${.CURDIR} && testBin=${.OBJDIR}/${PROG} OBJDIR=${.OBJDIR} sh ./run_tests.sh
 
 .include <bsd.prog.mk>
 
