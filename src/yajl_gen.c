@@ -478,7 +478,7 @@ yajl_gen_get_buf(yajl_gen g, const unsigned char ** buf,
 /*+
  *  clear yajl's output buffer, but maintain all internal generation
  *  state.  This function will not "reset" the generator state, and is
- *  intended to enable incremental JSON outputing.
+ *  intended to enable incremental JSON outputting.
  +*/
 void
 yajl_gen_clear(yajl_gen g)
