@@ -10,7 +10,7 @@ MASTER_SITES=		${MASTER_SITE_GITHUB:=robohack/}
 GITHUB_TAG=		release-${PKGVERSION_NOREV}
 
 OWNER=		woods@planix.ca
-HOMEPAGE=	http://robohack.github.com/${PKGBASE}/
+HOMEPAGE=	https://robohack.github.io/${PKGBASE}/
 COMMENT=	Small JSON library written in ANSI C
 # "YAJL is released under the permissive ISC license."
 LICENSE=	modified-bsd
