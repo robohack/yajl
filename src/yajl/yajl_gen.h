@@ -80,7 +80,7 @@ extern "C" {
          * void * of your choosing.
          *
          * example:
-         *   yajl_gen_config(g, yajl_gen_print_callback, myFunc, myVoidPtr);
+         *   yajl_gen_config(g, yajl_gen_print_callback, myFunc, myVoidCtxPtr);
          +*/
         yajl_gen_print_callback = 0x04,
         /*+
