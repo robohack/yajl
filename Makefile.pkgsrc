@@ -118,7 +118,7 @@ do-configure:
 # https://github.com/robohack/yajl to), run 'make setup-pkgsrc':
 #
 REPODIR?=	.	# /work/woods/f-yajl
-PKGDIR?=	/usr/pkgsrc/devel/yajl
+PKGDIR?=	${PKGSRCDIR}/${CATEGORIES:[1]}/${PKGBASE}
 setup-pkgsrc:
 	cd ${REPODIR} && pax -rw -v -s '|\.pkgsrc$$||' *.pkgsrc ${PKGDIR}
 	cd ${PKGDIR} && make fetch
