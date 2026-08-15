@@ -51,6 +51,20 @@ struct yajl_gen_t
     yajl_alloc_funcs alloc;
 };
 
+/*
+ * n.b.:  yajl_buf_append()'s first parameter is a yajl_buf, but in order to be
+ * generally usable yajl_print_t() takes a void pointer, so we need a wrapper in
+ * order to avoid the undefined behaviour specified by the C standard in
+ * 6.3.2.3p8.
+ */
+static void
+yajl_buf_append_wrapper(void * ctx,
+                        const char * str,
+                        size_t len)
+{
+    yajl_buf_append((yajl_buf) ctx, str, len);
+}
+
 /*+ configure a yajl generator
  *
  * int yajl_gen_config
@@ -99,7 +113,7 @@ yajl_gen_config(yajl_gen g, yajl_gen_option opt, ...)
             break;
         }
         case yajl_gen_print_callback:
-            yajl_buf_free(g->ctx);
+            yajl_buf_free((yajl_buf) g->ctx);
             g->print = va_arg(ap, const yajl_print_t);
             g->ctx = va_arg(ap, void *);
             break;
@@ -152,7 +166,7 @@ yajl_gen_alloc(const yajl_alloc_funcs *afs)
     /* copy in pointers to allocation routines */
     g->alloc = *afs;
 
-    g->print = (yajl_print_t) &yajl_buf_append;
+    g->print = &yajl_buf_append_wrapper;
     g->ctx = yajl_buf_alloc(&(g->alloc));
     g->indentString = "    ";
 
@@ -193,7 +207,7 @@ yajl_gen_reset(yajl_gen g, const char * sep)
 void
 yajl_gen_free(yajl_gen g)
 {
-    if (g->print == (yajl_print_t) &yajl_buf_append) {
+    if (g->print == &yajl_buf_append_wrapper) {
         yajl_buf_free((yajl_buf) g->ctx);
     }
     YA_FREE(&(g->alloc), g);
@@ -466,7 +480,7 @@ yajl_gen_status
 yajl_gen_get_buf(yajl_gen g, const unsigned char ** buf,
                  size_t * len)
 {
-    if (g->print != (yajl_print_t) &yajl_buf_append) {
+    if (g->print != &yajl_buf_append_wrapper) {
         return yajl_gen_no_buf;
     }
     *buf = yajl_buf_data((yajl_buf) g->ctx);
@@ -483,7 +497,7 @@ yajl_gen_get_buf(yajl_gen g, const unsigned char ** buf,
 void
 yajl_gen_clear(yajl_gen g)
 {
-    if (g->print == (yajl_print_t) &yajl_buf_append) {
+    if (g->print == &yajl_buf_append_wrapper) {
         yajl_buf_clear((yajl_buf) g->ctx);
     }
 }
