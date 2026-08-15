@@ -29,41 +29,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 #define MAX_VALUE_TO_MULTIPLY ((LLONG_MAX / 10) + (LLONG_MAX % 10))
+#ifndef MAXULLONG_B10_DIGITS
+# define MAXULLONG_B10_DIGITS	(20)	/* for a 64-bit unsigned long long: 18,446,744,073,709,551,615 */
+#endif
 
 /*
- * same semantics as strtol(3) for base=10
- *
  * also used in yajl_tree_parse()'s handle_number() callback
  */
 long long
-yajl_parse_integer(const unsigned char *number, size_t length)
+yajl_parse_integer(const unsigned char *number, /* pointer to the beginning of
+                                                 * the number string, including
+                                                 * any sign character */
+                   size_t length)       /* length of the number string */
 {
+    char buf[MAXULLONG_B10_DIGITS + 2]; /* room for a sign and a NUL */
+    char *oldlocale;
     long long ret  = 0;
-    long sign = 1;
-    const unsigned char *pos = number;
-    if (*pos == '-') { pos++; sign = -1; }
-    if (*pos == '+') { pos++; }
 
-    while (pos < number + length) {
-        if ( ret > MAX_VALUE_TO_MULTIPLY ) {
-            errno = ERANGE;
-            return sign == 1 ? LLONG_MAX : LLONG_MIN;
+    /*
+     * copy number (up to length) to point to a NUL-terminated string
+     *
+     * note we don't have access to the yajl_handle so we can't use the
+     * pre-existing decodeBuf it has.  However since numbers are quite short
+     * strings we can just use a buffer on the stack.
+     *
+     * However since we use a fixed-length buffer on the stack we have to make
+     * sure the input string isn't longer than the longest possible base-10
+     * representation of LLONG_MAX (plus a sign char).
+     */
+    if (length > (MAXULLONG_B10_DIGITS + 1)) {
+        errno = ERANGE;
+        if (*number == '-') {
+            return LLONG_MIN;
+        } else {
+            return LLONG_MAX;
         }
-        ret *= 10;
-        if (LLONG_MAX - ret < (*pos - '0')) {
-            errno = ERANGE;
-            return sign == 1 ? LLONG_MAX : LLONG_MIN;
-        }
-        if (*pos < '0' || *pos > '9') {
-            errno = ERANGE;
-            return sign == 1 ? LLONG_MAX : LLONG_MIN;
-        }
-        ret += (*pos++ - '0');
     }
 
-    return sign * ret;
+    memcpy(buf, number, length);
+    buf[length] = '\0';
+
+    oldlocale = setlocale(LC_NUMERIC, NULL);
+    (void) setlocale(LC_NUMERIC, "C");
+    ret = strtoll(buf, NULL, 10);
+    (void) setlocale(LC_NUMERIC, oldlocale);
+
+    return ret;
 }
 
 static long long int
@@ -98,6 +112,9 @@ yajl_verify_integer(yajl_handle hand,
     return i;
 }
 
+/*
+ * RFC 7159 suggests JSON parsers should use long double (IEEE 754 64-bit)
+ */
 static double
 yajl_verify_double(yajl_handle hand,
                    const unsigned char *buf,
@@ -106,6 +123,7 @@ yajl_verify_double(yajl_handle hand,
 {
     double d = 0.0;
     char *end;
+    char *oldl;
 
     /* convert buf to point to a NUL-terminated string */
     yajl_buf_clear(hand->decodeBuf);
@@ -113,8 +131,14 @@ yajl_verify_double(yajl_handle hand,
     buf = yajl_buf_data(hand->decodeBuf);
 
     errno = 0;
-    /* XXX is INF or INFINITY, or NAN, valid in JSON? */
+    /*
+     * N.B.:  the "values" INF, INFINITY, and NAN, (i.e. as unquoted inputs to
+     * strtod()) are not actually valid for JSON numbers
+     */
+    oldl = setlocale(LC_NUMERIC, NULL);
+    (void) setlocale(LC_NUMERIC, "C");
     d = strtod((const char *) buf, &end);
+    (void) setlocale(LC_NUMERIC, oldl);
     /*
      * these 'end' checks should be prevented from triggering by the lexer
      * having pre-validated the token, but double-check!
@@ -177,10 +201,7 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
         size_t memneeded = 0;
         size_t line = 0;
         size_t coff = 0;
-#ifndef MAXULLONG_B10_DIGITS
-# define MAXULLONG_B10_DIGITS	(20)	/* for a 64-bit unsigned long long: 18,446,744,073,709,551,615 */
-#endif
-        char anumber[MAXULLONG_B10_DIGITS];
+        char anumber[MAXULLONG_B10_DIGITS+1];
 
         /*
          * N.B.:  the GNU coding standards, as followed by GCC, suggest the
