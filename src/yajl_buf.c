@@ -51,7 +51,7 @@ void yajl_buf_ensure_available(yajl_buf buf, size_t want)
 
     need = buf->len;
 
-    while (need > 0 && want >= (need - buf->used)) {
+    while (need > 0 && (want + 1) >= (need - buf->used)) {
         /* XXX <<=1 is too aggressive!  but it "wraps" nicely to zero... */
         need <<= 1;
     }
@@ -81,7 +81,7 @@ void yajl_buf_free(yajl_buf buf)
     YA_FREE(buf->alloc, buf);
 }
 
-/*+ append a number of bytes to the buffer +*/
+/*+ append a number of bytes to the buffer and NUL terminate it +*/
 void yajl_buf_append(yajl_buf buf, const void * data, size_t len)
 {
     yajl_buf_ensure_available(buf, len);

@@ -28,8 +28,8 @@
  */
 
 /*+
- * yajl_buf is a buffer with exponential growth.  the buffer ensures that
- * you are always null padded.
+ * yajl_buf is a buffer/string with exponential growth.  The buffer is
+ * guaranteed to always be NUL terminated.
  +*/
 typedef struct yajl_buf_t * yajl_buf;
 
