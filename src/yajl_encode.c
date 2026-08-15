@@ -74,15 +74,19 @@ yajl_string_encode(const yajl_print_t print,
     print(ctx, (const char *) (str + beg), end - beg);
 }
 
-static void hexToDigit(unsigned int * val, const unsigned char * hex)
+static void hexToDigit(unsigned int * rval, const unsigned char * hex)
 {
     unsigned int i;
+
     for (i=0;i<4;i++) {
         unsigned char c = hex[i];
-        if (c >= 'A') c = (unsigned char) ((c & ~0x20) - 7);
+
+        if (c >= 'A') {
+            c = (unsigned char) ((c & ~0x20) - 7);
+        }
         c = (unsigned char) (c - '0');
         assert(!(c & 0xF0));
-        *val = (*val << 4) | c;
+        *rval = (*rval << 4) | c;
     }
 }
 
