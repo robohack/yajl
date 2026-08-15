@@ -120,7 +120,7 @@ do-configure:
 REPODIR?=	.	# /work/woods/f-yajl
 PKGDIR?=	/usr/pkgsrc/devel/yajl
 setup-pkgsrc:
-	cd ${REPODIR} && pax -rw -v -s '|.pkgsrc$||' *.pkgsrc ${PKGDIR}
+	cd ${REPODIR} && pax -rw -v -s '|\.pkgsrc$$||' *.pkgsrc ${PKGDIR}
 	cd ${PKGDIR} && make fetch
 	cd ${PKGDIR} && make makesum
 	cd ${PKGDIR} && make test
