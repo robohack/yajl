@@ -66,6 +66,8 @@ INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/libexec
 INSTALLATION_DIRS+=	libdata/debug/${PREFIX}/sbin
 .endif
 
+# n.b.: these PLIST_VARS are for packages making libraries
+
 PLIST_VARS+=		mkdebuglib
 .if ${MKDEBUGLIB:Uno:tl} != "no"
 PLIST.mkdebuglib=	yes
