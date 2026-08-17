@@ -6,10 +6,35 @@
 #	This should be included in your project's top-level Makefile.inc after
 #	any include of <bsd.own.mk>
 
+# Copyright (C) 2025 Greg A. Woods - This work is licensed under the Creative
+# Commons Attribution-ShareAlike 4.0 International License.  To view a copy of
+# the license, visit <URL:http://creativecommons.org/licenses/by-sa/4.0/>, or
+
+# The primary source for this file is:  https://github.com/robohack/experiments
+
 # You can define USE_UBSAN or USE_ASAN on the command line to enable the
 # Undefined or Address sanitizers with recent enough Clang or GCC.  Note if your
 # system supports these you may of course use its way of enabling them instead
-# (e.g. on NetBSD set "MKSANITIZER=yes USE_SANITIZER=address").
+# (e.g. on NetBSD set "MKSANITIZER=yes USE_SANITIZER=address LDSTATIC=").
+#
+# Use of the address sanitizers may also require either ASAN_OPTIONS or
+# UBSAN_OPTIONS to be set in the runtime environment,
+#
+# e.g.: export ASAN_OPTIONS=detect_leaks=1
+#   or: export UBSAN_OPTIONS=halt_on_error=1.
+#
+# As per the GCC manual, see the (dated?) following documentation:
+#
+#	https://github.com/google/sanitizers/wiki/AddressSanitizerFlags
+#	https://github.com/google/sanitizers/wiki/AddressSanitizerFlags
+#	https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+#
+# and:
+#
+#	export ASAN_OPTIONS=help=1
+#	export ASAN_OPTIONS=verbosity=1:detect_leaks=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 
+#
+#	export UBSAN_OPTIONS=print_stacktrace=1
 #
 # N.B.:  The address sanitizer is not available when the PaX ASLR (Address Space
 # Layout Randomization) feature is enabled on a given system, but it can be
@@ -21,14 +46,32 @@
 #
 # to see what specific optimizations are enabled by -O*:
 #
-#	echo "" | gcc -O[0123] -S -fverbose-asm -o - -x c -
+#	echo "" | cc -O[0123] -S -fverbose-asm -o - -x c -
 #
 # to show search paths and "as" and linker commands:
 #
-#	echo "" | gcc -v -x c -
+#	echo "" | cc -v -x c -
 #
 #
 # N.B.:  these tricks do not work for lcc
+
+# _GCC_VERSION is borrowed from pkgsrc/mk/compiler/gcc.mk
+GREP ?=		grep
+ECHO ?=		echo
+.if empty(_GCC_VERSION)
+_GCC_VERSION_STRING!=	\
+	( env LC_ALL=C ${_CC} -v 2>&1 | ${GREP} 'gcc version') 2>/dev/null || ${ECHO} 0
+
+.  if !empty(_GCC_VERSION_STRING:Megcs*)
+_GCC_VERSION=	2.8.1		# egcs is considered to be gcc-2.8.1.
+.  elif !empty(DRAGONFLY_CCVER) && ${OPSYS} == "DragonFly"
+_GCC_VERSION!= env CCVER=${DRAGONFLY_CCVER} ${_CC} -dumpversion
+.  elif !empty(_GCC_VERSION_STRING:Mgcc*)
+_GCC_VERSION!=	${_CC} -dumpversion
+.  else
+_GCC_VERSION=	0
+.  endif
+.endif
 
 .if !defined(__GNUC__)
 __GNUC__ !=		echo __GNUC__ | $(CC) -E - | sed '/\#/d;s/__GNUC__//'
@@ -44,9 +87,10 @@ __GNUC_PATCHLEVEL__ !=	echo __GNUC_PATCHLEVEL__ | $(CC) -E - | sed '/\#/d;s/__GN
 . endif
 .endif
 
-# Note: for now Clang also defines the __GNUC*__ macros above...
+# Note: for now Clang and pcc also define the __GNUC*__ macros above...
 
-# Note: on all recent Mac OS X (and soon FreeBSD), "cc" is "clang"
+# Note: on all recent Mac OS X (and FreeBSD since 10), "cc" is "clang"
+
 # On Mac OS X 10.8 and newer "gcc" is actually "llvm-gcc" too!
 
 .if !defined(__clang__)
@@ -166,7 +210,7 @@ NO_CFLAGS_WARNINGS = 1
 CWARNFLAGS += -Wall
 # this one is just plain annoying much of the time:
 CWARNFLAGS += -Wno-missing-field-initializers
-# these aren't always in "-Wall"
+# these aren't always in "-Wall", but many are in newer compilers
 CWARNFLAGS += -Wimplicit
 CWARNFLAGS += -Wreturn-type
 CWARNFLAGS += -Wswitch
@@ -275,16 +319,18 @@ CWARNFLAGS += -fmessage-length=0
 . if ${__clang_major__} <= 5
 CWARNFLAGS += -fcatch-undefined-behavior
 .  if ${__clang_major__} == 4 || (${__clang_major__} == 3 && ${__clang_minor__} >= 3)
-.   if defined(USE_UBSAN)
+.   if defined(USE_UBSAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "undefined")
 # i.e. clang 3.3 or clang 4.x (but not clang 5.x)
 CWARNFLAGS += -fsanitize=undefined
+CWARNFLAGS += -fno-omit-frame-pointer
+CWARNFLAGS += -O1
 .   endif
 .  endif
 . else
 .  if ${__clang_major__} >= 7
 # N.B.:  It is not possible to combine more than one of the -fsanitize=address,
-# -fsanitize=thread, and -fsanitize=memory checkers in the same program.
-.   if defined(USE_UBSAN)
+# -fsanitize=thread, and -fsanitize=memory checkers in the same program. (or is it?)
+.   if defined(USE_UBSAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "undefined")
 # sadly Apple LLVM version 8.1.0 (clang-802.0.42) says:
 # clang: error: unsupported option '-fsanitize=memory' for target 'x86_64-apple-darwin16.6.0'
 #CWARNFLAGS += -fsanitize=memory
@@ -296,8 +342,20 @@ CWARNFLAGS += -fsanitize=undefined
 #CWARNFLAGS += -fsanitize=safe-stack
 #xxx this may not be useful?
 #CWARNFLAGS += -fsanitize=dataflow --fsanitize=cfi
+#
+# Note as noted below both Clang and GCC accept the "-fwrapv" flag which forces
+# the compiler to treat signed integer overflow as defined (other than division
+# of INT_MIN by -1).
+#
+# The manual also says:
+#
+#    While -ftrapv causes traps for signed overflows to be emitted,
+#    -fsanitize=undefined gives a diagnostic message.  This currently works only
+#    for the C family of languages.
+#
+CWARNFLAGS += -fsanitize=signed-integer-overflow
 .   endif
-.   if defined(USE_ASAN)
+.   if defined(USE_ASAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
 #xxx 'address' may not work (requires intrumentation of all program code)
 CWARNFLAGS += -fsanitize=address
 # (may also require setting ASAN_OPTIONS in the runtime environment,
@@ -305,12 +363,12 @@ CWARNFLAGS += -fsanitize=address
 .   endif
 .  else
 # clang > 5.0 < 7.x(?)
-.   if defined(USE_UBSAN)
+.   if defined(USE_UBSAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "undefined")
 # Apple LLVM version 6.0 (clang-600.0.57) (based on LLVM 3.5svn) says:
 #  clang: error: unsupported argument 'undefined' to option 'fsanitize='
 #CWARNFLAGS += -fsanitize=undefined
 .   endif
-.   if defined(USE_ASAN)
+.   if defined(USE_ASAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
 # ???
 #CWARNFLAGS += -fsanitize=address
 .   endif
@@ -321,10 +379,11 @@ LDFLAGS += ${CWARNFLAGS:M-fsanitize=*}
 .endif
 
 .if defined(__GNUC__) && !defined(__clang__)
-. if defined(USE_UBSAN)
+. if defined(USE_UBSAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "undefined")
 # xxx hmmmm which, exactly?
 .  if ${__GNUC__} >= 5
-CWARNFLAGS += -fsanitize=undefined
+# xxx the NetBSD mk files don't add this for building non-shared objects
+#CWARNFLAGS += -fsanitize=undefined
 # -fsanitize=undefined has sub-options
 CWARNFLAGS += -fsanitize=alignment
 CWARNFLAGS += -fsanitize=bool
@@ -336,19 +395,31 @@ CWARNFLAGS += -fsanitize=integer-divide-by-zero
 CWARNFLAGS += -fsanitize=null
 CWARNFLAGS += -fsanitize=object-size
 CWARNFLAGS += -fsanitize=shift
-LDFLAGS += -fsanitize=undefined -pthread
+CWARNFLAGS += -fsanitize=signed-integer-overflow
+CWARNFLAGS += -fno-omit-frame-pointer
+CWARNFLAGS += -O1
+#LDFLAGS += -fsanitize=undefined -pthread
 # xxx adding these _almost_ allows static linking on NetBSD, but for shm_open()
 # and shm_unlink() not being resolved from librt even when it is specified
 #LDADD += -lrt
 #LDADD += -pthread
+# XXX gcc on NetBSD does not currently support static-linking with libubsan
+#.    if !empty(LDSTATIC)
+#LDFLAGS += -static-libubsan
+#.    endif
 LDSTATIC := # empty -- undefined sanitizer effectively does not support static linking
 .  endif
 . endif
-. if defined(USE_ASAN)
+. if defined(USE_ASAN) || (${MKSANITIZER:Uno} == "yes" && defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
 .  if ${__GNUC__} > 4 || \
 	(${__GNUC__} == 4 && ${__GNUC_MINOR__} >= 8)
-CWARNFLAGS += -fsanitize=address
-LDFLAGS += -fsanitize=address
+# xxx the NetBSD mk files don't add this for building non-shared objects
+#CWARNFLAGS += -fsanitize=address
+#LDFLAGS += -fsanitize=address
+# XXX gcc on NetBSD does not currently support static-linking with libasan
+#.    if !empty(LDSTATIC)
+#LDFLAGS += -static-libasan
+#.    endif
 LDSTATIC := # empty -- address sanitizer does not support static linking
 .  endif
 . endif
@@ -366,7 +437,7 @@ LDSTATIC := # empty -- address sanitizer does not support static linking
 #
 . if defined(USE_LEAKSAN)
 LDFLAGS += -fsanitize=leak
-LDSTATIC := # empty -- leak sanitizer does not support static linking
+#LDSTATIC := # empty -- leak sanitizer does not support static linking
 . endif
 .endif
 
@@ -382,7 +453,9 @@ OPTIM = -O2
 . if defined(__GNULD__) && ${__GNULD__} >= 1
 #LDFLAGS += -Wl,--warn-common
 #LDFLAGS += -Wl,--fatal-warnings
+.  if !defined(USE_ASAN) && ${MKSANITIZER:Uno} == "no"
 LDFLAGS += -Wl,--unresolved-symbols=report-all
+.  endif
 #LDFLAGS += -Wl,--error-unresolved-symbols
 . else
 .  if !empty(${DBG:M-g})
@@ -416,6 +489,7 @@ CFLAGS += ${DBG}
 CFLAGS += ${OPTIM}
 .endif
 .if empty(CFLAGS:M*-std=${CSTD}*)
+# XXX N.B.:  See autoconf's lib/autoconf/c.m4 for what different compilers need
 CFLAGS += -std=${CSTD}
 .endif
 .if !empty(CPPFLAGS) && empty(CFLAGS:M*${CPPFLAGS}*)
@@ -494,6 +568,8 @@ CWARNFLAGS +=	-Wstack-protector
 #
 # XXX see also:  https://stackoverflow.com/questions/33278757/disable-all-optimization-options-in-gcc
 #
+# XXX see also:  https://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html
+#
 # XXX worse yet GCC (and perhaps Clang) only warn about certain issues IFF they
 # are abusing them.  For example GCC's -Wstrict-overlfow only works if
 # -fstrict-overflow is enabled _and_ you have enabled a sufficient level of
@@ -526,6 +602,6 @@ LDFLAGS += ${_CCLINKFLAGS}
 #
 .if defined(MAKE_VERSION) && ${MAKE} != "bsdmake" && (!defined(.FreeBSD) || ${.FreeBSD} != "true")
 CFLAGS += ${CWARNFLAGS}
+.endif
 # xxx also this, as the default ".c:" rule, using ${LINK.c}, doesn't include it
 LDFLAGS += ${LDSTATIC}
-.endif
