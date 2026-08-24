@@ -65,7 +65,7 @@ yajlTestMalloc(void *ctx,
     rv = malloc(sz);
     assert(rv != NULL);
     if (TEST_CTX(ctx)->do_printfs) {
-        fprintf(stderr, "yalloc:  %p of %ju\n", rv, sz);
+        fprintf(stderr, "yalloc:  %p of %ju\n", rv, (uintmax_t) sz);
     }
     return rv;
 }
@@ -85,7 +85,7 @@ yajlTestRealloc(void *ctx,
     rv = realloc(ptr, sz);
     assert(rv != NULL);
     if (TEST_CTX(ctx)->do_printfs) {
-        fprintf(stderr, "yrealloc:  %p -> %p of %ju\n", ptr, rv, sz);
+        fprintf(stderr, "yrealloc:  %p -> %p of %ju\n", ptr, rv, (uintmax_t) sz);
     }
     return rv;
 }
@@ -195,7 +195,7 @@ yajl_tree_print_v(const char *path[],
             printf("%s:\n", yajl_tree_path(path, p2));
         }
         for (i = 0; i < v->u.array.len; i++) {
-            printf("    [%ju]: (%s) ", i, yajl_type_name(v->u.array.values[i]->type));
+            printf("    [%ju]: (%s) ", (uintmax_t) i, yajl_type_name(v->u.array.values[i]->type));
             /* XXX p2 should be path + p2 */
             yajl_tree_print_v(path, p2, v->u.array.values[i]);
         }

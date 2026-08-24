@@ -147,7 +147,7 @@ yajlTestMalloc(void *ctx,
     rv = malloc(sz);
     assert(rv != NULL);
     if (TEST_CTX(ctx)->do_printfs) {
-        fprintf(stderr, "yalloc:  %p of %ju\n", rv, sz);
+        fprintf(stderr, "yalloc:  %p of %ju\n", rv, (uintmax_t) sz);
     }
     return rv;
 }
@@ -167,7 +167,7 @@ yajlTestRealloc(void *ctx,
     rv = realloc(ptr, sz);
     assert(rv != NULL);
     if (TEST_CTX(ctx)->do_printfs) {
-        fprintf(stderr, "yrealloc:  %p -> %p of %ju\n", ptr, rv, sz);
+        fprintf(stderr, "yrealloc:  %p -> %p of %ju\n", ptr, rv, (uintmax_t) sz);
     }
     return rv;
 }

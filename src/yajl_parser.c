@@ -234,12 +234,12 @@ yajl_render_error_string(yajl_handle hand, const unsigned char * jsonText,
 
         line = yajl_lex_current_line(hand->lexer);
         strcat((char *) str, "line: ");
-        snprintf(anumber, sizeof(anumber), "%ju", (intmax_t) line);
+        snprintf(anumber, sizeof(anumber), "%ju", (uintmax_t) line);
         strcat((char *) str, anumber);
 
         coff = yajl_lex_current_char(hand->lexer);
         strcat((char *) str, ": offset: ");
-        snprintf(anumber, sizeof(anumber), "%ju", (intmax_t) coff);
+        snprintf(anumber, sizeof(anumber), "%ju", (uintmax_t) coff);
         strcat((char *) str, anumber);
 
         strcat((char *) str, ": ");
