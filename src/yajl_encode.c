@@ -143,23 +143,39 @@ void yajl_string_decode(yajl_buf buf, const unsigned char * str,
                     assert(len - end >= 4);
                     hexToDigit(&codepoint, str + ++end);
                     end+=3;
-                    /* check if this is a surrogate */
+                    /*
+                     * check if this is a surrogate
+                     *
+                     * a high surrogate is only a character when it is followed
+                     * by a \uXXXX escape holding a low surrogate, which needs
+                     * six more bytes to be present.  `end` is left on the last
+                     * hex digit we consumed, so that an unpaired surrogate does
+                     * not swallow the character that follows it.
+                     */
                     if ((codepoint & 0xFC00) == 0xD800) {
-                        if (end + 2 < len && str[end + 1] == '\\' && str[end + 2] == 'u') {
-                            unsigned int surrogate = 0;
-
-                            end++;
-                            assert(len - (end + 2) >= 4);
-                            hexToDigit(&surrogate, str + end + 2);
-                            codepoint =
-                                (((codepoint & 0x3F) << 10) |
-                                 ((((codepoint >> 6) & 0xF) + 1) << 16) |
-                                 (surrogate & 0x3FF));
-                            end += 5;
-                        } else {
+                        unsigned int surrogate = 0;
+                        if (end + 7 <= len &&
+                            str[end + 1] == '\\' &&
+                            str[end + 2] == 'u') {
+                            hexToDigit(&surrogate, str + end + 3);
+                        }
+                        if ((surrogate & 0xFC00) != 0xDC00) {
                             unescaped = "?";
                             break;
                         }
+                        codepoint =
+                            (((codepoint & 0x3F) << 10) |
+                             ((((codepoint >> 6) & 0xF) + 1) << 16) |
+                             (surrogate & 0x3FF));
+                        end += 6;
+                    } else if ((codepoint & 0xFC00) == 0xDC00) {
+                        /*
+                         * a low surrogate with no high surrogate before it is
+                         * not a character; encoding it would emit invalid
+                         * UTF-8
+                         */
+                        unescaped = "?";
+                        break;
                     }
 
                     Utf32toUtf8(codepoint, utf8Buf);
