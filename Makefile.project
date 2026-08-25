@@ -2,8 +2,11 @@
 
 #	Common/shared setup for this project.
 #
-# This file contains general project-specific settings.
+# This file contains general but project-specific settings that might be needed
+# in sub-directories.  It is included, if it exists, by Makefile.inc.
 #
+# n.b.:  if this project is moved into a BSD source tree then this file should
+# be renamed to Makefile.inc there.
 
 # The common name of the package.
 #
@@ -11,7 +14,7 @@
 # library's simple name prefixed by "lib".  Ideally it is the same as the base
 # of PKGNAME in the pkgsrc module.
 #
-PACKAGE =	yajl
+PACKAGE_NAME =	yajl
 
 # this project is all pure standard C
 #
@@ -30,30 +33,6 @@ LIB_MAJOR =	2
 LIB_MINOR =	2
 LIB_MICRO =	91
 
-bmake_install_dirs += ${BINDIR}
-bmake_install_dirs += ${INCSDIR}
-bmake_install_dirs += ${LIBDIR}
-bmake_install_dirs += ${PKGCONFIGDIR}
-# these DEBUGDIR ones could/should maybe depend on MKDEBUGLIB, but that's only
-# defined after a .include <bsd.*.mk>
-bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/bin
-bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/lib
-bmake_install_dirs += ${DOCDIR}/${PACKAGE}
-bmake_install_dirs += ${DOCDIR}/${PACKAGE}/html/
-#bmake_install_dirs += ${MANDIR} # xxx there are no manual pages, yet...
-
-# Building Documentation:
+# The full version ID for the library
 #
-# The documentation is all currently within comments in the source code and we
-# use Cxref to extract it and turn it into something more useful and coherent,
-# which by default is a set of HTML pages.  This has the added advantage of
-# providing a comprehensive hyperlinked cross-reference of all the types and
-# functions in all of the source files.
-#
-# Cxref can be found at:  https://www.gedanken.org.uk/software/cxref/
-#
-# It is included in Homebrew and a package is available for Ubuntu Linux.
-#
-# If cxref is not available then set CXREF=true on the make command-line.
-#
-# See doc/Makefile.
+LIB_VERSION =	${LIB_MAJOR}.${LIB_MINOR}.${LIB_MICRO}

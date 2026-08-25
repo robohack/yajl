@@ -60,14 +60,14 @@ GREP ?=		grep
 ECHO ?=		echo
 .if empty(_GCC_VERSION)
 _GCC_VERSION_STRING!=	\
-	( env LC_ALL=C ${_CC} -v 2>&1 | ${GREP} 'gcc version') 2>/dev/null || ${ECHO} 0
+	( env LC_ALL=C ${CC} -v 2>&1 | ${GREP} 'gcc version') 2>/dev/null || ${ECHO} 0
 
 .  if !empty(_GCC_VERSION_STRING:Megcs*)
 _GCC_VERSION=	2.8.1		# egcs is considered to be gcc-2.8.1.
 .  elif !empty(DRAGONFLY_CCVER) && ${OPSYS} == "DragonFly"
-_GCC_VERSION!= env CCVER=${DRAGONFLY_CCVER} ${_CC} -dumpversion
+_GCC_VERSION!= env CCVER=${DRAGONFLY_CCVER} ${CC} -dumpversion
 .  elif !empty(_GCC_VERSION_STRING:Mgcc*)
-_GCC_VERSION!=	${_CC} -dumpversion
+_GCC_VERSION!=	${CC} -dumpversion
 .  else
 _GCC_VERSION=	0
 .  endif

@@ -1,0 +1,90 @@
+# -*- makefile-bsdmake -*-
+#
+#	Makefile - input for BSD Make
+#
+# Copyright (C) 2026 Greg A. Woods - This work is licensed under the Creative
+# Commons Attribution-ShareAlike 4.0 International License.  To view a copy of
+# the license, visit <URL:http://creativecommons.org/licenses/by-sa/4.0/>, or
+# send a letter to:  Creative Commons, PO Box 1866, Mountain View, CA 94042, USA
+#
+
+# Sub-directories of the project
+#
+SUBDIR =	src
+
+# Some variants of Mk-files (e.g. NetBSD's) build subdirs in parallel (when
+# "make -j N" with N>1 is used) and they support having a .WAIT in a SUBDIR
+# list, and for them it is vital and necessary to have the .WAIT (.ORDER doesn't
+# quite make up for it because of the fact these directories always exist prior
+# to starting make).
+#
+# BMake with pkgsrc's bootstrap-mk-files are equivalent to NetBSD's native
+# Mk-files, so work fine with '-j' so long as this .WAIT is present.  These set
+# "unix" to "We Run Unix" in <sys.mk>.
+#
+# BMake with sjg's Mk-files doesn't build subdirs in parallel at all yet, and
+# until 20240212 it does not support .WAIT in the SUBDIR list.  It seems like
+# some older versions, notably 20181221, will try to run SUBDIRs in parallel,
+# but don't support .WAIT, so we try to not allow it.
+#
+# BMake (i.e. native make if recent) on FreeBSD with FreeBSD's mk-files also
+# does build subdirs in parallel IFF SUBDIR_PARALELL is defined, and it does
+# require .WAIT in the SUBDIR list.  Note if SUBDIR_PARALLEL is not defined it
+# will still work with '-j' and with or without this .WAIT as it is then
+# equivalent to sjg's Mk-files as it does not run subdirs in parallel.
+#
+# The really old bsdmake on OSX/macOS has a wonky huge MAKE_VERSION=5200408120
+#
+# WARNING!!!  If .WAIT is not included in SUBDIR for any reason then DO NOT
+# invoke parallel builds (no -j)!
+#
+.if !defined(MAKE_VERSION) || \
+	(defined(unix) && ${unix} == "We run Unix" && ${MAKE} != "bsdmake") || \
+	(${MAKE_VERSION} >= 20240212 && ${MAKE} != "bsdmake") || \
+	(defined(.FreeBSD) && ${.FreeBSD} == "true")
+SUBDIR +=	.WAIT
+SUBDIR_PARALLEL = 1 # defined, for FreeBSD....
+.elif (defined(.MAKE.JOBS) && (${.MAKE.JOBS} > 1) && \
+	(!defined(MAKE_VERSION) || (${MAKE_VERSION} < 20200710 && ${MAKE} != "bsdmake"))) || \
+	(${MAKE} == "bsdmake" && ${.MAKEFLAGS:M-j} == "-j")
+#
+# xxx:  only more recent bmake's define .MAKE.JOBS.
+#
+. error "Parallel builds not supported without .WAIT in SUBDIR list."
+.endif
+
+SUBDIR +=	doc
+SUBDIR +=	reformatter
+SUBDIR +=	verify
+SUBDIR +=	example
+SUBDIR +=	perf
+SUBDIR +=	test
+
+# include the "standard" mk-file for building in sub-directories
+#
+.include <bsd.subdir.mk>
+
+# Building Documentation:
+#
+# The documentation is all currently within comments in the source code and we
+# use Cxref to extract it and turn it into something more useful and coherent,
+# which by default is a set of HTML pages.  This has the added advantage of
+# providing a comprehensive hyperlinked cross-reference of all the types and
+# functions in all of the source files.
+#
+# Cxref can be found at:  https://www.gedanken.org.uk/software/cxref/
+#
+# It is included in Homebrew and a package is available for Ubuntu Linux.
+#
+# If cxref is not available then set CXREF=true on the make command-line.
+#
+# See doc/Makefile.
+
+# note when using MAKEOBJDIR, do a local rebuild:
+#
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR} && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
+# End:

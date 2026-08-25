@@ -20,7 +20,7 @@ BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 USE_LANGUAGES=		c c99
 
 USE_BSD_MAKEFILE=	yes
-BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild
+BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild # xxx build-$(uname -s)-$(uname -m)
 MAKE_ENV+=		MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
 
 USE_FEATURES+=		snprintf
@@ -115,9 +115,13 @@ do-configure:
 #	gh release create release-${PKGVERSION_NOREV} -t "Version ${PKGVERSION_NOREV}" --verify-tag --notes-from-tag
 #
 # Now, still in your ${REPODIR}, (or wherever you have cloned
-# https://github.com/robohack/yajl to), run 'make setup-pkgsrc':
+# https://github.com/robohack/yajl to), run:
 #
-REPODIR?=	.	# /work/woods/f-yajl
+#	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
+#	cd /usr/pkgsrc/devel/yajl
+#	make setup-pkgsrc
+#
+REPODIR?=	/work/woods/f-yajl
 PKGDIR?=	${PKGSRCDIR}/${CATEGORIES:[1]}/${PKGBASE}
 setup-pkgsrc:
 	cd ${REPODIR} && pax -rw -v -s '|\.pkgsrc$$||' *.pkgsrc ${PKGDIR}

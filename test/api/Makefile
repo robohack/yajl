@@ -17,9 +17,11 @@ regress:
 
 .include <bsd.prog.mk>
 
-# note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../../build make
+# note when using MAKEOBJDIR, do a local rebuild:
+#
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "cd ../.. && mkdir -p build && MAKEOBJDIRPREFIX=$(pwd -P)/build " (default-value 'compile-command))
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR} && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
 # End:

@@ -39,8 +39,8 @@ docs: .PHONY html/yajl.apdx.html
 #
 install-docs:: .PHONY docs .WAIT
 	rm -f ${.OBJDIR}/html/index.html
-	cd html && cp -fR ./ ${DESTDIR}${DOCDIR}/${PACKAGE}/html/
-	ln -fs doc/yajl.cxref.html ${DESTDIR}${DOCDIR}/${PACKAGE}/html/index.html
+	cd html && cp -fR ./ ${DESTDIR}${DOCDIR}/${PACKAGE_NAME}/html/
+	ln -fs doc/yajl.cxref.html ${DESTDIR}${DOCDIR}/${PACKAGE_NAME}/html/index.html
 
 # XXX this really SHOULD also depend on all the $${files} found herein....
 #
@@ -50,12 +50,12 @@ html/yajl.apdx.html: yajl.cxref # html
 	  files=$$(find ../src \( -type d \( -name CVS -or -name .git\* -or -name .svn -or -name build -or -name 'build-*' -or -name dist -or -name 'dist-*' -or -name obj -or -name 'obj.*' \) -prune \) -or -type f \( -name '*.[ch]' -or -name '*.cxref' \) -print); \
 	  files="yajl.cxref $${files} ../reformatter/json_reformat.c ../example/parse_config.c"; \
 	  for file in $${files}; do \
-		${CXREF} -R.. -xref-all -block-comments -O${.OBJDIR}/html -N${PACKAGE} -I${.CURDIR}/../src -I${GENHDIR} -CPP 'cc -std=c99 -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
+		${CXREF} -R.. -xref-all -block-comments -O${.OBJDIR}/html -N${PACKAGE_NAME} -I${.CURDIR}/../src -I${GENHDIR} -CPP 'cc -std=c99 -E -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
 	  done; \
 	  for file in $${files}; do \
-		${CXREF} -R.. -warn-all -xref-all -block-comments -O${.OBJDIR}/html -N${PACKAGE} -html -html-src -I${.CURDIR}/../src -I${GENHDIR} -CPP 'cc -E -std=c99 -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
+		${CXREF} -R.. -warn-all -xref-all -block-comments -O${.OBJDIR}/html -N${PACKAGE_NAME} -html -html-src -I${.CURDIR}/../src -I${GENHDIR} -CPP 'cc -E -std=c99 -U__BLOCKS__ -D__STRICT_ANSI__=1 -D_POSIX_SOURCE=1 -D_POSIX_C_SOURCE=1 -CC -x c' $${file}; \
 	  done; \
-	  ${CXREF} -R.. -index-all -O${.OBJDIR}/html -N${PACKAGE} -html; \
+	  ${CXREF} -R.. -index-all -O${.OBJDIR}/html -N${PACKAGE_NAME} -html; \
 	)
 	ln -fs doc/yajl.cxref.html ${.OBJDIR}/html/index.html
 
@@ -69,7 +69,7 @@ DOCFILES =		\
 
 install-docs:: .PHONY ${DOCFILES:S|^|${.CURDIR}/../|}
 .for docfile in ${DOCFILES}
-	cp ${.CURDIR}/../${docfile} ${DESTDIR}${DOCDIR}/${PACKAGE}/
+	cp ${.CURDIR}/../${docfile} ${DESTDIR}${DOCDIR}/${PACKAGE_NAME}/
 .endfor
 
 # this is how we hook in the "docs" install...
@@ -99,3 +99,12 @@ MANDIR := ${MANDIR}/man
 #.if !target(install)
 #install: .PHONY realinstall
 #.endif
+
+# note when using MAKEOBJDIR, do a local rebuild:
+#
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR} && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
+# End:

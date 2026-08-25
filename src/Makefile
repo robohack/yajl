@@ -1,6 +1,6 @@
 # -*- makefile-bsdmake -*-
 
-LIB =	${PACKAGE:S/^lib//}
+LIB =	${PACKAGE_NAME:S/^lib//}
 
 # If these are set blank then no shared library is built
 SHLIB_MAJOR ?=   ${LIB_MAJOR}
@@ -25,8 +25,17 @@ FILESDIR =		${PKGCONFIGDIR}
 FILESDIR_yajl.pc =	${PKGCONFIGDIR}
 FILESBUILD_yajl.pc =	yes
 .endif
+#
+# n.b.:  It might seem like a good idea not to remake the target if it has
+# already been made and this make wouldn't change it.  However then this target
+# would always need to be remade because making it wouldn't change the file
+# timestamp to be newer, so since we have to run the 'sed' either way, just
+# remake it if it _could_ be out of date.
+#
+# note there are more dependencies declared below
+#
 yajl.pc: ${.CURDIR}/yajl.pc.in
-	sed -e 's/@FULLNAME@/${PACKAGE}/' \
+	sed -e 's/@FULLNAME@/${PACKAGE_NAME}/' \
 	    -e 's/@LIB@/${LIB}/' \
 	    -e 's/@LIB_MAJOR@/${LIB_MAJOR}/' \
 	    -e 's/@LIB_MINOR@/${LIB_MINOR}/' \
@@ -66,6 +75,16 @@ beforedepend: yajl/yajl_version.h yajl.pc
 #
 FILES_COPY =	-c
 
+# n.b.: As with yajl.pc above, we really have to remake this if it _could_ be
+# out of date.  Unfortunately this means other things may need to be needlessly
+# remade because only timestamps are used to determine what's out-of-date.
+# Getting too smart with content change detection for a node in the middle like
+# this doesn't really help anything, and it's cleaner to see nothing being
+# remade on another build than to see this commands run for this file on every
+# remake.
+#
+# note there are more dependencies declared below
+#
 yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 	sed -e 's/$${LIB_MAJOR}/${LIB_MAJOR}/' \
 	    -e 's/$${LIB_MINOR}/${LIB_MINOR}/' \
@@ -75,7 +94,7 @@ yajl/yajl_version.h: ${.CURDIR}/yajl/yajl_version.h.in
 # XXX Handling ${.OBJDIR} both with and without use of ${MAKEOBJDIRPREFIX} is
 # tedious.
 #
-.if ! defined(MAKEOBJDIRPREFIX)
+.if ! defined(MAKEOBJDIRPREFIX) || defined(.FreeBSD)
 yajl/yajl_version.h: ${.OBJDIR}/yajl
 
 ${.OBJDIR}/yajl:
@@ -149,7 +168,7 @@ _bmake_static_lib_install_symlink: .PHONY
 #
 # Ideally we would move yajl to ../include and force the "includes" target to be
 # run for "beforedepend", installing all headers into a "include/yajl"
-# sub-directory of ${.OBJDIR}.
+# sub-directory of ${.OBJDIR}.   (Maybe someday....)
 #
 SUBDIR += yajl
 
@@ -159,6 +178,10 @@ SUBDIR += yajl
 .if defined(_BSD_OWN_MK_) && ${_BSD_OWN_MK_} == 1
 . include <bsd.subdir.mk>
 .endif
+
+#####################
+#
+#	The rest of this must appear _after_ the <bsd.*.mk> includes!
 
 # xxx hmmmm.... weird!  Avoid a "don't know how to make incinstall" error with
 # Bmake-20181221 and newer (and maybe some older?  was ok in mk-20160401):
@@ -195,6 +218,8 @@ LD_shared=-shared -Wl,-h,lib${LIB}.so.${SHLIB_MAJOR}
 # We'll still link our own programs and tests with the static library as that
 # makes testing during build possible, but providing a dylib might be useful for
 # other uses and may make packager's jobs easier....
+#
+# Note "bsdmake" is/was the ancient BSD Make on ancient MacOS.
 #
 .if ${MAKE} != "bsdmake" && \
 	((defined(TARGET_OSNAME) && (${TARGET_OSNAME} == "Darwin")) || \
@@ -264,9 +289,11 @@ yajl/yajl_version.h: ${.CURDIR}/Makefile
 yajl/yajl_version.h: ${.CURDIR}/${bmake_topdir}/Makefile.project
 yajl/yajl_version.h: ${.CURDIR}/${bmake_topdir}/Makefile.inc
 
-# note to do a local rebuild you can also do:  MAKEOBJDIRPREFIX=../build make
+# note when using MAKEOBJDIR, do a local rebuild:
+#
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "cd .. && mkdir -p build && MAKEOBJDIRPREFIX=$(pwd -P)/build " (default-value 'compile-command))
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR} && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
 # End:

@@ -1,0 +1,215 @@
+# -*- makefile-bsdmake -*-
+#
+#	Makefile.end - This is included at the end of the wrapper Makefile
+#	(after Makefile.main)
+#
+# The canonical source for this file is in https://github.com/robohack/yajl
+#
+# Copyright (C) 2026 Greg A. Woods - This work is licensed under the Creative
+# Commons Attribution-ShareAlike 4.0 International License.  To view a copy of
+# the license, visit <URL:http://creativecommons.org/licenses/by-sa/4.0/>, or
+# send a letter to:  Creative Commons, PO Box 1866, Mountain View, CA 94042, USA
+#
+
+# This file contains default boilerplate to support stand-alone builds,
+# i.e. builds outside of a BSD system source tree.
+
+# create dependency maps from ${BUILDTARGETS} (from Makefile.inc) to plain
+# targets
+#
+# XXX these don't seem to have any effect for FreeBSD's BMake (20230622)!!!
+#
+.for __targ in ${BUILDTARGETS:N.WAIT}
+${__targ}: .PHONY .MAKE ${__targ:S/bmake-do-//}
+.endfor
+
+# Despite being included in the SUBDIR_TARGETS, obj, depend, and docs don't
+# actually recurse into subdirs without all this extra goop!
+#
+# XXX actually this doesn't seem to help do anything at all
+#
+.if !empty(SUBDIR) && (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+. for __targ in obj depend docs
+.  for __dir in ${SUBDIR:N.WAIT}
+${__dir}: ${__targ}_subdir_${__dir} .PHONY .MAKE
+.  endfor
+. endfor
+.endif				# FreeBSD && !empty(SUBDIR)
+
+# Bmake systems don't support a "dependall" target.
+#
+# Note that NetBSD's dependall is implemented differently, depending on a
+# "realdepend", then doing a recursive "make reallall".  That seems excessive,
+# but the change comment when it was added doesn't mention it at all.
+#
+# XXX this does not seem to work for FreeBSD -- the build of all fails because
+# it fails to build the intermediate BUILDTARGETS dependencies!
+#
+.if !target(dependall)
+dependall: .PHONY all
+.endif
+
+# bmake-do-obj is given a dependency on "obj" (see below), thus causing "make
+# obj".  Once that's done we get back to bmake-test-obj-again to see if we
+# chdir'ed "there", and if not we bail.
+#
+# The rules herein do not normally do anything useful -- the objdir should have
+# been just created by bmake-do-obj, however if that failed somehow....
+#
+bmake-test-obj: .PHONY bmake-do-obj
+	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIRPREFIX}" -a ! -d "${MAKEOBJDIRPREFIX}" ]; then echo "You must create ${MAKEOBJDIRPREFIX} first!"; mkdir -p ${MAKEOBJDIRPREFIX}; fi
+	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIR}" -a ! -d "${MAKEOBJDIR}" ]; then echo "You must create ${MAKEOBJDIR} first!"; mkdir -p ${MAKEOBJDIR}; fi
+	@if [ $$(pwd) = ${.CURDIR:Q} -a -z "${MAKEOBJDIRPREFIX}" -a -z "${MAKEOBJDIR}" ]; then echo "You must create ${__objdir:Uobj[.${MACHINE}]} first!"; false; fi
+
+# N.B.:  because simple projects use <bsd.prog.mk> at a top level, we must have
+# the ${.OBJDIR} present __BEFORE__ make is run since make will try to chdir(2)
+# to ${.OBJDIR} before doing anything else, but if that doesn't exist then it
+# will simply stay in ${.CURDIR} to run commands....  However we can have this
+# depend on bmake-test-obj and thus that's a dependency on bmake-do-obj which
+# will cause the proper ${.OBJDIR} to be made and the user can just run
+# "MAKEOBJDIRPREFIX=build make" again and everything will finally procede in the
+# right ${.OBJDIR}.
+#
+# Note this is added as a dependency to "all" in the outer "Makefile".
+#
+# On FreeBSD (since 11.0), or with bmake (since 2014-11-18, with MK_AUTO_OBJ=yes
+# in the environment or command-line) then the need to run an extra "make obj"
+# step can be avoided.
+#
+# XXX this is a rather crude hack -- but the only real fix is to wait for
+# everyone to pick up <auto.obj.mk> so this can just use MKOBJDIRS=auto (set in
+# with MK_AUTO_OBJ=yes in Makefile.inc, if that is not already the default)...
+#
+bmake-test-obj-again: .PHONY bmake-test-obj
+	@if [ $$(pwd) = ${.CURDIR:Q} ]; then echo "Not yet working in ${MAKEOBJDIRPREFIX:U${MAKEOBJDIR:Uobj[.${MACHINE}]}}, try again!"; false; fi
+
+# XXX this doesn't seem to have the desired effect, especially when all alone
+# without the one in Makefile.inc
+#
+# most implementations do not make 'regress' depend on first building everything
+# but we need to build everything before we can do any testing
+#
+#regress: .PHONY all
+
+# For stand-alone build & install we will also need to make the installation
+# directories:
+#
+bmake_install_dirs += ${BINDIR}
+bmake_install_dirs += ${INCSDIR}
+bmake_install_dirs += ${LIBDIR}
+bmake_install_dirs += ${PKGCONFIGDIR}
+# these DEBUGDIR ones could/should maybe depend on MKDEBUGLIB, but that's only
+# defined after a .include <bsd.*.mk>
+bmake_install_dirs += ${DEBUGDIR}
+# note PREFIX is included to support integration in pkgsrc -- it is normally empty
+bmake_install_dirs += ${DEBUGDIR}/${PREFIX}${BINDIR}
+bmake_install_dirs += ${DEBUGDIR}/${PREFIX}/${LIBDIR}
+bmake_install_dirs += ${DOCDIR}/${PACKAGE_NAME}
+bmake_install_dirs += ${DOCDIR}/${PACKAGE_NAME}/html/
+bmake_install_dirs += ${MANDIR}
+.for _section in 1 2 3 4 5 6 7 8 9
+bmake_install_dirs += ${MANDIR}/man${_section}
+.endfor
+# (in general though it is safest to always make them all)
+
+beforeinstall: _bmake_install_dirs
+
+# many BSD system mk files will not make directories on demand
+_bmake_install_dirs: .PHONY
+.for instdir in ${bmake_install_dirs}
+	${INSTALL} -d ${DESTDIR}${instdir}
+.endfor
+
+# XXX This seems necessary for BMake (in pkgsrc and on Linux) to avoid parallel
+# jobs during install from running ahead of the install directories being
+# made....
+#
+${bmake_install_dirs:S|^|${DESTDIR}/|}: _bmake_install_dirs
+
+.if !target(docs)
+docs: .PHONY
+.endif
+
+afterinstall: .PHONY install-docs
+
+install-docs: .PHONY beforeinstall .WAIT docs
+.for docfile in ${DOCS}
+	cp ${.CURDIR:Q}/${docfile} ${DESTDIR}${SHAREDIR}/doc/${PACKAGE_NAME}/
+.endfor
+
+# xxx Unfortunately most MK files don't provide a "beforecleandir" or
+# "beforedistclean".
+#
+#beforecleandir: cleandir
+#	rmdir ${.OBJDIR}
+
+#
+# for NetBSD integration:
+#
+
+# XXX this is just the most common transformation needed....
+SRCINSTDIR ?=	${BSDSRCDIR}/${BINDIR:S|/bin|usr.|g}
+SRCUPDATEDIR ?=	${SRCINSTDIR}/${PACKAGE_NAME}
+
+RCS_ID_EDITS =	-E -e 's/\$$Name: ([^$$]*)\$$/\1/' \
+		-e 's/\$$Id: ([^$$]*)\$$/\1/'
+
+${PACKAGE_NAME}-to-netbsd: .PHONY ${SRCS} ${HEADERS} ${DOCS} ${MAN} ${FILES} ${OTHER}
+	${INSTALL_DIR} ${SRCUPDATEDIR}
+	rm -f ${SRCUPDATEDIR}/Makefile
+	sed ${RCS_ID_EDITS} < Makefile.main > ${SRCUPDATEDIR}/Makefile
+.for _file_ in ${SRCS} ${HEADERS} ${DOCS} ${MAN} ${FILES} ${OTHER}
+	if [ ! -d $$(basename ${SRCUPDATEDIR}/${_file_}) ]; then \
+		mkdir -p $$(basename ${SRCUPDATEDIR}/${_file_}); \
+	fi
+	rm -f ${SRCUPDATEDIR}/${_file_}
+	sed ${RCS_ID_EDITS} < ${_file_} > ${SRCUPDATEDIR}/${_file_}
+	chmod ${FILESMODE} ${SRCUPDATEDIR}/${_file_}
+.endfor
+
+TMPDIR ?=	${HOME}/tmp
+TARBASE ?=	${PACKAGE_NAME}-${PACKAGE_VERSION}
+${TARBASE}: .PHONY
+	pax -wvz -s '|^|$@/|' -f ${TMPDIR}/$@.tar.gz *
+tar: .PHONY ${TARBASE}
+
+#
+# "make help" support, inspired by Julio Merino
+#
+
+obj:	# make object directories (set MAKEOBJDIRPREFIX in env!)
+depend:	# create dependency map & make includes (set MAKEOBJDIRPREFIX in env!)
+all:	# make all targets (keep same MAKEOBJDIRPREFIX in env!)
+regress:# do regression testing
+install:# install all targets (set DESTDIR on cmd line, keep MAKEOBJDIRPREFIX in env)
+
+# n.b.: those are tabs after the backslashes, and for "column -s"
+.PHONY: help
+help: # Shows interactive help.
+help: Makefile Makefile.main Makefile.inc Makefile.end
+#	@cat README.adoc
+	@echo
+	@echo "make variables:"
+	@echo
+	@sed -Ene 's/^([^# \	]{1,})[ \	]*\?=[^#]{1,}#[ \	]*(.*)$$/\1:\	\2/p' $> | column -s '	' -t | sort
+	@echo
+	@echo "make targets:"
+	@echo
+	@sed -Ene 's/^([^#: \	]{1,}):.*#(.*)$$/\1:\	\2/p' $> | column -s '	' -t | sort
+	@echo
+
+# XXX this next line is just for "bsdmake help" -- it only works for <bsd.subdir.mk>!
+DESTDIR ?=	# set to the installation prefix
+
+# On NetBSD MACHINE_ARCH is not a necessary distinction for userland programs.
+# (but maybe it is for Solaris?)
+#
+# xxx there's no Make variable for "uname -r"
+#
+# MAKEOBJDIR='${.CURDIR:C,^'$(pwd -P)','$(pwd -P)'/build'-${.MAKE.OS}-${MACHINE}-$(uname -r)',}' make -j 8 LDSTATIC=-static
+#
+# Local Variables:
+# eval: (make-local-variable 'compile-command)
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
+# End:
+#
