@@ -228,7 +228,7 @@ jobs:
       # n.b.:  using MAKEOBJDIRPREFIX pretty much requires a separate "make obj"
       run: |
         rm -rf build && mkdir build
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfhpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
     - name: Reveal the make and shell environments
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} showenv
@@ -237,7 +237,7 @@ jobs:
         env | sort
     - name: Run the build
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfhpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} all
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} all
     - name: Make the distribution (without parallel)
       # XXX BMake does not seem to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
@@ -249,4 +249,4 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist install
     - name: Run regression tests
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfhpvm ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} regress
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpvm ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} regress
