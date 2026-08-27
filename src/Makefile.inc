@@ -26,7 +26,7 @@
 .if !defined(.INCLUDEDFROMFILE) || \
 	${.INCLUDEDFROMFILE} != "subdir.mk"
 bmake_topdir := ${bmake_topdir}/..
-.error "bmake_topdir= ${bmake_topdir}: Included from ${.INCLUDEDFROMDIR}'/'${.INCLUDEDFROMFILE}"
+.warning "appended '/..' to bmake_topdir!"
 .endif
 
-.error "bmake_topdir= ${bmake_topdir}: Included from ${.INCLUDEDFROMDIR}'/'${.INCLUDEDFROMFILE}"
+.warning "bmake_topdir= ${bmake_topdir}: Included from ${.INCLUDEDFROMDIR}'/'${.INCLUDEDFROMFILE}"
