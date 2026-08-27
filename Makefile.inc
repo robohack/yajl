@@ -28,8 +28,7 @@
 # For any subdirectory Makefiles this ${bmake_topdir} is provided to help find
 # the project's root directory.
 #
-# N.B.:  the top-level Makefile is not expected to ever have to use this value
-# though!
+# N.B.:  the top-level Makefile overrides this value, of course!
 #
 bmake_topdir = ..
 #
