@@ -398,7 +398,7 @@ CWARNFLAGS += -fsanitize=shift
 CWARNFLAGS += -fsanitize=signed-integer-overflow
 CWARNFLAGS += -fno-omit-frame-pointer
 CWARNFLAGS += -O1
-#LDFLAGS += -fsanitize=undefined -pthread
+LDFLAGS += -fsanitize=undefined -pthread
 # xxx adding these _almost_ allows static linking on NetBSD, but for shm_open()
 # and shm_unlink() not being resolved from librt even when it is specified
 #LDADD += -lrt
@@ -415,7 +415,7 @@ LDSTATIC := # empty -- undefined sanitizer effectively does not support static l
 	(${__GNUC__} == 4 && ${__GNUC_MINOR__} >= 8)
 # xxx the NetBSD mk files don't add this for building non-shared objects
 #CWARNFLAGS += -fsanitize=address
-#LDFLAGS += -fsanitize=address
+LDFLAGS += -fsanitize=address
 # XXX gcc on NetBSD does not currently support static-linking with libasan
 #.    if !empty(LDSTATIC)
 #LDFLAGS += -static-libasan
