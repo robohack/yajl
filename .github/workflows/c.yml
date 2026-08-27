@@ -186,59 +186,62 @@ jobs:
           parallel: ''
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-    - name: whoami
-      run: uname -a
-    - name: macos id
+      uses: actions/checkout@v7
+    - name: Find out who I am
+      run: |
+        uname -a
+        w
+    - name: Check macOS software versions
       if: ${{ startsWith(matrix.os, 'macos') }}
-      run: sw_vers
-    - name: ubuntu dependencies
+      run: |
+        sw_vers
+    - name: Install Ubuntu dependencies
       if: ${{ startsWith(matrix.os, 'ubuntu') }}
       run: |
         sudo apt-get update
         sudo apt-get install bmake cxref
-    - name: macOS dependencies
+    - name: Install MacOS dependencies
       if: ${{ startsWith(matrix.os, 'macos') }}
+      # n.b.:  cxref is in macports.... which apparently can be installed like this:
+      # wget https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
+      # sudo installer -pkg ./MacPorts-2.9.1-14-Sonoma.pkg -target /
       run: |
         ls -l /Developer/usr/bin/bsdmake || true
-        # n.b.:  cxref is in macports.... which apparently can be installed like this:
-        # wget https://github.com/macports/macports-base/releases/download/v2.9.1/MacPorts-2.9.1-14-Sonoma.pkg
-        # sudo installer -pkg ./MacPorts-2.9.1-14-Sonoma.pkg -target /
         brew update
         brew install bmake
-    - name: netbsd_dependencies
+    - name: Install NetBSD dependencies
       if: ${{ startsWith(matrix.os, 'netbsd') }}
       run: |
         # pkg_add pkgin
         pkgin install cxref
         # pkgin install bmake
-    - name: toolchain versions
+    - name: Review toolchain versions
       run: |
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
-    - name: builddir and obj
+    - name: Create the build directory and do make obj
+      # n.b.:  using MAKEOBJDIRPREFIX pretty much requires a separate "make obj"
       run: |
         rm -rf build && mkdir build
-        # n.b.:  MAKEOBJDIRPREFIX pretty much requires separate "make obj"
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
-    - name: showenv
+    - name: Reveal the make and shell environments
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
         echo ========================================
         echo Actual Environment:
         env | sort
-    - name: build
+    - name: Run the build
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }}
-    - name: distribution without parallel
+    - name: Make the distribution (without parallel)
       # XXX BMake does not seem to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
-    - name: distribution in parallel
+    - name: Make the distribution (with parallel)
       if: ${{ ! startsWith(matrix.make, 'bmake') }}
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
-    - name: regression
+    - name: Run regression tests
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress CXREF=${{ matrix.docs }}
