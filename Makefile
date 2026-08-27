@@ -331,7 +331,10 @@ LDFLAGS ?=	# Additional linker flags, e.g. -I/usr/local/lib (in env!)
 
 # N.B.:  undo Makefile.inc's bmake_topdir (which is meant for subdirs!)
 #
-bmake_topdir :=	.
+# XXX with ":=" this wasn't working with some older BMakes, e.g. 20200710 (still
+# used by Ubuntu), but it does work with ancient BMakes, e.g. 20150505!
+#
+bmake_topdir =	.
 
 # This ("all") must be the first target seen by make.
 #
