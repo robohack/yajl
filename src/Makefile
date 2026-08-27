@@ -173,6 +173,7 @@ _bmake_static_lib_install_symlink: .PHONY
 SUBDIR += yajl
 
 .include <bsd.lib.mk>
+.warning "saving bmake_topdir= ${bmake_topdir}"
 save_bsdmake_topdir=${bmake_topdir}
 # avoid a duplicate include on some systems, probably only NetBSD and pkgsrc
 # bootstrap-mk-files need this....
@@ -180,6 +181,7 @@ save_bsdmake_topdir=${bmake_topdir}
 . include <bsd.subdir.mk>
 .endif
 bsdmake_topdir=${save_bmake_topdir}
+.warning "restored bmake_topdir= ${bmake_topdir}"
 
 #####################
 #
