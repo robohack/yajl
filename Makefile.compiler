@@ -453,7 +453,7 @@ OPTIM = -O2
 . if defined(__GNULD__) && ${__GNULD__} >= 1
 #LDFLAGS += -Wl,--warn-common
 #LDFLAGS += -Wl,--fatal-warnings
-.  if !defined(USE_ASAN) && ${MKSANITIZER:Uno} == "no"
+.  if !defined(USE_ASAN) && !defined(USE_UBSAN) && ${MKSANITIZER:Uno} == "no"
 LDFLAGS += -Wl,--unresolved-symbols=report-all
 .  endif
 #LDFLAGS += -Wl,--error-unresolved-symbols
