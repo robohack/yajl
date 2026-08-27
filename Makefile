@@ -347,6 +347,10 @@ all: .PHONY .MAKE bmake-test-obj-again .WAIT ${BUILDTARGETS}
 #
 .include "${.CURDIR}/Makefile.main"
 
+# N.B.:  re-undo Makefile.inc's bmake_topdir (which is meant for subdirs!)
+#
+bmake_topdir =	.
+
 #	Final thoughts....
 #
 # This must be included after <bsd.prog.mk> or <bsd.lib.mk> or <bsd.subdir.mk>
