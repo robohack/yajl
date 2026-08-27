@@ -14,12 +14,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories
-        # latest runners: ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-12, macos-13, macos-14
+        # https://docs.github.com/en/actions/reference/runners/github-hosted-runners#standard-github-hosted-runners-for-public-repositories
         #
-        # N.B.:  NetBSD et al VMs:  https://github.com/vmactions
+        # latest runners:
         #
-        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, macos-14, macos-13, macos-12 ]
+        #    ubuntu-22.04, ubuntu-24.04
+        #    ubuntu-22.04-arm, ubuntu-24.04-arm
+        #    macos-15-intel, macos-26-intel
+        #    macos-14, macos-15, macos-26
+        #
+        # N.B. ToDo:  NetBSD et al VMs:  https://github.com/vmactions
+        #
+        os: [ ubuntu-24.04, ubuntu-22.04,
+              ubuntu-24.04-arm, ubuntu-22.04-arm,
+              macos-26-intel, macos-15-intel,
+              macos-26, macos-15, macos-14 ]
         cc: [ gcc, clang ]
         make: [ bmake, make ]
         sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
@@ -30,43 +39,31 @@ jobs:
         #
         # N.B.:  here we _EXCLUDE_ the matrix options we don't want!
         #
-        # MacOS-11.x
-        - os: macos-11
+        # MacOS 15.x Intel
+        - os: macos-15-intel
           # it's clang anyway
           cc: gcc
-        - os: macos-11
+        - os: macos-15-intel
           # make is gmake
           make: make
-        - os: macos-11
+        - os: macos-15-intel
           docs: cxref
-        - os: macos-11
+        - os: macos-15-intel
           parallel: ''
         #
-        # MacOS-12.x
-        - os: macos-12
+        # MacOS 26 Intel
+        - os: macos-26-intel
           # it's clang anyway
           cc: gcc
-        - os: macos-12
+        - os: macos-26-intel
           # make is gmake
           make: make
-        - os: macos-12
+        - os: macos-26-intel
           docs: cxref
-        - os: macos-12
+        - os: macos-26-intel
           parallel: ''
         #
-        # MacOS-13.x
-        - os: macos-13
-          # it's clang anyway
-          cc: gcc
-        - os: macos-13
-          # make is gmake
-          make: make
-        - os: macos-13
-          docs: cxref
-        - os: macos-13
-          parallel: ''
-        #
-        # MacOS-14.x
+        # MacOS 14.x Arm
         - os: macos-14
           # it's clang anyway
           cc: gcc
@@ -78,7 +75,31 @@ jobs:
         - os: macos-14
           parallel: ''
         #
-        # MacOS-latest
+        # MacOS 15.x Arm
+        - os: macos-15
+          # it's clang anyway
+          cc: gcc
+        - os: macos-15
+          # make is gmake
+          make: make
+        - os: macos-15
+          docs: cxref
+        - os: macos-15
+          parallel: ''
+        #
+        # MacOS 26.x Arm
+        - os: macos-26
+          # it's clang anyway
+          cc: gcc
+        - os: macos-26
+          # make is gmake
+          make: make
+        - os: macos-26
+          docs: cxref
+        - os: macos-26
+          parallel: ''
+        #
+        # MacOS-latest Arm
         - os: macos-latest
           # it's clang anyway
           cc: gcc
@@ -108,6 +129,24 @@ jobs:
         - os: ubuntu-22.04
           parallel: ''
         #
+        # Ubuntu 24.04-arm
+        - os: ubuntu-24.04-arm
+          # it's gmake
+          make: make
+        - os: ubuntu-24.04-arm
+          docs: true
+        - os: ubuntu-24.04-arm
+          parallel: ''
+        #
+        # Ubuntu 22.04-arm
+        - os: ubuntu-22.04-arm
+          # it's gmake
+          make: make
+        - os: ubuntu-22.04-arm
+          docs: true
+        - os: ubuntu-22.04-arm
+          parallel: ''
+        #
         # Ubuntu 20.04
         - os: ubuntu-20.04
           # it's gmake
@@ -126,7 +165,7 @@ jobs:
           # https://bugs.launchpad.net/ubuntu/+source/gcc-defaults/+bug/2038386
           sanitizer: USE_LEAKSAN
         #
-        # Ubuntu Latest
+        # Ubuntu latest
         - os: ubuntu-latest
           # it's gmake
           make: make
@@ -172,15 +211,21 @@ jobs:
       run: |
         # pkg_add pkgin
         pkgin install cxref
+        # pkgin install bmake
     - name: toolchain versions
       run: |
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
-    - name: builddir
-      run: rm -rf build && mkdir build
+    - name: builddir and obj
+      run: |
+        rm -rf build && mkdir build
+        # n.b.:  MAKEOBJDIRPREFIX pretty much requires separate "make obj"
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
     - name: showenv
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
+        echo ========================================
+        echo Actual Environment:
         env | sort
     - name: build
       run: |
