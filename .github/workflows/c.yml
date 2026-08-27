@@ -223,6 +223,8 @@ jobs:
       run: |
         ${{ matrix.make }} -V MAKE_VERSION
         ${{ matrix.cc }} --version
+        ${{ matrix.cc }} -v
+        $(${{ matrix.make }} -V LD) -v
     - name: Create the build directory and do make obj
       # n.b.:  using MAKEOBJDIRPREFIX pretty much requires a separate "make obj"
       run: |
