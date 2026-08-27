@@ -226,22 +226,22 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
     - name: Reveal the make and shell environments
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} showenv
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} showenv
         echo ========================================
         echo Actual Environment:
         env | sort
     - name: Run the build
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }}
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} all
     - name: Make the distribution (without parallel)
       # XXX BMake does not seem to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} install CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist install
     - name: Make the distribution (with parallel)
       if: ${{ ! startsWith(matrix.make, 'bmake') }}
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} install CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist install
     - name: Run regression tests
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} regress CXREF=${{ matrix.docs }}
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} regress
