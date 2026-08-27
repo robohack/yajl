@@ -24,7 +24,7 @@
 # doesn't include the GitHub Ubuntu runners with BMake 20200710.
 #
 .if !defined(.INCLUDEDFROMFILE) || \
-	( ${.INCLUDEDFROMFILE} != "subdir.mk" &&
+	( ${.INCLUDEDFROMFILE} != "subdir.mk" && \
 	  ${.INCLUDEDFROMFILE} != "Makefile.inc" ) # XXX hack for 20200710?
 bmake_topdir := ${bmake_topdir}/..
 .warning "appended '/..' to bmake_topdir!"
