@@ -354,13 +354,6 @@ all: .PHONY .MAKE bmake-test-obj-again .WAIT ${BUILDTARGETS}
 #
 .include "${.CURDIR}/Makefile.end"
 
-# N.B.:  re-undo Makefile.inc's bmake_topdir (which is meant for subdirs!)
-#
-# (Some versions of BMake's Mk-files will include a local Makefile.inc as well
-# as any parent-directory Makefile.inc, so we need to reset this again.)
-#
-bmake_topdir =	.
-
 # N.B.:  This setting of MAKEOBJDIR will also work for doing local builds in any
 # sub-directory, even if it is expanded by a shell while in that sub-directory.
 #

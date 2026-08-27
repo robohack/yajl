@@ -4,7 +4,7 @@
 # include done by <bsd.prog.mk> in the subdir's Makefile
 .include "../Makefile.inc"
 
-# XXX there's something odd about sjg's Mk-files.
+# XXX there's something odd about some versions of sjg's Mk-files.
 #
 # For some unknown reason <subdir.mk> does .-include <${.CURDIR}/Makefile.inc>.
 # No other BSD-based Mk-files does this.  This should be fixed eventually.
@@ -21,7 +21,7 @@
 # So it is possibly fixed in BMake 20200911, and certainly in 20200927.
 #
 # xxx so this hack only works with more recent versions of BMake.  Sadly that
-# doesn't include the GitHub Ubuntu 22.04 runner with BMake 20200710.
+# doesn't include the GitHub Ubuntu runners with BMake 20200710.
 #
 .if !defined(.INCLUDEDFROMFILE) || \
 	${.INCLUDEDFROMFILE} != "subdir.mk"

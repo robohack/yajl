@@ -30,7 +30,11 @@
 #
 # N.B.:  the top-level Makefile overrides this value, of course!
 #
+# Regarding the .if protection, see src/Makefile.inc
+#
+.if !defined(bmake_topdir)
 bmake_topdir = ..
+.endif
 #
 # ${bmake_topdir} is used to allow values in LDADD, DPADD, and CPPFLAGS (or
 # CFLAGS) to directly reference both products and sources in other parts of the
