@@ -26,14 +26,13 @@ jobs:
         # N.B. ToDo:  NetBSD et al VMs:  https://github.com/vmactions
         #
         os: [
-          # XXX Broken variable reassignment in bmake-20220200710 on all ubuntu
-          #ubuntu-24.04, ubuntu-22.04,
-          #ubuntu-24.04-arm, ubuntu-22.04-arm,
           ubuntu-latest,
           macos-latest,
+          #ubuntu-24.04, ubuntu-22.04,
+          #ubuntu-24.04-arm, ubuntu-22.04-arm,
           #macos-26-intel, macos-15-intel,
           #macos-26, macos-15, macos-14
-          ]
+        ]
         cc: [ gcc, clang ]
         make: [ bmake, make ]
         sanitizer: [ NO_SANI, USE_ASAN, USE_UBSAN, USE_LEAKSAN ]
@@ -228,7 +227,7 @@ jobs:
       # n.b.:  using MAKEOBJDIRPREFIX pretty much requires a separate "make obj"
       run: |
         rm -rf build && mkdir build
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
     - name: Reveal the make and shell environments
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} showenv
@@ -237,7 +236,7 @@ jobs:
         env | sort
     - name: Run the build
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpv ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} all
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} all
     - name: Make the distribution (without parallel)
       # XXX BMake does not seem to handle parallel installs well yet....
       if: ${{ startsWith(matrix.make, 'bmake') }}
