@@ -89,7 +89,7 @@ bmake-test-obj-again: .PHONY bmake-test-obj
 # most implementations do not make 'regress' depend on first building everything
 # but we need to build everything before we can do any testing
 #
-#regress: .PHONY all
+regress: .PHONY all
 
 # For stand-alone build & install we will also need to make the installation
 # directories:
