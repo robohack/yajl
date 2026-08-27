@@ -172,6 +172,7 @@ _bmake_static_lib_install_symlink: .PHONY
 #
 SUBDIR += yajl
 
+.warning "original bmake_topdir= ${bmake_topdir}"
 .include <bsd.lib.mk>
 .warning "saving bmake_topdir= ${bmake_topdir}"
 save_bsdmake_topdir=${bmake_topdir}
