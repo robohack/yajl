@@ -1,5 +1,6 @@
 # Documentation for Developers
 
+
 ## Library Versioning
 
 Attempts will/should be made to conform to Semantic Versioning rules:
@@ -8,6 +9,7 @@ Attempts will/should be made to conform to Semantic Versioning rules:
 
 This will apply to both the release numbers, as well as the library version
 numbers, which should ideally be kept in sync.
+
 
 ### General Library Versioning Guidelines
 
@@ -91,6 +93,11 @@ or in Magit:
 and then set/adjust the tag name, press return, and then paste the "release"
 message file contents into the minibuffer and press return again.
 
+Note the signing will require a GPG key passphrase, so if run from within emacs
+it may be asked for in the emacs instance used for email!
+
+Don't forget to push the release tag to Github!
+
 
 ### Create the GitHub "release" for the pre-release:
 
@@ -117,26 +124,22 @@ For older versions of `gh` just re-use the release notes file again directly:
 
 (*xxx* alternatively this can be done via the web interface)
 
+You might want to "(f)etch (a)ll" in Magit again now too.
+
 
 ## Testing!
 
 Make sure you test everything again with `make regress`!
 
+
 ### Testing releases with pkgsrc
 
-Copy *.pkgsrc over into /usr/pkgsrc/devel/yajl, then fetch the release archive,
-update the distinfo, and build:
+Copy Makefile.pkgsrc over into /usr/pkgsrc/devel/yajl, then fetch the
+release archive, update the distinfo, and build a package:
 
-	pax -rw -v -s '|.pkgsrc$||' *.pkgsrc /usr/pkgsrc/devel/yajl
+	cp Makefile.pkgsrc /usr/pkgsrc/devel/yajl/Makefile
 	cd /usr/pkgsrc/devel/yajl
-	make fetch
-	make makesum
-	make test		# optional (no, not really -- do it!)
-	make package	# optional
-
-or just do the following:
-
-	make -f Makefile.pkgsrc setup-pkgsrc
+	make setup-pkgsrc
 
 
 ## Creating a full Release
