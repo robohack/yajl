@@ -19,8 +19,8 @@ BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 
 USE_LANGUAGES=		c c99
 
-USE_BSD_MAKEFILE=	yes
-BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild # xxx build-$(uname -s)-$(uname -m)
+USE_BSD_MAKEFILE=	yes	# also sets TEST_TARGET=regress
+BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild # xxx build-$(uname -s)-$(uname -m)-$(uname -r)
 MAKE_ENV+=		MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
 
 USE_FEATURES+=		snprintf
@@ -128,6 +128,7 @@ setup-pkgsrc:
 	cd ${PKGDIR} && make fetch
 	cd ${PKGDIR} && make makesum
 	cd ${PKGDIR} && make test
+	cd ${PKGDIR} && make package
 
 .include "../../mk/bsd.pkg.mk"
 
