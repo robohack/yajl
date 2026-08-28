@@ -358,17 +358,7 @@ BUILDTARGETS +=	bmake-do-docs
 
 # Special case additional convenience targets
 #
-# N.B.:  these must be included by all sub-directory Makefiles!
-#
 # In NetBSD all TARGETS are candidates for making in the SUBDIR list
-#
-# (but avoid creating TARGETS if it doesn't exist)
-#
-# XXX except it must be set before <bsd.subdir.mk> is included!!!
-#
-#.if (defined(.FreeBSD) && (${.FreeBSD} == "true")) || \
-#
-# N.B.:  MK_AUTO_OBJ=yes must be set in the environment or on the command line.
 #
 # In FreeBSD and sjg's Mk-files the list of SUBDIR_TARGETS cannot be appended to
 # after including <bsd.subdir.mk>, but most of the interesting targets, such as
@@ -382,29 +372,32 @@ BUILDTARGETS +=	bmake-do-docs
 #
 # "regress" was once a default for FreeBSD, but not for some time now.
 #
-SUBDIR_TARGETS +=	obj	# obj is in 
+#	for FreeBSD and sjg's Mk-files:
+#
+SUBDIR_TARGETS +=	obj	# obj may already be there...
 #SUBDIR_TARGETS +=	depend
 SUBDIR_TARGETS +=	docs
 SUBDIR_TARGETS +=	regress
 SUBDIR_TARGETS +=	showenv
 SUBDIR_TARGETS +=	TAGS
-#.else				# for NetBSD
-. if empty(TARGETS:Mdocs)
+#
+#	and for NetBSD (and pkgsrc bootstrap-mk-files):
+#
+.if empty(TARGETS:Mdocs)
 TARGETS +=	docs
-. endif
-. if empty(TARGETS:Mregress)
+.endif
+.if empty(TARGETS:Mregress)
 TARGETS +=	regress
-. endif
-. if empty(TARGETS:Mtags)
+.endif
+.if empty(TARGETS:Mtags)
 TARGETS +=	tags
-. endif
-. if empty(TARGETS:MTAGS)
+.endif
+.if empty(TARGETS:MTAGS)
 TARGETS +=	TAGS
-. endif
-. if empty(TARGETS:Mshowenv)
+.endif
+.if empty(TARGETS:Mshowenv)
 TARGETS +=	showenv
-. endif
-#.endif
+.endif
 
 # default targets for the extra ones added to TARGETS above (to avoid "don't
 # know how to make" errors)
