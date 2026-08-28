@@ -372,6 +372,8 @@ BUILDTARGETS +=	bmake-do-docs
 #
 # "regress" was once a default for FreeBSD, but not for some time now.
 #
+# Just set them both without trying to figure out which mk-files are being used.
+#
 #	for FreeBSD and sjg's Mk-files:
 #
 SUBDIR_TARGETS +=	obj	# obj may already be there...
