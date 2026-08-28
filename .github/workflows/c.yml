@@ -250,4 +250,4 @@ jobs:
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} DESTDIR=$(pwd -P)/dist install
     - name: Run regression tests
       run: |
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpvm ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} regress
+        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} -d -Ccdfpvm ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} -d -Cemtp regress
