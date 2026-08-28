@@ -31,7 +31,7 @@ INCSUBDIR =	/yajl
 #
 LIB_MAJOR =	2
 LIB_MINOR =	2
-LIB_MICRO =	91
+LIB_MICRO =	92
 
 # The full version ID for the library
 #

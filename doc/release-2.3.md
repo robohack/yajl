@@ -1,3 +1,24 @@
+# Version 2.2.92 (beta)
+
+This (beta) release includes the following major fixes, changes, and
+updates:
+
+- major overhaul of the Makefiles to extract the basic core Makefile and to
+  allow the wrapper Makefiles to be used in other projects
+
+- avoid UB when passing pointers to slightly incompatible functions
+
+- parse numbers with strtoll() (in the "C" locale) to avoid overrun and underrun
+  and any other problems that come from a hand-rolled number parser
+
+- avoid potential buffer overrun  when parsing UTF-8 surrogate characters
+
+- other minor code fixes and cleanups
+
+
+	**Beta Changelog**: https://github.com/robohack/yajl/compare/release-2.2.91...release-2.2.92
+	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.92
+
 # Version 2.2.91 (beta)
 
 This (beta) release includes the following major fixes, changes, and
@@ -27,4 +48,4 @@ the example and test programs.
 Note also MKDOC use has been deprecated.  If you don't have Cxref
 available then just set CXREF=true on the make command line.
 
-	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.91
+	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.92
