@@ -29,7 +29,7 @@
 .if !defined(.INCLUDEDFROMFILE) || \
 	${.INCLUDEDFROMFILE} != "subdir.mk"
 bmake_topdir := ${bmake_topdir}/..
-.warning "appended '/..' to bmake_topdir!"
+#.warning "appended '/..' to bmake_topdir!"
 .endif
 
-.warning "bmake_topdir= ${bmake_topdir}: Included from ${.INCLUDEDFROMDIR}'/'${.INCLUDEDFROMFILE}"
+#.warning "bmake_topdir= ${bmake_topdir}: Included from ${.INCLUDEDFROMDIR}'/'${.INCLUDEDFROMFILE}"
