@@ -366,7 +366,7 @@ BUILDTARGETS +=	bmake-do-docs
 #
 # XXX except it must be set before <bsd.subdir.mk> is included!!!
 #
-.if (defined(.FreeBSD) && (${.FreeBSD} == "true"))
+#.if (defined(.FreeBSD) && (${.FreeBSD} == "true")) || \
 #
 # N.B.:  MK_AUTO_OBJ=yes must be set in the environment or on the command line.
 #
@@ -382,13 +382,13 @@ BUILDTARGETS +=	bmake-do-docs
 #
 # "regress" was once a default for FreeBSD, but not for some time now.
 #
-SUBDIR_TARGETS +=	obj
+SUBDIR_TARGETS +=	obj	# obj is in 
 #SUBDIR_TARGETS +=	depend
 SUBDIR_TARGETS +=	docs
 SUBDIR_TARGETS +=	regress
 SUBDIR_TARGETS +=	showenv
 SUBDIR_TARGETS +=	TAGS
-.else				# for NetBSD
+#.else				# for NetBSD
 . if empty(TARGETS:Mdocs)
 TARGETS +=	docs
 . endif
@@ -404,7 +404,7 @@ TARGETS +=	TAGS
 . if empty(TARGETS:Mshowenv)
 TARGETS +=	showenv
 . endif
-.endif
+#.endif
 
 # default targets for the extra ones added to TARGETS above (to avoid "don't
 # know how to make" errors)
