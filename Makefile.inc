@@ -472,7 +472,11 @@ _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 	echo ""
 	echo "Some Interesting Vars:"
 	echo "unix = ${unix:Q}"
+.if defined(MAKE_VERSION)
 	echo "MAKE_VERSION = ${MAKE_VERSION:Q}"
+.else
+	echo "undefined(MAKE_VERSION)"
+.endif
 	echo ".FreeBSD = ${.FreeBSD:Q}"
 	echo ".CURDIR = ${.CURDIR:Q}"
 .if defined(MAKEOBJDIR)
@@ -487,7 +491,12 @@ _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 .endif
 	echo ".OBJDIR = ${.OBJDIR:Q}"
 	echo ".OBJDIR:T = ${.OBJDIR:T:Q}"
+	echo ".OBJDIR:H = ${.OBJDIR:H:Q}"
+.if defined(MKOBJDIRS)
 	echo "MKOBJDIRS = ${MKOBJDIRS:Q}"
+.else
+	echo "undefined(MKOBJDIRS)"
+.endif
 	echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"
 	echo "GENHDIR = ${GENHDIR:Q}"
 	echo "DEBUGDIR = ${DEBUGDIR:Q}"
