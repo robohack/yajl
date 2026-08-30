@@ -12,7 +12,8 @@
 # send a letter to:  Creative Commons, PO Box 1866, Mountain View, CA 94042, USA
 #
 
-# WARNING!!!  Do not put any targets in here without great care to protect them!
+# WARNING!!!  Do not put any targets in here without taking great care to
+# protect them from becoming the .MAIN target!
 
 # N.B.:  Normally nothing in here should be changed just to build this project.
 #
@@ -336,7 +337,7 @@ GENHDIR += ${.OBJDIR}/../${bmake_topdir}/src/${.OBJDIR:T}
 # Default build targets -- see Makefile.end
 #
 # Yes, "bsdmake obj" is forced -- it is stupid to build in the source directory)
-# (forcing "bsdmake depend" is also good, though a bit of a waste for pkgsrc.
+# (forcing "bsdmake depend" is also good, though a bit of a waste for pkgsrc).
 #
 # Note with some versions of "bmake" this will cause obj* directories to be
 # created in the existing obj* directories the second time around...
