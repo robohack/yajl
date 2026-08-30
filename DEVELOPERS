@@ -51,7 +51,7 @@ to trigger Continuous Integration (CI) actions (with results visible under the
 	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist install
 	# check dist/* is correct...
 	rm -rf build dist
-	make distclean
+	make cleandir
 
 
 ### Now, first, create a pre-release
