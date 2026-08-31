@@ -499,6 +499,16 @@ _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 	echo "undefined(MKOBJDIRS)"
 .endif
 	echo "_BSD_OWN_MK_ = ${_BSD_OWN_MK_:Q}"
+.if defined(SUBDIR)
+	echo "SUBDIR = ${SUBDIR:Q}"
+.else
+	echo "undefined(SUBDIR)"
+.endif
+.if defined(SUBDIR_TARGETS)
+	echo "SUBDIR_TARGETS = ${SUBDIR_TARGETS:Q}"
+.else
+	echo "undefined(SUBDIR_TARGETS)"
+.endif
 	echo "GENHDIR = ${GENHDIR:Q}"
 	echo "DEBUGDIR = ${DEBUGDIR:Q}"
 	echo "LINTLIBDIR = ${LINTLIBDIR:Q}"
