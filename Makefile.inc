@@ -221,7 +221,9 @@ MKHTML ?=		yes	# set to 'no' to avoid building HTML manual pages
 # xxx on NetBSD <bsd.sys.mk> sets this just to "paxctl", so if /usr/sbin isn't
 # in the caller's PATH it fails
 #
+.if exists(/usr/sbin/paxctl)
 PAXCTL ?=		/usr/sbin/paxctl
+.endif
 
 # Because we don't do "make includes" in private projects, we need to allow
 # other program products to be built with reference to the original source
