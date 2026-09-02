@@ -84,11 +84,11 @@ First write a "release" message in doc/release-2.3.md
 
 Then create the signed tag (here we are of course tagging the pre-release):
 
-	git tag -s -F doc/release-2.3.md release-2.2.90
+	git tag -s -a -F doc/release-2.3.md release-2.2.90
 
 or in Magit:
 
-	t -s r
+	t -s -a r
 
 and then set/adjust the tag name, press return, and then paste the "release"
 message file contents into the minibuffer and press return again.
