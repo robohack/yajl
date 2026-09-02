@@ -15,8 +15,9 @@ E2 = echo '{broken:' | ${.OBJDIR}/${PROG} broken || true
 T2 = [ $$(expr "$$(echo '{broken:' | ${.OBJDIR}/${PROG} broken 2>&1)" : "tree_parse_error: line: 1: offset: 1: lexical error: invalid char in json text.*memory leaks:.0") -eq 185 ]
 
 regress:
-.if defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
-	if [  -x ${PAXCTL} ]; then ${PAXCTL} +a ${.OBJDIR}/${PROG}; fi
+.if defined(PAXCTL) && !empty(PAXCTL) && \
+    (defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address"))
+	if [ -x ${PAXCTL} ]; then ${PAXCTL} +a ${.OBJDIR}/${PROG}; fi
 .endif
 	ulimit -v unlimited && ${E1}
 	ulimit -v unlimited && ${T1}

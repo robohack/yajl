@@ -13,7 +13,8 @@ realinstall:
 proginstall:
 
 regress:
-.if defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address")
+.if defined(PAXCTL) && !empty(PAXCTL) && \
+    (defined(USE_ASAN) || (defined(USE_SANITIZER) && ${USE_SANITIZER} == "address"))
 	@if [ -x ${PAXCTL} ]; then ${PAXCTL} +a ${.OBJDIR}/${PROG}; fi
 .endif
 	ulimit -v unlimited && ${.OBJDIR}/${PROG}
