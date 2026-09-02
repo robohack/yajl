@@ -3,6 +3,17 @@
 SUBDIR =	api
 SUBDIR +=	parsing
 
+# XXX this direct include of <bsd.own.mk> seems to be needed for sjg's Mk-files
+# to see the extra SUBDIR_TARGETS defined in ../Makefile.inc (which is included
+# via <init.mk>), since <subdir.mk> only includes <own.mk> _after_ the special
+# subdir-* targets are defined.
+#
+# It should be harmless on other systems...
+#
+# (note in ../src/Makefile this is achieved by first including <bsd.lib.mk>)
+#
+.include <bsd.own.mk>
+
 .include <bsd.subdir.mk>
 
 # note when using MAKEOBJDIR, do a local rebuild:
