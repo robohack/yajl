@@ -1,3 +1,13 @@
+# Version 2.2.93 (beta)
+
+This (beta) release includes the following major fixes, changes, and
+updates:
+
+- minor overhaul of the Makefiles to make MAKEOBJDIRPREFIX work better
+
+	**Beta Changelog**: https://github.com/robohack/yajl/compare/release-2.2.92...release-2.2.93
+	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.93
+
 # Version 2.2.92 (beta)
 
 This (beta) release includes the following major fixes, changes, and
