@@ -37,9 +37,7 @@
 
 # BUILD:
 #
-#	mkdir -p build; MAKEOBJDIRPREFIX=$(pwd)/build b(sd)make obj depend all
-#
-# (you may need to run it twice if the build directory is initially empty)
+#	mkdir -p build/$(pwd); MAKEOBJDIRPREFIX=$(pwd)/build b(sd)make all
 #
 #
 # INSTALL:
@@ -64,12 +62,15 @@
 # You should use $MAKEOBJDIRPREFIX, set in the environment, so as to build
 # everything elsewhere outside of, or within a single sub-directory, of the
 # source tree (i.e. instead of polluting the source itself tree with "obj"
-# sub-directories everywhere).
+# sub-directories everywhere).  Make sure to create the initial object directory
+# -- make must be able to chdir to the initial object directory under
+# MAKEOBJDIRPREFIX (i.e. with the current canonical (physical) PWD appended)
+# else it will ignore it entirely.
 #
 #	BUILD_DIR=build-$(uname -s)-$(uname -p)-$(uname -r)
-#	mkdir ${BUILD_DIR}
+#	mkdir ${BUILD_DIR}/$(pwd -P)
 #	export MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR}
-#	b(sd)make obj depend all
+#	b(sd)make all
 #
 # You may change the final installation heriarchy from the default of "/usr" to
 # any path prefix of your choice by setting PREFIX on the make command lines,
@@ -169,26 +170,24 @@ LDFLAGS ?=	# Additional linker flags, e.g. -I/usr/local/lib (in env!)
 #
 # FreeBSD:
 #
-# FreeBSD mk-files don't work reliably without "obj" and "depend" being
-# specified on the command line.
+# Modern FreeBSD (since at least 14.x) with /usr/share/mk/auto.obj.mk needs only
+# to have MAKEOBJDIRPREFIX set in the environment or on the command line.
 #
-# If you're using a recent release, e.g. since 14.x, you can "export
-# MK_AUTO_OBJ=yes" and then the "obj" target can be omitted (but you still need
-# to manually build the "depend" target first).  THIS ONLY WORKS IF YOU PUT
-# "MK_AUTO_OBJ=yes" ON THE COMMAND LINE OR IN THE ENVIRONMENT!  (Having it set
-# in /etc/src-env.conf DOES NOT WORK for an out-of-/usr/src project.)
+# Older FreeBSD Mk-files don't work reliably, by default, without "obj" and
+# "depend" being given explicitly on the command line.
 #
-# You don't need to pre-create the build directory though.
-#
-# Either way on FreeBSD until at least 14.x you do still need to run a separate
-# "make depend" before "make all"!
+# You don't even need to pre-create the build directory.
 #
 #	BUILD_DIR=build-$(uname -s)-$(uname -p)-$(uname -r)
 #	export MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR}
 #	export MK_AUTO_OBJ=yes
-#	make depend all regress
+#	make all
+#	make regress
 #
-# On FreeBSD (at least since 14.0), static-linking requires setting
+# Note the separate "make regress" -- the dependency on "all" doesn't work.
+# FreeBSD's SUBDIR and SUBDIR_TARGETS handling is sub-standard.
+#
+# Note on FreeBSD (at least since 14.0), static-linking requires setting
 # NO_SHARED=yes in the environment.
 #
 # Installing sjg's BMake package will also work, obviously, but beware since
@@ -206,56 +205,57 @@ LDFLAGS ?=	# Additional linker flags, e.g. -I/usr/local/lib (in env!)
 #
 # More about using $MAKEOBJDIRPREFIX:
 #
-# Using $MAKEOBJDIRPREFIX requires always invoking the build again with
-# $MAKEOBJDIRPREFIX set in the environment, and set to the same directory if you
-# want to rebuild or continue a build.
+# Using $MAKEOBJDIRPREFIX requires always invoking BSD Make with it set in the
+# environment (or on the command line for newer BSD Makes).
 #
-# If you want to run make in just a sub-directory of the source tree AFTER
-# you've done an initial build (or at least after you've done an initial run of
-# "make obj") then you can do so provided you carefully set $MAKEOBJDIRPREFIX to
-# the the pathname of the initial build directory you created.
+# Because BSD Make tries to chdir immediately to the first object directory,
+# i.e.  ${MAKEOBJDIRPREFIX}${.CURDIR}, aka $MAKEOBJDIRPREFIX/$(pwd -P) in shell
+# terms, that directory must also exist prior to invoking make.
 #
-# Remember BSD Make tries to change to ${MAKEOBJDIRPREFIX}${.CURDIR} before
-# executing any rules, so if you use a fully qualified pathname then you can use
-# the exact same $MAKEOBJDIRPREFIX no matter where you are in the project
-# hierarchy.  If the build directory is also a sub-directory of the project's
-# source hierarchy then you can also use a relative path to it from within a
-# sub-directory.
+# While it is possible to craft things such that you can run make in just a
+# sub-directory of the source tree AFTER you've done an initial full build (or
+# at least after you've done an initial run of "make obj") this should probably
+# be avoided -- always go to the root of the source tree and run the whole
+# build.
 #
 # Note that setting $MAKEOBJDIRPREFIX in your shell's environment may risk
 # mixing things up for different projects, though if your BSD Make does
-# correctly set ${.CURDIR} to the canonical fully qualified current working
-# directory where it was started from, and if you have set $MAKEOBJDIRPREFIX to
-# a fully qualified pathname, then this could be a good way to share use of a
-# fast scratch filesystem for builds of many different projects using BSD
-# Makefiles.
+# correctly set ${.CURDIR} to the canonical (physical) fully qualified current
+# working directory where it was started from, and if you have set
+# $MAKEOBJDIRPREFIX to a fully qualified pathname (possibly outside the source
+# tree), then this could be a good way to share use of a fast scratch filesystem
+# for builds of many different projects using BSD Makefiles.
 #
 # If you mess things up and end up with generated files in your source directory
-# then run "make cleandir" to start over.
+# then run "make cleandir" to start over.  Note cleandir does not remove obj
+# directories though.  See the 'find' below.
 #
 #####################
 #
 # How to do without $MAKEOBJDIRPREFIX:
 #
 # If you don't use $MAKEOBJDIRPREFIX then "obj.${MACHINE}" sub-directories will
-# be created for each directory with products.  EXCEPT ON some older FreeBSD!!!
-# (where the default is always just "obj", BUT IT IS BROKEN! (as of 12.0)
-# without WITH_AUTO_OBJ=yes on the command line).
+# be created for each directory with products.  EXCEPT ON FreeBSD!!!  (where the
+# default is always just "obj".
 #
-# This can be avoided by using the environment variable MAKEOBJDIR as follows
-# (which more or less simulates how MAKEOBJDIRPREFIX is used, but without
-# burying all the object directories within another nested level of the current
-# working directory path):
+# If your BSD Make is new enough then this can be avoided by using MAKEOBJDIR
+# (either as an environment variable or on the command line) as follows (which
+# more or less works the way MAKEOBJDIRPREFIX does, but without burying all the
+# object directories within another nested level of the current working
+# directory path, thus making it better for in-tree build directories as opposed
+# to some area shared by multiple projects):
 #
 #	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make
+#
+# (or in more simple terms:  export MAKEOBJDIR='${.CURDIR:S,${SRCTOP},${OBJTOP},}')
 #
 # (Note this way of setting MAKEOBJDIR is more or less necessary for any project
 # with subdirectories, and it is derived from the related one in NetBSD's
 # build.sh.)
 #
 # HOWEVER:  this won't work with older make's, including BMake until at least
-# after 20200524, and even NetBSD-10.  This is probably fixed first in NetBSD's
-# Make as of 20230218.
+# after 20200524, not even NetBSD-10, nor on FreeBSD, at least up to 14.x.  This
+# is probably fixed first in NetBSD's Make as of 20230218.
 #
 # If you end up with "obj.*" sub-directories and you want to go back to using a
 # 'build' directory (as would be sane to do) then you can remove all the obj.*
@@ -335,11 +335,11 @@ bmake_topdir =	.
 
 # This ("all") must be the first target seen by make.
 #
-# Depending on "bmake-test-obj-again" is a workaround for versions of make which
-# do not fully support MKOBJDIRS=auto (usually set with MK_AUTO_OBJ).
+# Depending on "bmake-test-obj" is a workaround for versions of make which do
+# not fully support MKOBJDIRS=auto (usually set with MK_AUTO_OBJ).
 #
 #.MAIN: all
-all: .PHONY .MAKE bmake-test-obj-again .WAIT ${BUILDTARGETS}
+all: .PHONY .MAKE bmake-test-obj .WAIT ${BUILDTARGETS}
 
 #	Now, on with the show....
 #
@@ -367,8 +367,10 @@ bmake_topdir =	.
 #
 #	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
 #
+#	DESTDIR="dest-${BUILD_DIR#build-}"
+#
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR} && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); cd $(make -v bmake_topdir) && mkdir -p ${BUILD_DIR}/$(pwd -P) && MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
 # End:
 #

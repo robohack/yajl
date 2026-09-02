@@ -23,13 +23,14 @@
 ${__targ}: .PHONY .MAKE ${__targ:S/bmake-do-//}
 .endfor
 
-# Despite being included in the SUBDIR_TARGETS, obj, depend, and docs don't
-# actually recurse into subdirs without all this extra goop!
+# Despite being included in the SUBDIR_TARGETS, depend, regress, and docs don't
+# actually recurse into subdirs!
 #
-# XXX actually this doesn't seem to help do anything at all
+# XXX for some older version of FreeBSD the following extra targets seemed to
+# help, but now they don't do anything at all.
 #
 .if !empty(SUBDIR) && (defined(.FreeBSD) && (${.FreeBSD} == "true"))
-. for __targ in obj depend docs
+. for __targ in depend docs regress
 .  for __dir in ${SUBDIR:N.WAIT}
 ${__dir}: ${__targ}_subdir_${__dir} .PHONY .MAKE
 .  endfor
@@ -42,45 +43,56 @@ ${__dir}: ${__targ}_subdir_${__dir} .PHONY .MAKE
 # "realdepend", then doing a recursive "make reallall".  That seems excessive,
 # but the change comment when it was added doesn't mention it at all.
 #
-# XXX this does not seem to work for FreeBSD -- the build of all fails because
-# it fails to build the intermediate BUILDTARGETS dependencies!
+# XXX this does not seem to work for FreeBSD -- the dependencies seem to be
+# ignored, as with the "regress" target.
 #
 .if !target(dependall)
-dependall: .PHONY all
+dependall: .PHONY depend .WAIT all
 .endif
 
-# bmake-do-obj is given a dependency on "obj" (see below), thus causing "make
-# obj".  Once that's done we get back to bmake-test-obj-again to see if we
-# chdir'ed "there", and if not we bail.
+# When using MAKEOBJDIRPREFIX the chdir must happen before make even opens the
+# first Makefile, thus the recommendation to mkdir it before running make.  If
+# that is not done then bmake-test-obj-hook will have made it and bmake-do-obj
+# will have made all the other objdirs, however bmake-test-obj will notice that
+# the chdir didn't happen and will bail, but since all the objdirs now exist a
+# second run of "make" will proceed properly.
 #
-# The rules herein do not normally do anything useful -- the objdir should have
-# been just created by bmake-do-obj, however if that failed somehow....
+# XXX not sure about the local "obj.*" case -- especially if OBJMACHINE is turned off
 #
-bmake-test-obj: .PHONY bmake-do-obj
-	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIRPREFIX}" -a ! -d "${MAKEOBJDIRPREFIX}" ]; then echo "You must create ${MAKEOBJDIRPREFIX} first!"; mkdir -p ${MAKEOBJDIRPREFIX}; fi
-	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIR}" -a ! -d "${MAKEOBJDIR}" ]; then echo "You must create ${MAKEOBJDIR} first!"; mkdir -p ${MAKEOBJDIR}; fi
-	@if [ $$(pwd) = ${.CURDIR:Q} -a -z "${MAKEOBJDIRPREFIX}" -a -z "${MAKEOBJDIR}" ]; then echo "You must create ${__objdir:Uobj[.${MACHINE}]} first!"; false; fi
+# Unfortunately there's no way to use the ".OBJDIR:" target in a rule like this.
+#
+# Sjg's Mk-files, as with FreeBSD's, have <auto.obj.mk> do the creation while
+# the Makefile is being parsed by figuring out what __objdir should be and
+# setting it, then setting another variable (__objdir_made) with "!=" using a
+# script which actually creates the directory, then finally parsing ".OBJDIR:
+# ${__objdir}" to cause make to chdir there.  Doing it reliably though requires
+# some features, like the ".tA" modifier, which may not be in all relevant
+# versions of BSD Make.
+#
+bmake-test-obj-hook: .PHONY
+	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIRPREFIX}" -a ! -d "${MAKEOBJDIRPREFIX}" ]; then echo "Trying to create ${MAKEOBJDIRPREFIX} first!  Run '${MAKE}' again"; mkdir -p ${MAKEOBJDIRPREFIX}${.CURDIR:Q}; fi
+	@if [ $$(pwd) = ${.CURDIR:Q} -a ! -z "${MAKEOBJDIR}" -a ! -d "${MAKEOBJDIR}" ]; then echo "Trying to create ${MAKEOBJDIR} first!  Run '${MAKE}' again"; mkdir -p ${MAKEOBJDIR}; fi
+	@if [ $$(pwd) = ${.CURDIR:Q} -a -z "${MAKEOBJDIRPREFIX}" -a -z "${MAKEOBJDIR}" ]; then echo "Trying to create obj.${MACHINE}-${MACHINE_ARCH} first!  Run '${MAKE}' again"; mkdir -p obj.${MACHINE}-${MACHINE_ARCH}; fi
 
 # N.B.:  because simple projects use <bsd.prog.mk> at a top level, we must have
 # the ${.OBJDIR} present __BEFORE__ make is run since make will try to chdir(2)
 # to ${.OBJDIR} before doing anything else, but if that doesn't exist then it
 # will simply stay in ${.CURDIR} to run commands....  However we can have this
-# depend on bmake-test-obj and thus that's a dependency on bmake-do-obj which
-# will cause the proper ${.OBJDIR} to be made and the user can just run
-# "MAKEOBJDIRPREFIX=build make" again and everything will finally procede in the
-# right ${.OBJDIR}.
+# depend on bmake-test-obj-hook as well as on bmake-do-obj which will cause the
+# proper ${.OBJDIR} to be made and the user can then just run make again and
+# everything will finally procede in the right ${.OBJDIR}.
 #
 # Note this is added as a dependency to "all" in the outer "Makefile".
 #
 # On FreeBSD (since 11.0), or with bmake (since 2014-11-18, with MK_AUTO_OBJ=yes
-# in the environment or command-line) then the need to run an extra "make obj"
-# step can be avoided.
+# in the environment or command-line) then even the initial mkdir step can be
+# avoided.
 #
 # XXX this is a rather crude hack -- but the only real fix is to wait for
 # everyone to pick up <auto.obj.mk> so this can just use MKOBJDIRS=auto (set in
 # with MK_AUTO_OBJ=yes in Makefile.inc, if that is not already the default)...
 #
-bmake-test-obj-again: .PHONY bmake-test-obj
+bmake-test-obj: .PHONY bmake-test-obj-hook .WAIT bmake-do-obj
 	@if [ $$(pwd) = ${.CURDIR:Q} ]; then echo "Not yet working in ${MAKEOBJDIRPREFIX:U${MAKEOBJDIR:Uobj[.${MACHINE}]}}, try again!"; false; fi
 
 # XXX this doesn't seem to have the desired effect, especially when all alone
@@ -89,7 +101,12 @@ bmake-test-obj-again: .PHONY bmake-test-obj
 # most implementations do not make 'regress' depend on first building everything
 # but we need to build everything before we can do any testing
 #
-regress: .PHONY all
+# XXX for some reason even NetBSD Make requires the odd trailing .WAIT
+#
+# XXX but the whole dependency, including the .WAIT, doesn't seem to affect
+# FreeBSD (14.x) -- do a "make all" first
+#
+regress: .PHONY all .WAIT
 
 # For stand-alone build & install we will also need to make the installation
 # directories:
@@ -137,8 +154,8 @@ install-docs: .PHONY beforeinstall .WAIT docs
 	cp ${.CURDIR:Q}/${docfile} ${DESTDIR}${SHAREDIR}/doc/${PACKAGE_NAME}/
 .endfor
 
-# xxx Unfortunately most MK files don't provide a "beforecleandir" or
-# "beforedistclean".
+# xxx Unfortunately most MK files don't provide a "beforecleandir" (or
+# "beforedistclean").
 #
 #beforecleandir: cleandir
 #	rmdir ${.OBJDIR}
@@ -210,6 +227,6 @@ DESTDIR ?=	# set to the installation prefix
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -r); mkdir -p ${BUILD_DIR}/$(pwd -P); MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static")
 # End:
 #

@@ -19,11 +19,11 @@ BUILD_DEPENDS+=	cxref-[0-9]*:../../devel/cxref
 
 USE_LANGUAGES=		c c99
 
+USE_FEATURES+=		snprintf
+
 USE_BSD_MAKEFILE=	yes	# also sets TEST_TARGET=regress
 BSD_MAKE_BUILD_DIR=	${WRKDIR}/pkgbuild # xxx build-$(uname -s)-$(uname -m)-$(uname -r)
 MAKE_ENV+=		MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
-
-USE_FEATURES+=		snprintf
 
 # xxx this use of ${VAR:!cmd!} is quite ugly to have to do, but because it is
 # evaluated lazily it works to find the canonical form of ${WRKSRC} as a
@@ -38,9 +38,10 @@ USE_FEATURES+=		snprintf
 # being missing!  In other news the new pkglint(1) is both kinda stupid and
 # overly pedantic for no real benefit.
 #
-CANONICAL_WRKSRC=		${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
-PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/${PKGBASE}.pc
-PKGCONFIG_OVERRIDE_STAGE=	post-build
+CANONICAL_WRKSRC=	${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
+
+PKGCONFIG_OVERRIDE=	${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/${PKGBASE}.pc
+PKGCONFIG_OVERRIDE_STAGE= post-build
 
 AUTO_MKDIRS=		yes
 
@@ -90,23 +91,25 @@ PLIST.mkprofile=	yes
 .endif
 
 do-configure:
-	${MKDIR} ${BSD_MAKE_BUILD_DIR}
+	${MKDIR} ${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}
 
-# n.b.:  this particular package does not need this pre-build step
-#        -- it does it itself!
+# n.b.:  normally this package forces "make obj" itself, assuming the BUILD_DIR
+# with the canonical WRKSRC is already created (otherwise it can't cd there
+# until it is created)
+#
 #pre-build:
-#	cd ${WRKSRC} && ${BUILD_MAKE_CMD} obj
+#	cd ${WRKSRC} && ${BUILD_MAKE_CMD} obj || true
 
 # how to get from there to here....
 #
 #	git status
 #	# commit anything outstanding...
-#	mkdir build
-#	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build all regress
+#	mkdir build/$(pwd -P)
+#	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build regress
 #	make -j 8 MAKEOBJDIRPREFIX=$(pwd -P)/build DESTDIR=$(pwd -P)/dist install
 #	# check dist/* is correct... (bins, lib names, includes, .pc file, etc.)
 #	rm -rf build dist
-#	make distclean
+#	make cleandir
 #	# update DISTNAME above and LIB_* in Makefile.project...
 #	git add Makefile.project Makefile.pkgsrc
 #	git commit -m 'Makefile.project, Makefile.pkgsrc: ready for release: ${PKGVERSION_NOREV}'

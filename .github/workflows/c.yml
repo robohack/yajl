@@ -229,11 +229,9 @@ jobs:
         ${{ matrix.cc }} --version
         ${{ matrix.cc }} -v
         $(${{ matrix.make }} -V LD) -v
-    - name: Create the build directory and do make obj
-      # n.b.:  using MAKEOBJDIRPREFIX pretty much requires a separate "make obj"
+    - name: Create the build and initial obj directories
       run: |
-        rm -rf build && mkdir build
-        MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} ${{ matrix.parallel }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} obj || true
+        rm -rf build && mkdir -p build/$(pwd -P)
     - name: Reveal the make and shell environments
       run: |
         MAKEOBJDIRPREFIX=$(pwd -P)/build ${{ matrix.make }} CC=${{ matrix.cc }} ${{ matrix.sanitizer }}=yes CXREF=${{ matrix.docs }} showenv

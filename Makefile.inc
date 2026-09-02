@@ -45,9 +45,10 @@ bmake_topdir = ..
 # and/or which may also build header files shared by several sources in
 # different directories in the same project.
 #
-# For example this file can be used to define the version number(s) for the
-# project, and thus sources which use these numbers (header file templates, or
-# shared library filenames, etc), can add a dependency on this file as follows:
+# For example a Makefile.project file, included conditionally below, can be used
+# to define the version number(s) for the project, and thus sources which use
+# these numbers (header file templates, or shared library filenames, etc), can
+# add a dependency on this file as follows:
 #
 #	version.h: ${.CURDIR}/version.h.in ${.CURDIR}/${bmake_topdir}/Makefile.inc
 #
@@ -57,20 +58,18 @@ bmake_topdir = ..
 # very early on, just before <bsd.own.mk> is included, and it is done by
 # sub-directory makes.  For most implementations certain system variables must
 # be defined before <bsd.own.mk> is included, and so they can be defined here.
-# See below though for why this also includes <bsd.own.mk> itself half-way
-# through.  As such we depend on the standard <bsd.*.mk> files protecting
-# themselves from multiple inclusions, and though this was not true on the
-# original CSRG BSD releases it has been done now in all modern releases.
+# As such we depend on the standard <bsd.*.mk> files protecting themselves from
+# multiple inclusions, and though this was not true on the original CSRG BSD
+# releases it has been done now in all modern releases.
 #
 # Note also that this is only included by default by Makefiles using standard
 # <bsd.*.mk> files in an immediate subdirectory -- i.e. it is done as follows:
 #
 #	.include "${.CURDIR}/../Makefile.inc"
 #
-# Thus the top level Makefile may need to directly include this file, but it
-# must only do so after it has defined the default target (i.e. the .MAIN
-# target, normally "all").  The top level Makefile should not (need to) use
-# ${bmake_topdir}.
+# Thus (outside of a BSD source tree) the top level wrapper Makefile needs to
+# directly include this file itself, (thus why this file must not define a .MAIN
+# target!).  The top level Makefile should not (need to) use ${bmake_topdir}.
 #
 # This also means that in any project with deeper source trees it may be
 # necessary to create a "Makefile.inc" in intermediate sub-directories in order
@@ -205,15 +204,11 @@ SHLIB_LDENDFILE =	# empty
 # Finally some common settings
 
 # yes, always -- we use this because it's safer when using a shared network
-# directory for building/testing/etc.  (though it is sometimes somewhat
-# annoying)
+# directory for building/testing/etc.
 #
 MKOBJ =			yes
 OBJMACHINE ?=		yes
 OBJMACHINE_ARCH ?=	yes
-# XXX ideally this would be "auto", but that is not yet very widely supported.
-# See Makefile.end.
-MKOBJDIRS ?=		yes
 
 # note MAKECONF may override
 MKHTML ?=		yes	# set to 'no' to avoid building HTML manual pages
@@ -379,11 +374,12 @@ BUILDTARGETS +=	bmake-do-docs
 #
 #	for FreeBSD and sjg's Mk-files:
 #
-SUBDIR_TARGETS +=	obj	# obj may already be there...
-#SUBDIR_TARGETS +=	depend
+#SUBDIR_TARGETS +=	obj	# obj will be added...
+#SUBDIR_TARGETS +=	depend	# depend will be added...
 SUBDIR_TARGETS +=	docs
 SUBDIR_TARGETS +=	regress
 SUBDIR_TARGETS +=	showenv
+#SUBDIR_TARGETS +=	tags	# tags will be added...
 SUBDIR_TARGETS +=	TAGS
 #
 #	and for NetBSD (and pkgsrc bootstrap-mk-files):
@@ -407,9 +403,10 @@ TARGETS +=	showenv
 # default targets for the extra ones added to TARGETS above (to avoid "don't
 # know how to make" errors)
 #
-# N.B.:  the attempt to use !target() may fail if including <bsd.own.mk> has not
-# defined the proper default targets (i.e. if they are defined somewhere later
-# after this file is already parsed), but for these this will not likely matter.
+# N.B.:  the attempt to use !target() won't actually work since <bsd.own.mk> has
+# not been included to defined the normal default targets (i.e. if they are
+# defined somewhere later after this file is already parsed), but for these this
+# will not likely matter.
 
 # Most implementations do not make 'regress' depend on first building everything
 # but we need to build everything before we can do any testing.  This is done
@@ -418,6 +415,9 @@ TARGETS +=	showenv
 # before it tries to test those things.
 #
 # XXX for some reason even NetBSD Make requires the odd trailing .WAIT
+#
+# XXX but the whole dependency, including the .WAIT, doesn't seem to affect
+# FreeBSD (14.x) -- do "make all" first
 #
 .if !target(regress)
 regress: .NOTMAIN all .WAIT
@@ -457,7 +457,9 @@ docs: .NOTMAIN .PHONY
 # Makefile debugging support
 #
 .if !target(showenv)
-showenv: .NOTMAIN .PHONY _GAW_bmake-showenv
+showenv: .NOTMAIN .PHONY
+showenv:  bmake-test-obj .WAIT
+showenv: _GAW_bmake-showenv
 
 _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 	echo ""
@@ -527,6 +529,10 @@ _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 	echo ""
 .endif
 
+.if !target(bmake-test-obj)
+bmake-test-obj: .PHONY .NOTMAIN
+.endif
+
 # finally we include Makefile.compiler
 #
 .include "Makefile.compiler"
@@ -546,6 +552,6 @@ _GAW_bmake-showenv: .NOTMAIN .PHONY .SILENT
 #
 # Local Variables:
 # eval: (make-local-variable 'compile-command)
-# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -p); mkdir -p ${BUILD_DIR}; MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static all")
+# compile-command: (concat "BUILD_DIR=build-$(uname -s)-$(uname -m)-$(uname -p); mkdir -p ${BUILD_DIR}/$(pwd -P); MAKEOBJDIRPREFIX=$(pwd -P)/${BUILD_DIR} " (default-value 'compile-command) " -j 8 LDSTATIC=-static all")
 # End:
 #
