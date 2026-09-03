@@ -131,8 +131,8 @@ setup-pkgsrc:
 	cd ${REPODIR} && pax -rw -v -s '|\.pkgsrc$$||' *.pkgsrc ${PKGDIR}
 	cd ${PKGDIR} && make fetch
 	cd ${PKGDIR} && make makesum
-	cd ${PKGDIR} && make test
 	cd ${PKGDIR} && make package
+	cd ${PKGDIR} && make test
 
 .include "../../mk/bsd.pkg.mk"
 
