@@ -7,13 +7,13 @@ include/yajl/yajl_parse.h
 include/yajl/yajl_tree.h
 include/yajl/yajl_version.h
 lib/libyajl.a
-lib/libyajl_s.a
-${PLIST.mkdebuglib}lib/libyajl_g.a
-${PLIST.mkprofile}lib/libyajl_p.a
-${PLIST.mkpic}lib/libyajl_pic.a
 lib/libyajl.so
 lib/libyajl.so.2
 lib/libyajl.so.${PKGVERSION}
+${PLIST.mkdebuglib}lib/libyajl_g.a
+${PLIST.mkprofile}lib/libyajl_p.a
+${PLIST.mkpic}lib/libyajl_pic.a
+lib/libyajl_s.a
 lib/pkgconfig/yajl.pc
 ${PLIST.mklint}libdata/lint/llib-lyajl.ln
 ${PLIST.mkdebug}libdata/debug${PREFIX}/bin/json_reformat.debug
