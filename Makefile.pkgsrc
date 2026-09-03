@@ -31,17 +31,18 @@ MAKE_ENV+=		MAKEOBJDIRPREFIX=${BSD_MAKE_BUILD_DIR}
 # its ${.CURDIR}.
 #
 # XXX Normally ${WRKSRC} would be a canonical pathname, but it may not be if
-# ${WRKOBJDIR} is set, but not to a canonical path.
+# ${WRKOBJDIR} is set, but not to a canonical path.  MacOS is a perfect example
+# where "/var" is actually a symlink to "private/var", but if just "/var" is in
+# ${WRKOBJDIR} then we need "pwd -P" to expand the linked path properly.
 #
 # XXX the appearance of the first word "WRKSRC" in the value below is actually
 # unnecessary for make(1), but the makefile parser in pkglint cannot handle it
 # being missing!  In other news the new pkglint(1) is both kinda stupid and
 # overly pedantic for no real benefit.
 #
-CANONICAL_WRKSRC=	${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD}!}
-
-PKGCONFIG_OVERRIDE=	${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/${PKGBASE}.pc
-PKGCONFIG_OVERRIDE_STAGE= post-build
+CANONICAL_WRKSRC=		${WRKSRC:!cd ${WRKSRC} && ${PWD_CMD} -P!}
+PKGCONFIG_OVERRIDE=		${BSD_MAKE_BUILD_DIR}/${CANONICAL_WRKSRC}/src/${PKGBASE}.pc
+PKGCONFIG_OVERRIDE_STAGE=	post-build
 
 AUTO_MKDIRS=		yes
 
