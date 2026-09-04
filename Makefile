@@ -61,7 +61,7 @@
 #
 # You should use $MAKEOBJDIRPREFIX, set in the environment, so as to build
 # everything elsewhere outside of, or within a single sub-directory, of the
-# source tree (i.e. instead of polluting the source itself tree with "obj"
+# source tree (i.e. instead of polluting the source itself tree with "obj.*"
 # sub-directories everywhere).  Make sure to create the initial object directory
 # -- make must be able to chdir to the initial object directory under
 # MAKEOBJDIRPREFIX (i.e. with the current canonical (physical) PWD appended)
@@ -245,17 +245,33 @@ LDFLAGS ?=	# Additional linker flags, e.g. -I/usr/local/lib (in env!)
 # directory path, thus making it better for in-tree build directories as opposed
 # to some area shared by multiple projects):
 #
-#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); \cd $td; pwd -P)','$(td=$(make -v bmake_topdir); \cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make
 #
 # (or in more simple terms:  export MAKEOBJDIR='${.CURDIR:S,${SRCTOP},${OBJTOP},}')
 #
-# (Note this way of setting MAKEOBJDIR is more or less necessary for any project
-# with subdirectories, and it is derived from the related one in NetBSD's
-# build.sh.)
+# This will typically require running make twice if the build directory does not
+# already exist.
 #
-# HOWEVER:  this won't work with older make's, including BMake until at least
-# after 20200524, not even NetBSD-10, nor on FreeBSD, at least up to 14.x.  This
-# is probably fixed first in NetBSD's Make as of 20230218.
+# Broken down into steps to allow easy pre-creation of the build directory, thus
+# avoiding having to run make twice:
+#
+#	cd $srctop
+#	BUILD_DIR=build-$(uname -s)-$(uname -p)-$(uname -r)
+#	mkdir ${BUILD_DIR}
+#	export MAKEOBJDIR='${.CURDIR:C,^'$(pwd -P)','$(pwd -P)'/'${BUILD_DIR}',}'
+#	b(sd)make all
+#
+# (Note this way of setting MAKEOBJDIR using a .CURDIR substitution expression
+# is necessary for any project with subdirectories, and it is derived from the
+# related one in NetBSD's build.sh.)
+#
+# (Note the backslash in front of the "cd" commands is to make sure the plain
+# built-in shell command is executed, not any alias or shell function your setup
+# may have.)
+#
+#####################
+#
+# Cleaning Up Unwanted obj.* Directories
 #
 # If you end up with "obj.*" sub-directories and you want to go back to using a
 # 'build' directory (as would be sane to do) then you can remove all the obj.*
@@ -363,9 +379,10 @@ bmake_topdir =	.
 #
 # On NetBSD MACHINE_ARCH is not a necessary distinction for userland programs...
 #
-# xxx there's no Make variable for "uname -r" so it need to be run by the shell.
+# xxx There is no Make variable for "uname -r" so it needs to be run by the
+# shell.
 #
-#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); cd $td; pwd -P)','$(td=$(make -v bmake_topdir); cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
+#	MAKEOBJDIR='${.CURDIR:C,^'$(td=$(make -v bmake_topdir); \cd $td; pwd -P)','$(td=$(make -v bmake_topdir); \cd $td; pwd -P)'/build-${.MAKE.OS}-${MACHINE}-'$(uname -r)',}' make -j 8 LDSTATIC=-static
 #
 #	DESTDIR="dest-${BUILD_DIR#build-}"
 #
