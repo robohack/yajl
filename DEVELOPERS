@@ -87,6 +87,8 @@ Then create the signed tag (here we are of course tagging the pre-release):
 
 	git tag -s -a -F doc/release-2.3.md release-2.2.90
 
+(${GPG_TTY} may need to be set in the environment to the current TTY name)
+
 or in Magit:
 
 	t -s -a r
