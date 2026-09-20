@@ -1,7 +1,7 @@
 # -*- makefile-bsdmake -*-
 # $NetBSD$
 
-DISTNAME=	yajl-2.3
+DISTNAME=	yajl-2.3.1
 #PKGREVISION=	0
 CATEGORIES=	devel textproc
 
