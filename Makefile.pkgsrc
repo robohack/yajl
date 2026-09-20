@@ -56,6 +56,7 @@ GENERATE_PLIST+=	cd ${DESTDIR}${PREFIX} && \
 .include "../../mk/bsd.prefs.mk"
 
 PLIST_SUBST+=	PREFIX=${PREFIX:Q}
+PLIST_SUBST+=	LIB_VERSION=${LIB_VERSION:Q}
 
 # N.B.:  the following depend on PKGMAKECONF=/etc/mk.conf or the moral equivalent
 # xxx they are also not needed if pkgsrc is properly patched to do this itself!
@@ -135,6 +136,15 @@ setup-pkgsrc:
 	cd ${PKGDIR} && make test
 
 .include "../../mk/bsd.pkg.mk"
+
+# n.b.:  this silly trick requires PKGVERSION_NOREV to already be set....
+.if ${PKGVERSION_NOREV:C/^[0-9]+\.[0-9]+\.[0-9]+$/three/W} == "three"
+LIB_VERSION=	${PKGVERSION_NOREV}
+.elif ${PKGVERSION_NOREV:C/^[0-9]+\.[0-9]+$/two/W} == "two"
+LIB_VERSION=	${PKGVERSION_NOREV}.0
+.else
+. error	"Invalid PKGVERSION_NOREV ('${PKGVERSION_NOREV}'), should be N.N or N.N.N"
+.endif
 
 # override INCSDIR for the project subdir....
 INCSDIR=	${PREFIX}/include/${PKGBASE}
