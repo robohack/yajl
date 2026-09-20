@@ -30,8 +30,8 @@ INCSUBDIR =	/yajl
 #	https://semver.org/
 #
 LIB_MAJOR =	2
-LIB_MINOR =	2
-LIB_MICRO =	93
+LIB_MINOR =	3
+LIB_MICRO =	0
 
 # The full version ID for the library
 #

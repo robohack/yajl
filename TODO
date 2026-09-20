@@ -9,3 +9,6 @@
   b. some performance comparison against json_checker.
 * investigate pull instead of push parsing
 * set up example/* (parse_config) to also run a whole a test suite
+* see https://akr.am/blog/posts/parsing-json-in-forty-lines-of-awk
+  and https://github.com/mohd-akram/jawk
+* add tests for foreign locales, if available, to test strtoll() and strtod()

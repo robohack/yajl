@@ -64,6 +64,7 @@ and multiple pre-releases will of course simply increment from .90.)
 	# edit version in Makefile.project and Makefile.pkgsrc
 	git add Makefile.project Makefile.pkgsrc
 	git commit -m 'Makefile.project, Makefile.pkgsrc: ready for release: 2.2.90'
+        git push
 
 Write up notes about the release to prepare in `doc/release-2.3.md`, i.e. using
 the "next" full semantic version number(s).  Include a link to the compare with
@@ -72,7 +73,7 @@ the previous release at the end, formatted as follows
 	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.90
 
 Note this `doc/release-2.3.md` file need not be committed for pre-releases, only
-for the full release.
+for the full release, though it won't hurt to always commit it.
 
 
 ### Create the annotated release tag for the pre-release
@@ -98,6 +99,12 @@ it may be asked for in the emacs instance used for email!
 
 Don't forget to push the release tag to Github!
 
+	git push --tags
+
+or in Magit:
+
+	P t <return>
+
 
 ### Create the GitHub "release" for the pre-release:
 
@@ -122,7 +129,7 @@ For older versions of `gh` just re-use the release notes file again directly:
 		-t "Version 2.2.90 (beta)" \
 		-F doc/release-2.3.md
 
-(*xxx* alternatively this can be done via the web interface)
+(*xxx* alternatively this can also be done via the web interface)
 
 You might want to "(f)etch (a)ll" in Magit again now too.
 

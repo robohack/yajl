@@ -1,17 +1,8 @@
-# Version 2.2.93 (beta)
+# Version 2.3 (2026/09/20)
 
-This (beta) release includes the following major fixes, changes, and
-updates:
+This release includes the following major fixes, changes, and updates:
 
 - minor overhaul of the Makefiles to make MAKEOBJDIRPREFIX work better
-
-	**Beta Changelog**: https://github.com/robohack/yajl/compare/release-2.2.92...release-2.2.93
-	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.93
-
-# Version 2.2.92 (beta)
-
-This (beta) release includes the following major fixes, changes, and
-updates:
 
 - major overhaul of the Makefiles to extract the basic core Makefile and to
   allow the wrapper Makefiles to be used in other projects
@@ -24,15 +15,6 @@ updates:
 - avoid potential buffer overrun  when parsing UTF-8 surrogate characters
 
 - other minor code fixes and cleanups
-
-
-	**Beta Changelog**: https://github.com/robohack/yajl/compare/release-2.2.91...release-2.2.92
-	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.92
-
-# Version 2.2.91 (beta)
-
-This (beta) release includes the following major fixes, changes, and
-updates:
 
 - error messages now include the line number and character offset where
   the error was detected
@@ -58,4 +40,4 @@ the example and test programs.
 Note also MKDOC use has been deprecated.  If you don't have Cxref
 available then just set CXREF=true on the make command line.
 
-	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.2.92
+	**Full Changelog**: https://github.com/robohack/yajl/compare/release-2.2...release-2.3
